@@ -110,7 +110,7 @@ var list = function(entries, categories, q) {
         }).map(function(entry) {
             return h('li', {}, [listItem(entry, categories)]);
         })),
-        h('a', {href: '#!create'}, 'Hinzufügen'),
+        h('a', {href: '#!create', className: 'button m-cta'}, 'Hinzufügen'),
     ];
 };
 
@@ -136,9 +136,12 @@ var detail = function(entry, categories) {
         h('h3', {}, labels.rev),
         h('span', {className: 'rev'}, entry.rev),
         h('nav', {}, [
-            h('a', {className: 'back', href: '#!list'}, 'Zurück'),
+            h('a', {
+                href: '#!edit/' + entry.id,
+                className: 'button m-cta',
+            }, 'Bearbeiten'),
             ' ',
-            h('a', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a', {className: 'back button', href: '#!list'}, 'Zurück'),
         ]),
     ]);
 };
@@ -192,7 +195,7 @@ var form = function(entry, categories) {
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
             h('a', {
-                className: 'back',
+                className: 'back button',
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),

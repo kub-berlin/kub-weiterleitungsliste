@@ -19,17 +19,32 @@ input, textarea, select {
     }
 }
 
-input[type=submit] {
+
+@mixin button($color, $color-tint) {
     border: 0;
-    background: $color-focus;
-    color: contrast-color($color-focus);
+    background: $color;
+    color: contrast-color($color);
     line-height: 2;
     border-radius: 0.2em;
     font-size: 110%;
     cursor: pointer;
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    padding: 0.3em 0.75em;
+    margin: 0 0 1em;
 
     &:hover, &:focus {
-        background: $color-focus-tint;
-        color: contrast-color($color-focus-tint);
+        background: $color-tint;
+        color: contrast-color($color-tint);
     }
+}
+
+.button {
+    @include button($color-fg-tint, $color-fg);
+}
+
+.button.m-cta,
+input[type=submit] {
+    @include button($color-focus, $color-focus-tint);
 }
