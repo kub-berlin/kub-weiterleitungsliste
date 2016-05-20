@@ -147,8 +147,11 @@ var onFilterAll = function(event) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
     var category = findByKey(categories, key);
-    category.children.forEach(function(subcategory) {
-        subcategory.active = event.target.className === 'all';
+    var cats = category ? [category] : categories;
+    cats.forEach(function(category) {
+        category.children.forEach(function(subcategory) {
+            subcategory.active = event.target.className === 'all';
+        });
     });
     update();
 };

@@ -49,7 +49,13 @@ var listItem = function(entry, categories) {
 var categoryFilters = function(categories) {
     return h('ul', {
         className: 'category-filters'
-    }, categories.map(function(category, i) {
+    }, [
+        h('li', {}, [
+            h('a', {href: '#', className: 'all'}, '(alle)'),
+            ' ',
+            h('a', {href: '#', className: 'none'}, '(keins)'),
+        ]),
+    ].concat(categories.map(function(category, i) {
         return h('li', {
             className: 'c' + i,
             dataset: {
@@ -75,7 +81,7 @@ var categoryFilters = function(categories) {
                 ]);
             })),
         ]);
-    }));
+    })));
 };
 
 var checkCategoryMatch = function(entry, categories) {
