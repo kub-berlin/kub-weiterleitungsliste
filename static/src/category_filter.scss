@@ -1,0 +1,31 @@
+.category-filters {
+    font-weight: bold;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    input[type=checkbox] {
+        display: inline;
+        margin: 0;
+        padding: 0;
+        width: auto;
+    }
+
+    label,
+    li {
+        margin: 0;
+    }
+
+    .all,
+    .none {
+        font-size: 90%;
+        font-weight: initial;
+    }
+
+    ul {
+        font-weight: initial;
+        margin: 0 0 1em;
+        list-style: none;
+        padding: 0;
+    }
+}

@@ -42,6 +42,34 @@ var listItem = function(entry, categories) {
     ]);
 };
 
+var categoryFilters = function(categories) {
+    return h('ul', {
+        className: 'category-filters'
+    }, categories.map(function(category, i) {
+        return h('li', {
+            className: 'c' + i,
+            dataset: {
+                name: category.key,
+            },
+        }, [
+            category.key,
+            ' ',
+            h('a', {href: '#', className: 'all'}, '(alle)'),
+            ' ',
+            h('a', {href: '#', className: 'none'}, '(keins)'),
+            h('ul', {}, category.children.map(function(subcategory) {
+                return h('li', {}, [
+                    h('label', {}, [
+                        h('input', {type: 'checkbox', name: subcategory}),
+                        ' ',
+                        subcategory,
+                    ])
+                ]);
+            })),
+        ]);
+    }));
+};
+
 var list = function(entries, categories, q) {
     return [
         h('input', {
@@ -49,6 +77,7 @@ var list = function(entries, categories, q) {
             className: 'filter',
             placeholder: 'Filter'
         }),
+        h('div', {}, [categoryFilters(categories)]),
         h('ul', {}, entries.filter(function(entry) {
             return !q || !q.split(/\s/g).some(function(qq) {
                 return !obAny(entry, function(s) {
