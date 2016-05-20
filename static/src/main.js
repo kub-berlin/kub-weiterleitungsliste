@@ -90,7 +90,7 @@ var resize = function(event) {
         event.target.style.height = 'auto';
         event.target.style.height = event.target.scrollHeight + 5 + 'px';
     }, 0);
-}
+};
 
 
 // events
