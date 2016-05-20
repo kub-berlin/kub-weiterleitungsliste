@@ -1,0 +1,17 @@
+$color-fg: #333;
+$color-fg-tint: #666;
+$color-bg: #fff;
+$color-bg-tint: #f2f5f6;
+$color-bg-tint2: #dde4ea;
+$color-focus: #0052af;
+$color-focus-tint: pf-lighten($color-focus, 10);
+
+$_: contrast-check($color-fg, $color-bg);
+$_: contrast-check($color-fg-tint, $color-bg);
+$_: contrast-check($color-fg, $color-bg-tint);
+$_: contrast-check($color-fg-tint, $color-bg-tint);
+$_: contrast-check($color-focus, $color-bg);
+$_: contrast-check($color-focus, $color-bg-tint);
+
+$planifolia-contrast-dark-default: $color-fg;
+$planifolia-contrast-light-default: $color-bg;

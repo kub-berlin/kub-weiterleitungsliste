@@ -1,0 +1,55 @@
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+    max-width: 100%;
+}
+
+p, address, blockquote, pre, table, dl, ul, ol, figure {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+html {
+    overflow-y: scroll;
+    box-sizing: border-box;
+    color: $color-fg;
+    line-height: 1.4;
+    background: $color-bg-tint2;
+    font-size: 90%;
+}
+
+body {
+    max-width: 40em;
+    margin: 2em auto;
+    padding: 0.5em;
+    background: $color-bg;
+}
+
+a {
+    color: $color-focus;
+
+    &:focus, &:hover {
+        color: $color-focus-tint;
+    }
+}
+
+*::selection {
+    background: $color-focus;
+    color: contrast-color($color-focus);
+}
+
+textarea {
+    resize: vertical;
+}
+
+@media print {
+    html {
+        background: transparent;
+        color: #000;  // Black prints faster:
+    }
+
+    h2, h3 {
+        page-break-after: avoid;
+    }
+}

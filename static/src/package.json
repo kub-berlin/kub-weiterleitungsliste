@@ -1,0 +1,17 @@
+{
+  "name": "static",
+  "version": "0.0.0",
+  "main": "main.js",
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "node-sass": "^3.4.2",
+    "promise-xhr": "github:xi/promise-xhr#fix-get-json",
+    "virtual-dom": "^2.1.1"
+  },
+  "scripts": {
+    "build-js": "browserify main.js > ../main.js",
+    "build-css": "node-sass style.scss > ../style.css"
+  },
+  "author": "Tobias Bengfort <tobias.bengfort@posteo.de>",
+  "license": "GPL-2.0+"
+}

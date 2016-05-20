@@ -1,0 +1,141 @@
+////
+/// Functions to help with contrast as defined by
+/// [WCAG20](https://www.w3.org/TR/WCAG20/#contrast-ratiodef)
+///
+/// This module requires a function called `pow()`. You should make sure that
+/// one is available, e.g. by including the math module from this project.
+///
+/// @group contrast
+////
+
+/// @type color
+$planifolia-contrast-dark-default: black !default;
+/// @type color
+$planifolia-contrast-light-default: white !default;
+
+@function _planifolia-srgb($channel) {
+  $x: $channel / 255;
+  @if $x <= .03928 {
+    @return $x / 12.92;
+  } @else {
+    @return pow(($x + .055) / 1.055, 2.4);
+  }
+}
+
+/// @param {color} $fg foreground color
+/// @param {color} $bg [white] background color
+/// @return {color} blended color
+@function alpha-blend($fg, $bg: white) {
+  $a1: alpha($bg);
+  $a2: alpha($fg);
+
+  @if ($a1 == 0) {
+    @if ($a2 == 0) {
+      @return $fg;
+    }
+  }
+
+  $a: $a2 + (1 - $a2) * $a1;
+  $r: ($a2 * red($fg) + (1 - $a2) * $a1 * red($bg)) / $a;
+  $g: ($a2 * green($fg) + (1 - $a2) * $a1 * green($bg)) / $a;
+  $b: ($a2 * blue($fg) + (1 - $a2) * $a1 * blue($bg)) / $a;
+
+  @return rgba($r, $g, $b, $a);
+}
+
+/// Calculate the perceptual brightness of a color.
+///
+/// @param {color} $color
+/// @return {number} normalized to [0, 1]
+@function luma($color) {
+  $r: _planifolia-srgb(red($color));
+  $g: _planifolia-srgb(green($color));
+  $b: _planifolia-srgb(blue($color));
+  @return .2126 * $r + .7152 * $g + .0722 * $b;
+}
+
+@function _planifolia-contrast($fg, $bg) {
+  $lbg: luma($bg);
+  $lfg: luma(alpha-blend($fg, $bg));
+  @return (max($lbg, $lfg) + .05) / (min($lbg, $lfg) + .05);
+}
+
+/// Calculate the minimum possible contrast between two colors.
+///
+/// Note that the "minimum" part of this is only relevant if `$bg` is
+/// transparent. In that case, a backdrop color is chosen so that the resulting
+/// contrast is minimal.
+///
+/// @param {color} $fg foreground color
+/// @param {color} $bg background color
+/// @return {number} between 1 and 21
+@function contrast-min($fg, $bg) {
+  // optimize for the common case
+  @if alpha($bg) == 1 {
+    @return _planifolia-contrast($fg, $bg);
+  } @else {
+    $bg-black: alpha-blend($bg, black);
+    $bg-white: alpha-blend($bg, white);
+    $lfg: luma($fg);
+
+    @if luma($bg-white) < $lfg {
+      @return _planifolia-contrast($fg, $bg-white);
+    } @else if luma($bg-black) > $lfg {
+      @return _planifolia-contrast($fg, $bg-black);
+    } @else {
+      @return 1;
+    }
+  }
+}
+
+/// Calculate the contrast between two colors.
+///
+/// This function is different from `contrast-min` by not caring about the
+/// order of inputs. This is achieved by calculating the average of both
+/// possible results of `contrast-min`.
+///
+/// @param {color} $color1
+/// @param {color} $color2
+/// @return {number} between 1 and 21
+/// @see contrast-min
+@function contrast($color1, $color2) {
+  // optimize for the common case
+  @if alpha($color1) + alpha($color2) == 2 {
+    @return _planifolia-contrast($color1, $color2);
+  } @else {
+    $c1: contrast-min($color1, $color2);
+    $c2: contrast-min($color2, $color1);
+    @return ($c1 + $c2) / 2;
+  }
+}
+
+/// Pick the higher contrast option for a given base color.
+///
+/// @param {color} $base the base color to compare to
+/// @param {color} $color1 [$planifolia-contrast-dark-default] first option
+/// @param {color} $color2 [$planifolia-contrast-light-default] second option
+/// @return {color} either `$color1` or `$color2`
+@function contrast-color(
+  $base,
+  $color1: $planifolia-contrast-dark-default,
+  $color2: $planifolia-contrast-light-default
+) {
+  @if contrast($color1, $base) >= contrast($color2, $base) {
+    @return $color1;
+  } @else {
+    @return $color2;
+  }
+}
+
+/// Warn if the contrast is below a threshold
+///
+/// @param {color} $color1 background color
+/// @param {color} $color2 foreground color
+/// @param {number} $threshold [4.5]
+@function contrast-check($color1, $color2, $threshold: 4.5) {
+  $contrast: contrast($color1, $color2);
+  @if $contrast < $threshold {
+    @warn 'contrast #{$contrast} between #{$color1} and #{$color2} too low!';
+  }
+  @return null;
+}
