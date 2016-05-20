@@ -103,10 +103,23 @@ var field = function(name, value, required, type) {
     return h('label', {}, [labels[name], f]);
 };
 
-var form = function(entry) {
+var form = function(entry, categories) {
     return h('form', {}, [
         field('name', entry.name, true),
-        field('category', entry.category, true),
+        h('label', {}, [
+            labels.category + '/' + labels.subcategory,
+            h('select', {
+                name: 'subcategory',
+                value: entry.subcategory,
+                required: true,
+            }, categories.map(function(category) {
+                return h('optgroup', {
+                    label: category.key,
+                }, category.children.map(function(subcategory) {
+                    return h('option', {}, subcategory)
+                }))
+            })),
+        ]),
         field('subcategory', entry.subcategory, true),
         field('address', entry.address, true, 'textarea'),
         field('openinghours', entry.openinghours, false, 'textarea'),
@@ -133,9 +146,9 @@ var template = function(entries, categories, languages, view, arg) {
     } else if (view === 'detail') {
         child = detail(entries[arg - 1], categories);
     } else if (view === 'edit') {
-        child = form(entries[arg - 1]);
+        child = form(entries[arg - 1], categories);
     } else if (view === 'create') {
-        child = form({});
+        child = form({}, categories);
     } else {
         throw new Error('Invalid view');
     }

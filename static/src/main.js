@@ -103,7 +103,6 @@ var onSubmit = function(event) {
 
     var data = {
         name: getValue('name'),
-        category: getValue('category'),
         subcategory: getValue('subcategory'),
         address: getValue('address'),
         openinghours: getValue('openinghours'),
@@ -112,6 +111,12 @@ var onSubmit = function(event) {
         note: getValue('note'),
         rev: getValue('rev'),
     };
+
+    for (var i = 0; i < categories.length; i++) {
+        if (categories[i].children.indexOf(getValue('subcategory')) !== -1) {
+            data.category = categories[i].key;
+        }
+    }
 
     if (getValue('id')) {
         data.id = getValue('id');
