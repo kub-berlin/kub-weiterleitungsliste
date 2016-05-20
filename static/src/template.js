@@ -21,6 +21,26 @@ var indexOfKey = function(list, key) {
     return -1;
 };
 
+var obAny = function(obj, fn) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (fn(obj[key])) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
+var any = function(list, fn) {
+    for (var i = 0; i < list.length; i++) {
+        if (fn(list[i])) {
+            return true;
+        }
+    }
+    return false;
+};
+
 var listItem = function(entry, categories) {
     return h('a', {
         href: '#!detail/' + entry.id,
@@ -44,7 +64,11 @@ var list = function(entries, categories, q) {
             placeholder: 'Filter'
         }),
         h('ul', {}, entries.filter(function(entry) {
-            return !q || (entry.name || '').indexOf(q) !== -1;
+            return !q || !any(q.split(/\s/g), function(qq) {
+                return !obAny(entry, function(s) {
+                    return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
+                });
+            });
         }).map(function(entry) {
             return h('li', {}, [listItem(entry, categories)]);
         })),
