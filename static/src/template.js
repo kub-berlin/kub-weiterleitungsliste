@@ -77,7 +77,6 @@ var list = function(entries, categories, q) {
             className: 'filter',
             placeholder: 'Filter'
         }),
-        h('div', {}, [categoryFilters(categories)]),
         h('ul', {}, entries.filter(function(entry) {
             return !q || !q.split(/\s/g).some(function(qq) {
                 return !obAny(entry, function(s) {
@@ -178,21 +177,26 @@ var form = function(entry, categories) {
 };
 
 var template = function(entries, categories, languages, view, arg) {
-    var child;
+    var main;
+    var aside;
 
     if (view === 'list') {
-        child = list(entries, categories, arg);
+        main = list(entries, categories, arg);
+        aside = categoryFilters(categories);
     } else if (view === 'detail') {
-        child = detail(entries[arg - 1], categories);
+        main = detail(entries[arg - 1], categories);
     } else if (view === 'edit') {
-        child = form(entries[arg - 1], categories);
+        main = form(entries[arg - 1], categories);
     } else if (view === 'create') {
-        child = form({}, categories);
+        main = form({}, categories);
     } else {
         throw new Error('Invalid view');
     }
 
-    return h('div', {className: view}, [child]);
+    return h('div', {}, [
+        h('aside', {}, aside),
+        h('main', {className: view}, main),
+    ]);
 };
 
 module.exports = template

@@ -1,0 +1,25 @@
+main, aside:not(:empty) {
+    background: $color-bg;
+    padding: 0.5em;
+}
+
+aside {
+    display: none;
+}
+
+@media screen and (min-width: 40em) {
+    body {
+        max-width: 70em;
+        margin: 2em auto;
+        padding: 0.5em;
+    }
+
+    main {
+        width: (100% + 1%) / 3 * 2 - 1%;
+    }
+    aside {
+        display: block;
+        width: (100% + 1%) / 3 * 1 - 1%;
+        float: right;
+    }
+}
