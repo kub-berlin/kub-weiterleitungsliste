@@ -112,7 +112,7 @@ var form = function(entry) {
     ]);
 };
 
-var template = function(entries, view, arg) {
+var template = function(entries, categories, languages, view, arg) {
     var child;
 
     if (view === 'list') {

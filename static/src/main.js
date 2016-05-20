@@ -8,7 +8,17 @@ var template = require('./template');
 var element;
 var tree;
 var entries;
+var categories;
+var languages;
 
+
+var findByKey = function(list, key) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].key === key) {
+            return list[i];
+        }
+    }
+};
 
 /** Add event listener to all elements matching `selector` inside `element`. */
 var attachEventListener = function(selector, eventName, fn) {
@@ -43,6 +53,32 @@ var link = function(path, replace) {
 var updateEntries = function() {
     return xhr.getJSON('api.php').then(function(data) {
         entries = data;
+        categories = [];
+        languages = [];
+
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+
+            var category = findByKey(categories, entry.category);
+            if (!category) {
+                category = {
+                    key: entry.category,
+                    children: [],
+                };
+                categories.push(category);
+            }
+
+            if (category.children.indexOf(entry.subcategory) === -1) {
+                category.children.push(entry.subcategory);
+            }
+
+            var l = entry.lang.split(/, /g);
+            for (var j = 0; j < l.length; j++) {
+                if (l[j] && languages.indexOf(l[j]) === -1) {
+                    languages.push(l[j]);
+                }
+            }
+        }
     });
 };
 
@@ -116,7 +152,7 @@ var attachEventListeners = function() {
 // main
 var buildTree = function() {
     var loc = location.hash.substr(2).split('/');
-    return template(entries, loc[0] || 'list', loc[1]);
+    return template(entries, categories, languages, loc[0] || 'list', loc[1]);
 };
 
 updateEntries().then(function() {
