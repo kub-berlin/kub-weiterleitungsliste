@@ -1,10 +1,10 @@
-@mixin category($k, $n: 10) {
+@mixin category($k, $n, $chroma) {
     $l: pf-lightness($color-focus);
     $c: pf-chroma($color-focus);
     $h: pf-hue($color-focus) + pi() * 2 / $n * $k;
 
-    $color1: lch($l, $c, $h);
-    $color2: lch(90, 10, $h);
+    $color1: lch($l, $c * $chroma, $h);
+    $color2: lch(90, 10 * $chroma, $h);
     $_: contrast-check($color1, $color2);
 
     background: $color2;
@@ -14,13 +14,13 @@
 
 .category:not(:empty),
 .subcategory:not(:empty) {
-    @include category(0);
+    @include category(0, 1, 0);
     padding: 0 0.2em;
     border-radius: 0.2em;
 }
 
-@for $i from 1 to 10 {
+@for $i from 0 to 13 {
     .category.c#{$i}:not(:empty) {
-        @include category($i);
+        @include category($i, 13, 1);
     }
 }

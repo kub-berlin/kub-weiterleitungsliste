@@ -1,5 +1,14 @@
 var h = require('virtual-dom/h');
 
+var indexOfKey = function(list, key) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].key === key) {
+            return i;
+        }
+    }
+    return -1;
+};
+
 var labels = {
     name: 'Organisation',
     category: 'Bereich',
@@ -12,12 +21,14 @@ var labels = {
     rev: 'Stand der Info',
 };
 
-var listItem = function(entry) {
+var listItem = function(entry, categories) {
     return h('a', {
         href: '#!detail/' + entry.id,
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {className: 'category c2'}, entry.category),
+        h('span', {
+            className: 'category c' + indexOfKey(categories, entry.category)
+        }, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
         h('h2', {}, entry.name),
@@ -25,7 +36,7 @@ var listItem = function(entry) {
     ]);
 };
 
-var list = function(entries, q) {
+var list = function(entries, categories, q) {
     return [
         h('input', {
             type: 'search',
@@ -35,17 +46,19 @@ var list = function(entries, q) {
         h('ul', {}, entries.filter(function(entry) {
             return !q || (entry.name || '').indexOf(q) !== -1;
         }).map(function(entry) {
-            return h('li', {}, [listItem(entry)]);
+            return h('li', {}, [listItem(entry, categories)]);
         })),
         h('a', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
-var detail = function(entry) {
+var detail = function(entry, categories) {
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {className: 'category'}, entry.category),
+        h('span', {
+            className: 'category c' + indexOfKey(categories, entry.category)
+        }, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
         h('h2', {}, entry.name),
@@ -116,9 +129,9 @@ var template = function(entries, categories, languages, view, arg) {
     var child;
 
     if (view === 'list') {
-        child = list(entries, arg);
+        child = list(entries, categories, arg);
     } else if (view === 'detail') {
-        child = detail(entries[arg - 1]);
+        child = detail(entries[arg - 1], categories);
     } else if (view === 'edit') {
         child = form(entries[arg - 1]);
     } else if (view === 'create') {
