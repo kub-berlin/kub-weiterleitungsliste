@@ -13,12 +13,7 @@ var labels = {
 };
 
 var indexOfKey = function(list, key) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i].key === key) {
-            return i;
-        }
-    }
-    return -1;
+    return list.map(function(x) {return x.key}).indexOf(key);
 };
 
 var obAny = function(obj, fn) {
@@ -27,15 +22,6 @@ var obAny = function(obj, fn) {
             if (fn(obj[key])) {
                 return true;
             }
-        }
-    }
-    return false;
-};
-
-var any = function(list, fn) {
-    for (var i = 0; i < list.length; i++) {
-        if (fn(list[i])) {
-            return true;
         }
     }
     return false;
@@ -64,7 +50,7 @@ var list = function(entries, categories, q) {
             placeholder: 'Filter'
         }),
         h('ul', {}, entries.filter(function(entry) {
-            return !q || !any(q.split(/\s/g), function(qq) {
+            return !q || !q.split(/\s/g).some(function(qq) {
                 return !obAny(entry, function(s) {
                     return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
                 });
