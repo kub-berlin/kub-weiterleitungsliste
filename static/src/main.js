@@ -136,13 +136,6 @@ var onSubmit = function(event) {
     });
 };
 
-var onBack = function(event) {
-    if (history.length > 2) {
-        event.preventDefault();
-        history.back();
-    }
-};
-
 var onFilterAll = function(event) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
@@ -169,7 +162,6 @@ var attachEventListeners = function() {
     attachEventListener('.filter', 'search', onFilter);
     attachEventListener('.filter', 'keyup', onFilter);
     attachEventListener('form', 'submit', onSubmit);
-    attachEventListener('.back', 'click', onBack);
     attachEventListener('textarea', 'init', resize);
     attachEventListener('textarea', 'change', resize);
     attachEventListener('textarea', 'cut', resize);
