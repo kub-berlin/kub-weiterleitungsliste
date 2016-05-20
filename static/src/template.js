@@ -13,7 +13,7 @@ var labels = {
 };
 
 var indexOfKey = function(list, key) {
-    return list.map(function(x) {return x.key}).indexOf(key);
+    return list.map(function(x) {return x.key;}).indexOf(key);
 };
 
 var obAny = function(obj, fn) {
@@ -117,7 +117,6 @@ var detail = function(entry, categories) {
             h('a', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
         ]),
     ]);
-    return listItem(entry);
 };
 
 var field = function(name, value, required, type) {
@@ -154,8 +153,8 @@ var form = function(entry, categories) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
-                    return h('option', {}, subcategory)
-                }))
+                    return h('option', {}, subcategory);
+                }));
             })),
         ]),
         field('subcategory', entry.subcategory, true),
@@ -199,4 +198,4 @@ var template = function(entries, categories, languages, view, arg) {
     ]);
 };
 
-module.exports = template
+module.exports = template;
