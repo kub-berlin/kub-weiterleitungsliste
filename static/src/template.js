@@ -16,6 +16,10 @@ var indexOfKey = function(list, key) {
     return list.map(function(x) {return x.key;}).indexOf(key);
 };
 
+var findByKey = function(list, key) {
+    return list[indexOfKey(list, key)];
+};
+
 var obAny = function(obj, fn) {
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
@@ -74,6 +78,20 @@ var categoryFilters = function(categories) {
     }));
 };
 
+var checkCategoryMatch = function(entry, categories) {
+    var category = findByKey(categories, entry.category);
+    var subcategory = findByKey(category.children, entry.subcategory);
+    return subcategory.active;
+};
+
+var checkQueryMatch = function(entry, q) {
+    return !q || (!q.split(/\s/g).some(function(qq) {
+        return !obAny(entry, function(s) {
+            return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
+        });
+    }));
+};
+
 var list = function(entries, categories, q) {
     return [
         h('input', {
@@ -82,11 +100,7 @@ var list = function(entries, categories, q) {
             placeholder: 'Filter'
         }),
         h('ul', {}, entries.filter(function(entry) {
-            return !q || !q.split(/\s/g).some(function(qq) {
-                return !obAny(entry, function(s) {
-                    return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
-                });
-            });
+            return checkCategoryMatch(entry, categories) && checkQueryMatch(entry, q);
         }).map(function(entry) {
             return h('li', {}, [listItem(entry, categories)]);
         })),
