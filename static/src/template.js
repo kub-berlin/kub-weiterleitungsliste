@@ -60,9 +60,9 @@ var categoryFilters = function(categories) {
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [
                     h('label', {}, [
-                        h('input', {type: 'checkbox', name: subcategory}),
+                        h('input', {type: 'checkbox', name: subcategory.key}),
                         ' ',
-                        subcategory,
+                        subcategory.key,
                     ])
                 ]);
             })),
@@ -153,7 +153,7 @@ var form = function(entry, categories) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
-                    return h('option', {}, subcategory);
+                    return h('option', {}, subcategory.key);
                 }));
             })),
         ]),

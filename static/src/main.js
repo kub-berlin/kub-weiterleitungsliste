@@ -68,8 +68,11 @@ var updateEntries = function() {
                 categories.push(category);
             }
 
-            if (category.children.indexOf(entry.subcategory) === -1) {
-                category.children.push(entry.subcategory);
+            if (!findByKey(category.children, entry.subcategory)) {
+                category.children.push({
+                    key: entry.subcategory,
+                    active: true,
+                });
             }
 
             var l = entry.lang.split(/, /g);
@@ -113,7 +116,7 @@ var onSubmit = function(event) {
     };
 
     for (var i = 0; i < categories.length; i++) {
-        if (categories[i].children.indexOf(getValue('subcategory')) !== -1) {
+        if (findByKey(categories[i].children, getValue('subcategory'))) {
             data.category = categories[i].key;
         }
     }
