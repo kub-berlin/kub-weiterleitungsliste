@@ -60,7 +60,11 @@ var categoryFilters = function(categories) {
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [
                     h('label', {}, [
-                        h('input', {type: 'checkbox', name: subcategory.key}),
+                        h('input', {
+                            type: 'checkbox',
+                            name: subcategory.key,
+                            checked: subcategory.active,
+                        }),
                         ' ',
                         subcategory.key,
                     ])

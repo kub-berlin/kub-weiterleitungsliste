@@ -10,6 +10,7 @@ var tree;
 var entries;
 var categories;
 var languages;
+var update;
 
 
 var findByKey = function(list, key) {
@@ -142,6 +143,24 @@ var onBack = function(event) {
     }
 };
 
+var onFilterAll = function(event) {
+    event.preventDefault();
+    var key = event.target.parentElement.dataset.name;
+    var category = findByKey(categories, key);
+    category.children.forEach(function(subcategory) {
+        subcategory.active = event.target.className === 'all';
+    });
+    update();
+};
+
+var onFilterChange = function(event) {
+    var skey = event.target.name;
+    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
+    var subcategory = findByKey(findByKey(categories, key).children, skey);
+    subcategory.active = event.target.checked;
+    update();
+};
+
 var attachEventListeners = function() {
     attachEventListener('.filter', 'change', onFilter);
     attachEventListener('.filter', 'search', onFilter);
@@ -154,6 +173,9 @@ var attachEventListeners = function() {
     attachEventListener('textarea', 'paste', resize);
     attachEventListener('textarea', 'drop', resize);
     attachEventListener('textarea', 'keydown', resize);
+    attachEventListener('.category-filters .all', 'click', onFilterAll);
+    attachEventListener('.category-filters .none', 'click', onFilterAll);
+    attachEventListener('.category-filters input[type=checkbox]', 'change', onFilterChange);
 };
 
 
@@ -171,7 +193,7 @@ updateEntries().then(function() {
     document.body.appendChild(element);
 });
 
-var update = function() {
+update = function() {
     var newTree = buildTree();
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
