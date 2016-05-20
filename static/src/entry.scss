@@ -1,0 +1,42 @@
+h2 {
+    font-size: 150%;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
+
+h3 {
+    font-weight: normal;
+    font-size: 120%;
+    margin: 2.5em 0 0.5em;
+}
+
+p {
+    white-space: pre-line;
+}
+
+.list > ul > li > a {
+    display: block;
+    color: inherit;
+    text-decoration: inherit;
+    padding: 0.5em;
+    margin: 0 0 1em;
+    background: $color-bg-tint;
+    border-left: 2px solid $color-focus;
+
+    h2 {
+        font-size: 120%;
+    }
+
+    &:hover h2,
+    &:focus h2 {
+        color: $color-focus;
+    }
+}
+
+.category,
+.subcategory,
+.lang {
+    font-size: 80%;
+    color: $color-fg-tint;
+}

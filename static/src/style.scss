@@ -4,51 +4,9 @@
 
 @import "variables";
 @import "base";
-
-h3 {
-    font-weight: normal;
-    font-size: 120%;
-    margin: 2.5em 0 0.5em;
-}
-
-label {
-    display: block;
-    margin: 0 0 1em;
-}
-
-input, textarea, select {
-    display: block;
-    width: 100%;
-    margin: 0 0 1em;
-
-    border-radius: 0.2em;
-    border: 1px solid $color-fg-tint;
-    padding: 0.3em 0.75em;
-    font-family: inherit;
-
-    &:invalid {
-        border-color: $color-invalid;
-    }
-}
-
-input[type=submit] {
-    border: 0;
-    background: $color-focus;
-    color: contrast-color($color-focus);
-    line-height: 2;
-    border-radius: 0.2em;
-    font-size: 110%;
-    cursor: pointer;
-
-    &:hover, &:focus {
-        background: $color-focus-tint;
-        color: contrast-color($color-focus-tint);
-    }
-}
-
-p {
-    white-space: pre-line;
-}
+@import "form";
+@import "entry";
+@import "category";
 
 nav {
     margin: 2em 0 1em;
@@ -66,66 +24,5 @@ nav {
     > li {
         margin: 0;
         padding: 0;
-
-        > a {
-            display: block;
-            color: inherit;
-            text-decoration: inherit;
-            padding: 0.5em;
-            margin: 0 0 1em;
-            background: $color-bg-tint;
-            border-left: 2px solid $color-focus;
-
-            h2 {
-                font-size: 120%;
-            }
-
-            &:hover h2,
-            &:focus h2 {
-                color: $color-focus;
-            }
-        }
-    }
-}
-
-.list > ul > li > a h2,
-.detail h2 {
-    margin: 0;
-    padding: 0;
-    font-size: 150%;
-    font-weight: normal;
-}
-
-.category,
-.subcategory,
-.lang {
-    font-size: 80%;
-    color: $color-fg-tint;
-}
-
-@mixin category($k, $n: 10) {
-    $l: pf-lightness($color-focus);
-    $c: pf-chroma($color-focus);
-    $h: pf-hue($color-focus) + pi() * 2 / $n * $k;
-
-    $color1: lch($l, $c, $h);
-    $color2: lch(90, 10, $h);
-    $_: contrast-check($color1, $color2);
-
-    background: $color2;
-    color: $color1;
-    border-left: 0.35em solid $color1;
-}
-
-.category:not(:empty),
-.subcategory:not(:empty) {
-    @include category(0);
-    padding: 0 0.2em;
-    border-radius: 0.2em;
-}
-
-@for $i from 1 to 10 {
-    .category.c#{$i}:not(:empty) {
-        @include category($i);
     }
 }

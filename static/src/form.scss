@@ -1,0 +1,34 @@
+label {
+    display: block;
+    margin: 0 0 1em;
+}
+
+input, textarea, select {
+    display: block;
+    width: 100%;
+    margin: 0 0 1em;
+
+    border-radius: 0.2em;
+    border: 1px solid $color-fg-tint;
+    padding: 0.3em 0.75em;
+    font-family: inherit;
+
+    &:invalid {
+        border-color: $color-invalid;
+    }
+}
+
+input[type=submit] {
+    border: 0;
+    background: $color-focus;
+    color: contrast-color($color-focus);
+    line-height: 2;
+    border-radius: 0.2em;
+    font-size: 110%;
+    cursor: pointer;
+
+    &:hover, &:focus {
+        background: $color-focus-tint;
+        color: contrast-color($color-focus-tint);
+    }
+}
