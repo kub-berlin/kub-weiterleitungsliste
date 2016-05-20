@@ -2,13 +2,13 @@
 @import "bower_components/sass-planifolia/sass/color";
 @import "bower_components/sass-planifolia/sass/contrast";
 
-@import "variables";
-@import "base";
-@import "layout";
-@import "form";
-@import "entry";
-@import "category";
-@import "category_filter";
+@import "scss/variables";
+@import "scss/base";
+@import "scss/layout";
+@import "scss/form";
+@import "scss/entry";
+@import "scss/category";
+@import "scss/category_filter";
 
 nav {
     margin: 2em 0 1em;
