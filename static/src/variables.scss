@@ -5,6 +5,7 @@ $color-bg-tint: #f2f5f6;
 $color-bg-tint2: #dde4ea;
 $color-focus: #0052af;
 $color-focus-tint: pf-lighten($color-focus, 10);
+$color-invalid: pf-change-color($color-focus, $hue: 0);
 
 $_: contrast-check($color-fg, $color-bg);
 $_: contrast-check($color-fg-tint, $color-bg);

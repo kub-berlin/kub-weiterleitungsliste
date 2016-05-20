@@ -69,18 +69,20 @@ var detail = function(entry) {
     return listItem(entry);
 };
 
-var field = function(name, value, type) {
+var field = function(name, value, required, type) {
     var f;
 
     if (type === 'textarea') {
         f = h('textarea', {
             name: name,
             value: value,
+            required: required,
         });
     } else {
         f = h('input', {
             name: name,
             value: value,
+            required: required,
             type: type || 'text',
         });
     }
@@ -90,15 +92,15 @@ var field = function(name, value, type) {
 
 var form = function(entry) {
     return h('form', {}, [
-        field('name', entry.name),
-        field('category', entry.category),
-        field('subcategory', entry.subcategory),
-        field('address', entry.address, 'textarea'),
-        field('openinghours', entry.openinghours, 'textarea'),
-        field('contact', entry.contact, 'textarea'),
-        field('lang', entry.lang, 'textarea'),
-        field('note', entry.note, 'textarea'),
-        field('rev', entry.rev, 'date'),
+        field('name', entry.name, true),
+        field('category', entry.category, true),
+        field('subcategory', entry.subcategory, true),
+        field('address', entry.address, true, 'textarea'),
+        field('openinghours', entry.openinghours, false, 'textarea'),
+        field('contact', entry.contact, false, 'textarea'),
+        field('lang', entry.lang, false, 'textarea'),
+        field('note', entry.note, false, 'textarea'),
+        field('rev', entry.rev, true, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),

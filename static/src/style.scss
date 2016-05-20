@@ -25,6 +25,10 @@ input, textarea, select {
     border: 1px solid $color-fg-tint;
     padding: 0.3em 0.75em;
     font-family: inherit;
+
+    &:invalid {
+        border-color: $color-invalid;
+    }
 }
 
 input[type=submit] {
