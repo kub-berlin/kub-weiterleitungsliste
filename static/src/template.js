@@ -1,14 +1,5 @@
 var h = require('virtual-dom/h');
 
-var indexOfKey = function(list, key) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i].key === key) {
-            return i;
-        }
-    }
-    return -1;
-};
-
 var labels = {
     name: 'Organisation',
     category: 'Bereich',
@@ -19,6 +10,15 @@ var labels = {
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
     rev: 'Stand der Info',
+};
+
+var indexOfKey = function(list, key) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].key === key) {
+            return i;
+        }
+    }
+    return -1;
 };
 
 var listItem = function(entry, categories) {
