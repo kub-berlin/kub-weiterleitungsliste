@@ -219,7 +219,6 @@ var form = function(entry, categories) {
                 }));
             })),
         ]),
-        field('subcategory', entry.subcategory, true),
         field('address', entry.address, true, 'textarea'),
         field('openinghours', entry.openinghours, false, 'textarea'),
         field('contact', entry.contact, false, 'textarea'),
