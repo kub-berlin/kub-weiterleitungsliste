@@ -31,6 +31,10 @@ var obAny = function(obj, fn) {
     return false;
 };
 
+var error = function(msg) {
+    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
+}
+
 var listItem = function(entry, categories) {
     return h('a', {
         href: '#!detail/' + entry.id,
@@ -115,6 +119,10 @@ var list = function(entries, categories, q) {
 };
 
 var detail = function(entry, categories) {
+    if (!entry) {
+        return error('404 Not Found');
+    }
+
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
