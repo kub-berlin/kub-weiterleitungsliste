@@ -68,10 +68,14 @@ var checkQueryMatch = function(entry, q) {
     }));
 };
 
+var categoryClass = function(model, entry) {
+    return 'c' + indexOfKey(model.categories, entry.category, 'key');
+};
+
 
 // templates
 var error = function(msg) {
-    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
+    return h('h2.error', {}, 'Fehler: ' + msg);
 };
 
 var listItem = function(model, entry) {
@@ -79,21 +83,18 @@ var listItem = function(model, entry) {
         href: '#!detail/' + entry.id,
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {
-            className: 'category c' + indexOfKey(model.categories, entry.category, 'key')
-        }, entry.category),
+        h('span.category.' + categoryClass(model, entry), {}, entry.category),
         ' ',
-        h('span', {className: 'subcategory'}, entry.subcategory),
+        h('span.subcategory', {}, entry.subcategory),
         h('h2', {}, entry.name),
-        h('span', {className: 'lang'}, entry.lang),
+        h('span.lang', {}, entry.lang),
     ]);
 };
 
 var list = function(model) {
     return [
-        h('input', {
+        h('input.filter', {
             type: 'search',
-            className: 'filter',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
             value: model.q,
         }),
@@ -103,31 +104,28 @@ var list = function(model) {
         }).map(function(entry) {
             return h('li', {}, [listItem(model, entry)]);
         })),
-        h('a', {href: '#!create', className: 'button m-cta'}, 'Hinzufügen'),
+        h('a.button.m-cta', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
 var categoryFilters = function(model) {
-    return h('ul', {
-        className: 'category-filters'
-    }, [
+    return h('ul.category-filters', {}, [
         h('li', {}, [
-            h('a', {href: '#', className: 'all'}, '(alle)'),
+            h('a.all', {href: '#'}, '(alle)'),
             ' ',
-            h('a', {href: '#', className: 'none'}, '(keins)'),
+            h('a.none', {href: '#'}, '(keins)'),
         ]),
     ].concat(model.categories.map(function(category, i) {
-        return h('li', {
-            className: 'c' + i,
+        return h('li.c' + i, {
             dataset: {
                 name: category.key,
             },
         }, [
             category.key,
             ' ',
-            h('a', {href: '#', className: 'all'}, '(alle)'),
+            h('a.all', {href: '#'}, '(alle)'),
             ' ',
-            h('a', {href: '#', className: 'none'}, '(keins)'),
+            h('a.none', {href: '#'}, '(keins)'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [
                     h('label', {}, [
@@ -152,16 +150,14 @@ var detail = function(model, entry) {
 
     var children = [
         h('header', {}, [
-            h('span', {
-                className: 'category c' + indexOfKey(model.categories, entry.category, 'key')
-            }, entry.category),
+            h('span.category.' + categoryClass(model, entry), {}, entry.category),
             ' ',
-            h('span', {className: 'subcategory'}, entry.subcategory),
+            h('span.subcategory', {}, entry.subcategory),
             h('h2', {}, entry.name),
-            h('span', {className: 'lang'}, entry.lang),
+            h('span.lang', {}, entry.lang),
         ]),
         h('h3', {}, LABELS.address),
-        h('p', {className: 'address'}, autourl(entry.address)),
+        h('p.address', {}, autourl(entry.address)),
     ];
 
     var optional = ['openinghours', 'contact', 'note'];
@@ -169,7 +165,7 @@ var detail = function(model, entry) {
         var key = optional[i];
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
-            children.push(h('p', {className: key}, autourl(entry[key])));
+            children.push(h('p.' + key, {}, autourl(entry[key])));
         }
     }
 
@@ -177,20 +173,13 @@ var detail = function(model, entry) {
         className: (entry.category || '').replace(/ /g, '-'),
     }, children.concat([
         h('h3', {}, LABELS.rev),
-        h('time', {
-            className: 'rev',
+        h('time.rev', {
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')),
         h('nav', {}, [
-            h('a', {
-                href: '#!edit/' + entry.id,
-                className: 'button m-cta',
-            }, 'Bearbeiten'),
-            h('a', {
-                href: '#',
-                className: 'button m-cta delete',
-            }, 'Löschen'),
-            h('a', {className: 'back button', href: '#!list'}, 'Zurück'),
+            h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
+            h('a.back.button', {href: '#!list'}, 'Zurück'),
         ]),
     ]));
 };
@@ -242,8 +231,7 @@ var form = function(model, entry) {
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
-            h('a', {
-                className: 'back button',
+            h('a.back.button', {
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),
