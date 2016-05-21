@@ -127,17 +127,15 @@ var categoryFilters = function(model) {
             ' ',
             h('a.none', {href: '#'}, '(keins)'),
             h('ul', {}, category.children.map(function(subcategory) {
-                return h('li', {}, [
-                    h('label', {}, [
-                        h('input', {
-                            type: 'checkbox',
-                            name: subcategory.key,
-                            checked: subcategory.active,
-                        }),
-                        ' ',
-                        subcategory.key,
-                    ])
-                ]);
+                return h('li', {}, [h('label', {}, [
+                    h('input', {
+                        type: 'checkbox',
+                        name: subcategory.key,
+                        checked: subcategory.active,
+                    }),
+                    ' ',
+                    subcategory.key,
+                ])]);
             })),
         ]);
     })));
