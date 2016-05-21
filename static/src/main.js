@@ -18,12 +18,10 @@ var update;
 var onNavigate;
 
 
+// helpers
 var findByKey = function(list, key) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i].key === key) {
-            return list[i];
-        }
-    }
+    var i = list.map(function(x) {return x.key;}).indexOf(key);
+    return list[i];
 };
 
 /** Add event listener to all elements matching `selector` inside `element`. */
