@@ -26,17 +26,6 @@ var findByKey = function(list, key, kkey) {
     return list[indexOfKey(list, key, kkey)];
 };
 
-var obAny = function(obj, fn) {
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            if (fn(obj[key])) {
-                return true;
-            }
-        }
-    }
-    return false;
-};
-
 var autourl = function(text) {
     var match = text.match(RE_URL);
     if (match) {
@@ -62,7 +51,8 @@ var checkCategoryMatch = function(entry, categories) {
 
 var checkQueryMatch = function(entry, q) {
     return !q || (!q.split(/\s/g).some(function(qq) {
-        return !obAny(entry, function(s) {
+        return !Object.keys(entry).some(function(key) {
+            var s = entry[key];
             return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
         });
     }));
