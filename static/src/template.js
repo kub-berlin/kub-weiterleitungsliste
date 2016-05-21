@@ -107,7 +107,8 @@ var list = function(entries, categories, q) {
         h('input', {
             type: 'search',
             className: 'filter',
-            placeholder: 'Filter'
+            placeholder: 'Filter',
+            value: q,
         }),
         h('ul', {}, entries.filter(function(entry) {
             return checkCategoryMatch(entry, categories) && checkQueryMatch(entry, q);
@@ -216,17 +217,17 @@ var form = function(entry, categories) {
     ]);
 };
 
-var template = function(entries, categories, languages, view, arg) {
+var template = function(entries, categories, languages, q, view, id) {
     var main;
     var aside;
 
     if (view === 'list') {
-        main = list(entries, categories, arg);
+        main = list(entries, categories, q);
         aside = categoryFilters(categories);
     } else if (view === 'detail') {
-        main = detail(findByKey(entries, arg, 'id'), categories);
+        main = detail(findByKey(entries, id, 'id'), categories);
     } else if (view === 'edit') {
-        main = form(findByKey(entries, arg, 'id'), categories);
+        main = form(findByKey(entries, id, 'id'), categories);
     } else if (view === 'create') {
         main = form({}, categories);
     } else {

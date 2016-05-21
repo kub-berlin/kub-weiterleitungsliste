@@ -10,6 +10,7 @@ var tree;
 var entries;
 var categories;
 var languages;
+var q;
 var update;
 
 
@@ -99,7 +100,8 @@ var resize = function(event) {
 
 // events
 var onFilter = function(event) {
-    link('list/' + event.target.value, true);
+    q = event.target.value;
+    update();
 };
 
 var onSubmit = function(event) {
@@ -192,7 +194,7 @@ var attachEventListeners = function() {
 // main
 var buildTree = function() {
     var loc = location.hash.substr(2).split('/');
-    return template(entries, categories, languages, loc[0] || 'list', loc[1]);
+    return template(entries, categories, languages, q, loc[0] || 'list', loc[1]);
 };
 
 updateEntries().then(function() {
