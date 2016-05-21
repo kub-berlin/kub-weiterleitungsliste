@@ -9,7 +9,20 @@ var template = require('./template');
 var element;
 var tree;
 var entries;
+var categories;
+var languages;
+var q;
+var update;
+var listScrollTop;
 
+
+var findByKey = function(list, key) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].key === key) {
+            return list[i];
+        }
+    }
+};
 
 /** Add event listener to all elements matching `selector` inside `element`. */
 var attachEventListener = function(selector, eventName, fn) {
@@ -31,6 +44,7 @@ var getValue = function(name) {
 
 /** Change URL from JavaScript. */
 var link = function(path, replace) {
+    onNavigate();
     var url = location.pathname + location.search + '#!' + path;
     if (replace) {
         history.replaceState(null, null, url);
@@ -44,6 +58,35 @@ var link = function(path, replace) {
 var updateEntries = function() {
     return xhr.getJSON('api.php').then(function(data) {
         entries = data;
+        categories = [];
+        languages = [];
+
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+
+            var category = findByKey(categories, entry.category);
+            if (!category) {
+                category = {
+                    key: entry.category,
+                    children: [],
+                };
+                categories.push(category);
+            }
+
+            if (!findByKey(category.children, entry.subcategory)) {
+                category.children.push({
+                    key: entry.subcategory,
+                    active: true,
+                });
+            }
+
+            var l = entry.lang.split(/, /g);
+            for (var j = 0; j < l.length; j++) {
+                if (l[j] && languages.indexOf(l[j]) === -1) {
+                    languages.push(l[j]);
+                }
+            }
+        }
     });
 };
 
@@ -55,20 +98,30 @@ var resize = function(event) {
         event.target.style.height = 'auto';
         event.target.style.height = event.target.scrollHeight + 5 + 'px';
     }, 0);
-}
+};
+
+var getPath = function() {
+    var path = location.hash.substr(2).split('/');
+    path[0] = path[0] || 'list';
+    return path;
+};
 
 
 // events
 var onFilter = function(event) {
-    link('list/' + event.target.value, true);
+    q = event.target.value;
+    update();
 };
 
 var onSubmit = function(event) {
     event.preventDefault();
 
+    // prevent double-submit
+    var submit = event.target.querySelector('input[type=submit]');
+    submit.disabled = true;
+
     var data = {
         name: getValue('name'),
-        category: getValue('category'),
         subcategory: getValue('subcategory'),
         address: getValue('address'),
         openinghours: getValue('openinghours'),
@@ -77,6 +130,12 @@ var onSubmit = function(event) {
         note: getValue('note'),
         rev: getValue('rev'),
     };
+
+    for (var i = 0; i < categories.length; i++) {
+        if (findByKey(categories[i].children, getValue('subcategory'))) {
+            data.category = categories[i].key;
+        }
+    }
 
     if (getValue('id')) {
         data.id = getValue('id');
@@ -92,10 +151,43 @@ var onSubmit = function(event) {
     });
 };
 
-var onBack = function(event) {
-    if (history.length > 2) {
-        event.preventDefault();
-        history.back();
+var onDelete = function(event) {
+    event.preventDefault();
+    if (confirm("Wirklich löschen?")) {
+        xhr.post('api.php', JSON.stringify({
+            id: getPath()[1],
+        })).then(updateEntries).then(function() {
+            link('list');
+        }).catch(function(err) {
+            // FIXME handle error
+        });
+    }
+};
+
+var onFilterAll = function(event) {
+    event.preventDefault();
+    var key = event.target.parentElement.dataset.name;
+    var category = findByKey(categories, key);
+    var cats = category ? [category] : categories;
+    cats.forEach(function(category) {
+        category.children.forEach(function(subcategory) {
+            subcategory.active = event.target.className === 'all';
+        });
+    });
+    update();
+};
+
+var onFilterChange = function(event) {
+    var skey = event.target.name;
+    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
+    var subcategory = findByKey(findByKey(categories, key).children, skey);
+    subcategory.active = event.target.checked;
+    update();
+};
+
+var onNavigate = function() {
+    if (getPath()[0] === 'list') {
+        listScrollTop = scrollY;
     }
 };
 
@@ -104,20 +196,24 @@ var attachEventListeners = function() {
     attachEventListener('.filter', 'search', onFilter);
     attachEventListener('.filter', 'keyup', onFilter);
     attachEventListener('form', 'submit', onSubmit);
-    attachEventListener('.back', 'click', onBack);
+    attachEventListener('.delete', 'click', onDelete);
     attachEventListener('textarea', 'init', resize);
     attachEventListener('textarea', 'change', resize);
     attachEventListener('textarea', 'cut', resize);
     attachEventListener('textarea', 'paste', resize);
     attachEventListener('textarea', 'drop', resize);
     attachEventListener('textarea', 'keydown', resize);
+    attachEventListener('.category-filters .all', 'click', onFilterAll);
+    attachEventListener('.category-filters .none', 'click', onFilterAll);
+    attachEventListener('.category-filters input[type=checkbox]', 'change', onFilterChange);
+    attachEventListener('[href^="#"]', 'click', onNavigate);
 };
 
 
 // main
 var buildTree = function() {
-    var loc = location.hash.substr(2).split('/');
-    return template(entries, loc[0] || 'list', loc[1]);
+    var path = getPath();
+    return template(entries, categories, languages, q, path[0], path[1]);
 };
 
 updateEntries().then(function() {
@@ -128,7 +224,7 @@ updateEntries().then(function() {
     document.body.appendChild(element);
 });
 
-var update = function() {
+update = function() {
     var newTree = buildTree();
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
@@ -136,7 +232,10 @@ var update = function() {
     tree = newTree;
 };
 
-window.addEventListener('popstate', update, false);
+window.addEventListener('popstate', function() {
+    update();
+    scrollTo(0, getPath()[0] === 'list' ? listScrollTop : 0);
+}, false);
 
 },{"./template":38,"promise-xhr":9,"virtual-dom":13}],2:[function(require,module,exports){
 
@@ -1902,12 +2001,57 @@ var labels = {
     rev: 'Stand der Info',
 };
 
-var listItem = function(entry) {
+var indexOfKey = function(list, key, kkey) {
+    return list.map(function(x) {return x[kkey];}).indexOf(key);
+};
+
+var findByKey = function(list, key, kkey) {
+    return list[indexOfKey(list, key, kkey)];
+};
+
+var obAny = function(obj, fn) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (fn(obj[key])) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
+var autourl = function(text) {
+    // derived from http://blog.mattheworiordan.com/post/13174566389
+    var regex = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+
+    var match = text.match(regex);
+    if (match) {
+        var url = match[0];
+        var i = text.indexOf(url);
+        var before = text.substr(0, i);
+        var after = text.substr(i + url.length);
+        var surl = url;
+        if (!match[3]) {
+            surl = (url.indexOf('@') !== -1 ? 'mailto:' : 'http://') + surl;
+        }
+        return [before, h('a', {href: surl}, url)].concat(autourl(after));
+    } else {
+        return [text];
+    }
+};
+
+var error = function(msg) {
+    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
+}
+
+var listItem = function(entry, categories) {
     return h('a', {
         href: '#!detail/' + entry.id,
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {className: 'category c2'}, entry.category),
+        h('span', {
+            className: 'category c' + indexOfKey(categories, entry.category, 'key')
+        }, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
         h('h2', {}, entry.name),
@@ -1915,62 +2059,139 @@ var listItem = function(entry) {
     ]);
 };
 
-var list = function(entries, q) {
+var categoryFilters = function(categories) {
+    return h('ul', {
+        className: 'category-filters'
+    }, [
+        h('li', {}, [
+            h('a', {href: '#', className: 'all'}, '(alle)'),
+            ' ',
+            h('a', {href: '#', className: 'none'}, '(keins)'),
+        ]),
+    ].concat(categories.map(function(category, i) {
+        return h('li', {
+            className: 'c' + i,
+            dataset: {
+                name: category.key,
+            },
+        }, [
+            category.key,
+            ' ',
+            h('a', {href: '#', className: 'all'}, '(alle)'),
+            ' ',
+            h('a', {href: '#', className: 'none'}, '(keins)'),
+            h('ul', {}, category.children.map(function(subcategory) {
+                return h('li', {}, [
+                    h('label', {}, [
+                        h('input', {
+                            type: 'checkbox',
+                            name: subcategory.key,
+                            checked: subcategory.active,
+                        }),
+                        ' ',
+                        subcategory.key,
+                    ])
+                ]);
+            })),
+        ]);
+    })));
+};
+
+var checkCategoryMatch = function(entry, categories) {
+    var category = findByKey(categories, entry.category, 'key');
+    var subcategory = findByKey(category.children, entry.subcategory, 'key');
+    return subcategory.active;
+};
+
+var checkQueryMatch = function(entry, q) {
+    return !q || (!q.split(/\s/g).some(function(qq) {
+        return !obAny(entry, function(s) {
+            return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
+        });
+    }));
+};
+
+var list = function(entries, categories, q) {
     return [
         h('input', {
             type: 'search',
             className: 'filter',
-            placeholder: 'Filter'
+            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+            value: q,
         }),
         h('ul', {}, entries.filter(function(entry) {
-            return !q || (entry.name || '').indexOf(q) !== -1;
+            return checkCategoryMatch(entry, categories) && checkQueryMatch(entry, q);
         }).map(function(entry) {
-            return h('li', {}, [listItem(entry)]);
+            return h('li', {}, [listItem(entry, categories)]);
         })),
-        h('a', {href: '#!create'}, 'Hinzufügen'),
+        h('a', {href: '#!create', className: 'button m-cta'}, 'Hinzufügen'),
     ];
 };
 
-var detail = function(entry) {
+var detail = function(entry, categories) {
+    if (!entry) {
+        return error('404 Not Found');
+    }
+
+    var children = [
+        h('header', {}, [
+            h('span', {
+                className: 'category c' + indexOfKey(categories, entry.category, 'key')
+            }, entry.category),
+            ' ',
+            h('span', {className: 'subcategory'}, entry.subcategory),
+            h('h2', {}, entry.name),
+            h('span', {className: 'lang'}, entry.lang),
+        ]),
+        h('h3', {}, labels.address),
+        h('p', {className: 'address'}, autourl(entry.address)),
+    ];
+
+    var optional = ['openinghours', 'contact', 'note'];
+    for (var i =0; i < optional.length; i++) {
+        var key = optional[i];
+        if (entry[key]) {
+            children.push(h('h3', {}, labels[key]));
+            children.push(h('p', {className: key}, autourl(entry[key])));
+        }
+    }
+
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
-    }, [
-        h('span', {className: 'category'}, entry.category),
-        ' ',
-        h('span', {className: 'subcategory'}, entry.subcategory),
-        h('h2', {}, entry.name),
-        h('span', {className: 'lang'}, entry.lang),
-        h('h3', {}, labels.address),
-        h('p', {className: 'address'}, entry.address),
-        h('h3', {}, labels.openinghours),
-        h('p', {className: 'openinghours'}, entry.openinghours),
-        h('h3', {}, labels.contact),
-        h('p', {className: 'contact'}, entry.contact),
-        h('h3', {}, labels.note),
-        h('p', {className: 'note'}, entry.note),
+    }, children.concat([
         h('h3', {}, labels.rev),
-        h('span', {className: 'rev'}, entry.rev),
+        h('time', {
+            className: 'rev',
+            datetime: entry.rev,
+        }, (new Date(entry.rev)).toLocaleDateString('de-DE')),
         h('nav', {}, [
-            h('a', {className: 'back', href: '#!list'}, 'Zurück'),
-            ' ',
-            h('a', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a', {
+                href: '#!edit/' + entry.id,
+                className: 'button m-cta',
+            }, 'Bearbeiten'),
+            h('a', {
+                href: '#',
+                className: 'button m-cta delete',
+            }, 'Löschen'),
+            h('a', {className: 'back button', href: '#!list'}, 'Zurück'),
         ]),
-    ]);
-    return listItem(entry);
+    ]));
 };
 
-var field = function(name, value, type) {
+var field = function(name, value, required, type) {
     var f;
 
     if (type === 'textarea') {
         f = h('textarea', {
             name: name,
             value: value,
+            required: required,
         });
     } else {
         f = h('input', {
             name: name,
             value: value,
+            required: required,
             type: type || 'text',
         });
     }
@@ -1978,46 +2199,63 @@ var field = function(name, value, type) {
     return h('label', {}, [labels[name], f]);
 };
 
-var form = function(entry) {
+var form = function(entry, categories) {
     return h('form', {}, [
-        field('name', entry.name),
-        field('category', entry.category),
-        field('subcategory', entry.subcategory),
-        field('address', entry.address, 'textarea'),
-        field('openinghours', entry.openinghours, 'textarea'),
-        field('contact', entry.contact, 'textarea'),
-        field('lang', entry.lang, 'textarea'),
-        field('note', entry.note, 'textarea'),
-        field('rev', entry.rev, 'date'),
+        field('name', entry.name, true),
+        h('label', {}, [
+            labels.category + '/' + labels.subcategory,
+            h('select', {
+                name: 'subcategory',
+                value: entry.subcategory,
+                required: true,
+            }, categories.map(function(category) {
+                return h('optgroup', {
+                    label: category.key,
+                }, category.children.map(function(subcategory) {
+                    return h('option', {}, subcategory.key);
+                }));
+            })),
+        ]),
+        field('address', entry.address, true, 'textarea'),
+        field('openinghours', entry.openinghours, false, 'textarea'),
+        field('contact', entry.contact, false, 'textarea'),
+        field('lang', entry.lang, false, 'textarea'),
+        field('note', entry.note, false, 'textarea'),
+        field('rev', entry.rev, true, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
             h('a', {
-                className: 'back',
+                className: 'back button',
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),
     ]);
 };
 
-var template = function(entries, view, arg) {
-    var child;
+var template = function(entries, categories, languages, q, view, id) {
+    var main;
+    var aside;
 
     if (view === 'list') {
-        child = list(entries, arg);
+        main = list(entries, categories, q);
+        aside = categoryFilters(categories);
     } else if (view === 'detail') {
-        child = detail(entries[arg - 1]);
+        main = detail(findByKey(entries, id, 'id'), categories);
     } else if (view === 'edit') {
-        child = form(entries[arg - 1]);
+        main = form(findByKey(entries, id, 'id'), categories);
     } else if (view === 'create') {
-        child = form({});
+        main = form({}, categories);
     } else {
         throw new Error('Invalid view');
     }
 
-    return h('div', {className: view}, [child]);
+    return h('div', {}, [
+        h('aside', {}, aside),
+        h('main', {className: view}, main),
+    ]);
 };
 
-module.exports = template
+module.exports = template;
 
 },{"virtual-dom/h":12}]},{},[1]);
