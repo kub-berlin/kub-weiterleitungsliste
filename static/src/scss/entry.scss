@@ -9,12 +9,14 @@ h3 {
     font-weight: normal;
     font-size: 120%;
     margin: 2.5em 0 0.5em;
+    border-bottom: 1px solid $color-focus;
 }
 
 p {
     white-space: pre-line;
 }
 
+.detail header,
 .list > ul > li > a {
     display: block;
     color: inherit;
@@ -22,6 +24,13 @@ p {
     padding: 0.5em;
     margin: 0 0 1em;
     background: $color-bg-tint;
+}
+
+.detail header {
+    border-bottom: 2px solid $color-focus;
+}
+
+.list > ul > li > a {
     border-left: 2px solid $color-focus;
 
     h2 {

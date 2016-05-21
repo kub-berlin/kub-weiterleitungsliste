@@ -147,13 +147,15 @@ var detail = function(entry, categories) {
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {
-            className: 'category c' + indexOfKey(categories, entry.category, 'key')
-        }, entry.category),
-        ' ',
-        h('span', {className: 'subcategory'}, entry.subcategory),
-        h('h2', {}, entry.name),
-        h('span', {className: 'lang'}, entry.lang),
+        h('header', {}, [
+            h('span', {
+                className: 'category c' + indexOfKey(categories, entry.category, 'key')
+            }, entry.category),
+            ' ',
+            h('span', {className: 'subcategory'}, entry.subcategory),
+            h('h2', {}, entry.name),
+            h('span', {className: 'lang'}, entry.lang),
+        ]),
         h('h3', {}, labels.address),
         h('p', {className: 'address'}, autourl(entry.address)),
         h('h3', {}, labels.openinghours),
