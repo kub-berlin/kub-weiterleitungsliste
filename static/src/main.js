@@ -136,6 +136,20 @@ var onSubmit = function(event) {
     });
 };
 
+var onDelete = function(event) {
+    event.preventDefault();
+    if (confirm("Wirklich löschen?")) {
+        var loc = location.hash.substr(2).split('/');
+        xhr.post('api.php', JSON.stringify({
+            id: loc[1],
+        })).then(updateEntries).then(function() {
+            link('list');
+        }).catch(function(err) {
+            // FIXME handle error
+        });
+    }
+};
+
 var onFilterAll = function(event) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
@@ -162,6 +176,7 @@ var attachEventListeners = function() {
     attachEventListener('.filter', 'search', onFilter);
     attachEventListener('.filter', 'keyup', onFilter);
     attachEventListener('form', 'submit', onSubmit);
+    attachEventListener('.delete', 'click', onDelete);
     attachEventListener('textarea', 'init', resize);
     attachEventListener('textarea', 'change', resize);
     attachEventListener('textarea', 'cut', resize);

@@ -34,26 +34,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     # FIXME: do server-side validation
 
     $data = json_decode(file_get_contents('php://input'), true);
-    $data['mtime'] = time();
 
-    if (array_key_exists('id', $data)) {
-        $sql = 'UPDATE entries SET
-            name=:name,
-            mtime=:mtime,
-            category=:category,
-            subcategory=:subcategory,
-            address=:address,
-            openinghours=:openinghours,
-            contact=:contact,
-            lang=:lang,
-            note=:note,
-            rev=:rev
-            WHERE id=:id';
+    if (!array_key_exists('name', $data)) {
+        $sql = 'DELETE from entries WHERE id=:id';
     } else {
-        $sql = 'INSERT INTO entries
-            (name, mtime, category, subcategory, address, openinghours, contact, lang, note, rev)
-            VALUES
-            (:name, :mtime, :category, :subcategory, :address, :openinghours, :contact, :lang, :note, :rev)';
+        $data['mtime'] = time();
+        if (array_key_exists('id', $data)) {
+            $sql = 'UPDATE entries SET
+                name=:name,
+                mtime=:mtime,
+                category=:category,
+                subcategory=:subcategory,
+                address=:address,
+                openinghours=:openinghours,
+                contact=:contact,
+                lang=:lang,
+                note=:note,
+                rev=:rev
+                WHERE id=:id';
+        } else {
+            $sql = 'INSERT INTO entries
+                (name, mtime, category, subcategory, address, openinghours, contact, lang, note, rev)
+                VALUES
+                (:name, :mtime, :category, :subcategory, :address, :openinghours, :contact, :lang, :note, :rev)';
+        }
     }
 
     $stmt = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));

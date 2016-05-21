@@ -140,7 +140,10 @@ var detail = function(entry, categories) {
                 href: '#!edit/' + entry.id,
                 className: 'button m-cta',
             }, 'Bearbeiten'),
-            ' ',
+            h('a', {
+                href: '#',
+                className: 'button m-cta delete',
+            }, 'Löschen'),
             h('a', {className: 'back button', href: '#!list'}, 'Zurück'),
         ]),
     ]);
