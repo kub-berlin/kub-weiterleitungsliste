@@ -107,6 +107,10 @@ var onFilter = function(event) {
 var onSubmit = function(event) {
     event.preventDefault();
 
+    // prevent double-submit
+    var submit = event.target.querySelector('input[type=submit]');
+    submit.disabled = true;
+
     var data = {
         name: getValue('name'),
         subcategory: getValue('subcategory'),
