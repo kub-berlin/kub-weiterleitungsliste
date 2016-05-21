@@ -33,7 +33,7 @@ var obAny = function(obj, fn) {
 
 var autourl = function(text) {
     // derived from http://blog.mattheworiordan.com/post/13174566389
-    var regex = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+    var regex = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
     var match = text.match(regex);
     if (match) {
@@ -53,7 +53,7 @@ var autourl = function(text) {
 
 var error = function(msg) {
     return h('h2', {className: 'error'}, 'Fehler: ' + msg);
-}
+};
 
 var listItem = function(entry, categories) {
     return h('a', {

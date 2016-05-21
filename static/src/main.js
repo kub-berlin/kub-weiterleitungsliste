@@ -177,9 +177,9 @@ var onFilterAll = function(event) {
 };
 
 var onFilterChange = function(event) {
-    var skey = event.target.name;
+    var subkey = event.target.name;
     var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = findByKey(findByKey(categories, key).children, skey);
+    var subcategory = findByKey(findByKey(categories, key).children, subkey);
     subcategory.active = event.target.checked;
     update();
 };
