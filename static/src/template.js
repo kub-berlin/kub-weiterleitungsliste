@@ -127,7 +127,7 @@ var list = function(entries, categories, q) {
         h('input', {
             type: 'search',
             className: 'filter',
-            placeholder: 'Filter',
+            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
             value: q,
         }),
         h('ul', {}, entries.filter(function(entry) {
