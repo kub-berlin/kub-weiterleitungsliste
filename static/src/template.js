@@ -12,12 +12,12 @@ var labels = {
     rev: 'Stand der Info',
 };
 
-var indexOfKey = function(list, key) {
-    return list.map(function(x) {return x.key;}).indexOf(key);
+var indexOfKey = function(list, key, kkey) {
+    return list.map(function(x) {return x[kkey];}).indexOf(key);
 };
 
-var findByKey = function(list, key) {
-    return list[indexOfKey(list, key)];
+var findByKey = function(list, key, kkey) {
+    return list[indexOfKey(list, key, kkey)];
 };
 
 var obAny = function(obj, fn) {
@@ -41,7 +41,7 @@ var listItem = function(entry, categories) {
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
         h('span', {
-            className: 'category c' + indexOfKey(categories, entry.category)
+            className: 'category c' + indexOfKey(categories, entry.category, 'key')
         }, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
@@ -89,8 +89,8 @@ var categoryFilters = function(categories) {
 };
 
 var checkCategoryMatch = function(entry, categories) {
-    var category = findByKey(categories, entry.category);
-    var subcategory = findByKey(category.children, entry.subcategory);
+    var category = findByKey(categories, entry.category, 'key');
+    var subcategory = findByKey(category.children, entry.subcategory, 'key');
     return subcategory.active;
 };
 
@@ -127,7 +127,7 @@ var detail = function(entry, categories) {
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
         h('span', {
-            className: 'category c' + indexOfKey(categories, entry.category)
+            className: 'category c' + indexOfKey(categories, entry.category, 'key')
         }, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
