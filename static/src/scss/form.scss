@@ -38,6 +38,10 @@ input, textarea, select {
         background: $color-tint;
         color: contrast-color($color-tint);
     }
+
+    @media print {
+        display: none;
+    }
 }
 
 .button {
