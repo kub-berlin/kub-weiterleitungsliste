@@ -142,7 +142,10 @@ var detail = function(entry, categories) {
         h('h3', {}, labels.note),
         h('p', {className: 'note'}, entry.note),
         h('h3', {}, labels.rev),
-        h('span', {className: 'rev'}, entry.rev),
+        h('time', {
+            className: 'rev',
+            datetime: entry.rev,
+        }, (new Date(entry.rev)).toLocaleDateString('de-DE')),
         h('nav', {}, [
             h('a', {
                 href: '#!edit/' + entry.id,
