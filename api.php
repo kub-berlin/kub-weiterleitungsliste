@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors','On');
+// ini_set('display_errors', 'On');
 
 function get_database() {
     $db = new PDO('sqlite:db.sqlite');
