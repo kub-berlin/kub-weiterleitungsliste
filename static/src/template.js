@@ -144,9 +144,7 @@ var detail = function(entry, categories) {
         return error('404 Not Found');
     }
 
-    return h('div', {
-        className: (entry.category || '').replace(/ /g, '-'),
-    }, [
+    var children = [
         h('header', {}, [
             h('span', {
                 className: 'category c' + indexOfKey(categories, entry.category, 'key')
@@ -158,12 +156,20 @@ var detail = function(entry, categories) {
         ]),
         h('h3', {}, labels.address),
         h('p', {className: 'address'}, autourl(entry.address)),
-        h('h3', {}, labels.openinghours),
-        h('p', {className: 'openinghours'}, autourl(entry.openinghours)),
-        h('h3', {}, labels.contact),
-        h('p', {className: 'contact'}, autourl(entry.contact)),
-        h('h3', {}, labels.note),
-        h('p', {className: 'note'}, autourl(entry.note)),
+    ];
+
+    var optional = ['openinghours', 'contact', 'note'];
+    for (var i =0; i < optional.length; i++) {
+        var key = optional[i];
+        if (entry[key]) {
+            children.push(h('h3', {}, labels[key]));
+            children.push(h('p', {className: key}, autourl(entry[key])));
+        }
+    }
+
+    return h('div', {
+        className: (entry.category || '').replace(/ /g, '-'),
+    }, children.concat([
         h('h3', {}, labels.rev),
         h('time', {
             className: 'rev',
@@ -180,7 +186,7 @@ var detail = function(entry, categories) {
             }, 'Löschen'),
             h('a', {className: 'back button', href: '#!list'}, 'Zurück'),
         ]),
-    ]);
+    ]));
 };
 
 var field = function(name, value, required, type) {
