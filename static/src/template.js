@@ -244,7 +244,7 @@ var form = function(entry, categories) {
     ]);
 };
 
-var template = function(entries, categories, languages, q, view, id) {
+var template = function(entries, categories, q, view, id) {
     var main;
     var aside;
 

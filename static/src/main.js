@@ -9,7 +9,6 @@ var element;
 var tree;
 var entries;
 var categories;
-var languages;
 var q;
 var update;
 var listScrollTop;
@@ -58,7 +57,6 @@ var updateEntries = function() {
     return xhr.getJSON('api.php').then(function(data) {
         entries = data;
         categories = [];
-        languages = [];
 
         for (var i = 0; i < entries.length; i++) {
             var entry = entries[i];
@@ -77,13 +75,6 @@ var updateEntries = function() {
                     key: entry.subcategory,
                     active: true,
                 });
-            }
-
-            var l = entry.lang.split(/, /g);
-            for (var j = 0; j < l.length; j++) {
-                if (l[j] && languages.indexOf(l[j]) === -1) {
-                    languages.push(l[j]);
-                }
             }
         }
     });
@@ -212,7 +203,7 @@ var attachEventListeners = function() {
 // main
 var buildTree = function() {
     var path = getPath();
-    return template(entries, categories, languages, q, path[0], path[1]);
+    return template(entries, categories, q, path[0], path[1]);
 };
 
 updateEntries().then(function() {
