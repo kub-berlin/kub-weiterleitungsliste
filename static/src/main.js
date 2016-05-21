@@ -7,11 +7,15 @@ var template = require('./template');
 // globals
 var element;
 var tree;
-var entries;
-var categories;
-var q;
-var update;
 var listScrollTop;
+var model = {
+    entries: [],
+    categories: [],
+    q: null,
+};
+
+var update;
+var onNavigate;
 
 
 var findByKey = function(list, key) {
@@ -52,22 +56,22 @@ var link = function(path, replace) {
     window.dispatchEvent(new Event('popstate'));
 };
 
-/** Update `entries` from the server. */
-var updateEntries = function() {
-    return xhr.getJSON('api.php').then(function(data) {
-        entries = data;
-        categories = [];
+/** Update `model` from the server. */
+var updateModel = function() {
+    return xhr.getJSON('api.php').then(function(entries) {
+        model.entries = entries;
+        model.categories = [];
 
         for (var i = 0; i < entries.length; i++) {
             var entry = entries[i];
 
-            var category = findByKey(categories, entry.category);
+            var category = findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
                     key: entry.category,
                     children: [],
                 };
-                categories.push(category);
+                model.categories.push(category);
             }
 
             if (!findByKey(category.children, entry.subcategory)) {
@@ -98,8 +102,35 @@ var getPath = function() {
 
 
 // events
+onNavigate = function() {
+    if (getPath()[0] === 'list') {
+        listScrollTop = scrollY;
+    }
+};
+
 var onFilter = function(event) {
-    q = event.target.value;
+    model.q = event.target.value;
+    update();
+};
+
+var onFilterAll = function(event) {
+    event.preventDefault();
+    var key = event.target.parentElement.dataset.name;
+    var category = findByKey(model.categories, key);
+    var cats = category ? [category] : model.categories;
+    cats.forEach(function(category) {
+        category.children.forEach(function(subcategory) {
+            subcategory.active = event.target.className === 'all';
+        });
+    });
+    update();
+};
+
+var onFilterChange = function(event) {
+    var subkey = event.target.name;
+    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
+    var subcategory = findByKey(findByKey(model.categories, key).children, subkey);
+    subcategory.active = event.target.checked;
     update();
 };
 
@@ -121,9 +152,10 @@ var onSubmit = function(event) {
         rev: getValue('rev'),
     };
 
-    for (var i = 0; i < categories.length; i++) {
-        if (findByKey(categories[i].children, getValue('subcategory'))) {
-            data.category = categories[i].key;
+    for (var i = 0; i < model.categories.length; i++) {
+        var category = model.categories[i];
+        if (findByKey(category.children, getValue('subcategory'))) {
+            data.category = category.key;
         }
     }
 
@@ -132,7 +164,7 @@ var onSubmit = function(event) {
     }
 
     xhr.post('api.php', JSON.stringify(data)).then(function(result) {
-        return updateEntries().then(function() {
+        return updateModel().then(function() {
             var r = JSON.parse(result);
             link('detail/' + r.id);
         });
@@ -146,38 +178,11 @@ var onDelete = function(event) {
     if (confirm("Wirklich löschen?")) {
         xhr.post('api.php', JSON.stringify({
             id: getPath()[1],
-        })).then(updateEntries).then(function() {
+        })).then(updateModel).then(function() {
             link('list');
         }).catch(function(err) {
             // FIXME handle error
         });
-    }
-};
-
-var onFilterAll = function(event) {
-    event.preventDefault();
-    var key = event.target.parentElement.dataset.name;
-    var category = findByKey(categories, key);
-    var cats = category ? [category] : categories;
-    cats.forEach(function(category) {
-        category.children.forEach(function(subcategory) {
-            subcategory.active = event.target.className === 'all';
-        });
-    });
-    update();
-};
-
-var onFilterChange = function(event) {
-    var subkey = event.target.name;
-    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = findByKey(findByKey(categories, key).children, subkey);
-    subcategory.active = event.target.checked;
-    update();
-};
-
-var onNavigate = function() {
-    if (getPath()[0] === 'list') {
-        listScrollTop = scrollY;
     }
 };
 
@@ -189,9 +194,6 @@ var attachEventListeners = function() {
     attachEventListener('.delete', 'click', onDelete);
     attachEventListener('textarea', 'init', resize);
     attachEventListener('textarea', 'change', resize);
-    attachEventListener('textarea', 'cut', resize);
-    attachEventListener('textarea', 'paste', resize);
-    attachEventListener('textarea', 'drop', resize);
     attachEventListener('textarea', 'keydown', resize);
     attachEventListener('.category-filters .all', 'click', onFilterAll);
     attachEventListener('.category-filters .none', 'click', onFilterAll);
@@ -201,13 +203,8 @@ var attachEventListeners = function() {
 
 
 // main
-var buildTree = function() {
-    var path = getPath();
-    return template(entries, categories, q, path[0], path[1]);
-};
-
-updateEntries().then(function() {
-    tree = buildTree();
+updateModel().then(function() {
+    tree = template(model, getPath());
     element = virtualDom.create(tree);
     attachEventListeners();
     document.body.innerHTML = '';
@@ -215,7 +212,7 @@ updateEntries().then(function() {
 });
 
 update = function() {
-    var newTree = buildTree();
+    var newTree = template(model, getPath());
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
     attachEventListeners();
@@ -225,4 +222,4 @@ update = function() {
 window.addEventListener('popstate', function() {
     update();
     scrollTo(0, getPath()[0] === 'list' ? listScrollTop : 0);
-}, false);
+});

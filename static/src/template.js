@@ -1,6 +1,8 @@
 var h = require('virtual-dom/h');
 
-var labels = {
+
+// constants
+var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
@@ -12,6 +14,10 @@ var labels = {
     rev: 'Stand der Info',
 };
 
+// derived from http://blog.mattheworiordan.com/post/13174566389
+var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+
+// helpers
 var indexOfKey = function(list, key, kkey) {
     return list.map(function(x) {return x[kkey];}).indexOf(key);
 };
@@ -32,10 +38,7 @@ var obAny = function(obj, fn) {
 };
 
 var autourl = function(text) {
-    // derived from http://blog.mattheworiordan.com/post/13174566389
-    var regex = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
-
-    var match = text.match(regex);
+    var match = text.match(RE_URL);
     if (match) {
         var url = match[0];
         var i = text.indexOf(url);
@@ -51,17 +54,33 @@ var autourl = function(text) {
     }
 };
 
+var checkCategoryMatch = function(entry, categories) {
+    var category = findByKey(categories, entry.category, 'key');
+    var subcategory = findByKey(category.children, entry.subcategory, 'key');
+    return subcategory.active;
+};
+
+var checkQueryMatch = function(entry, q) {
+    return !q || (!q.split(/\s/g).some(function(qq) {
+        return !obAny(entry, function(s) {
+            return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
+        });
+    }));
+};
+
+
+// templates
 var error = function(msg) {
     return h('h2', {className: 'error'}, 'Fehler: ' + msg);
 };
 
-var listItem = function(entry, categories) {
+var listItem = function(model, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
         h('span', {
-            className: 'category c' + indexOfKey(categories, entry.category, 'key')
+            className: 'category c' + indexOfKey(model.categories, entry.category, 'key')
         }, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
@@ -70,7 +89,25 @@ var listItem = function(entry, categories) {
     ]);
 };
 
-var categoryFilters = function(categories) {
+var list = function(model) {
+    return [
+        h('input', {
+            type: 'search',
+            className: 'filter',
+            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+            value: model.q,
+        }),
+        h('ul', {}, model.entries.filter(function(entry) {
+            return checkCategoryMatch(entry, model.categories) &&
+                checkQueryMatch(entry, model.q);
+        }).map(function(entry) {
+            return h('li', {}, [listItem(model, entry)]);
+        })),
+        h('a', {href: '#!create', className: 'button m-cta'}, 'Hinzufügen'),
+    ];
+};
+
+var categoryFilters = function(model) {
     return h('ul', {
         className: 'category-filters'
     }, [
@@ -79,7 +116,7 @@ var categoryFilters = function(categories) {
             ' ',
             h('a', {href: '#', className: 'none'}, '(keins)'),
         ]),
-    ].concat(categories.map(function(category, i) {
+    ].concat(model.categories.map(function(category, i) {
         return h('li', {
             className: 'c' + i,
             dataset: {
@@ -108,38 +145,7 @@ var categoryFilters = function(categories) {
     })));
 };
 
-var checkCategoryMatch = function(entry, categories) {
-    var category = findByKey(categories, entry.category, 'key');
-    var subcategory = findByKey(category.children, entry.subcategory, 'key');
-    return subcategory.active;
-};
-
-var checkQueryMatch = function(entry, q) {
-    return !q || (!q.split(/\s/g).some(function(qq) {
-        return !obAny(entry, function(s) {
-            return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
-        });
-    }));
-};
-
-var list = function(entries, categories, q) {
-    return [
-        h('input', {
-            type: 'search',
-            className: 'filter',
-            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
-            value: q,
-        }),
-        h('ul', {}, entries.filter(function(entry) {
-            return checkCategoryMatch(entry, categories) && checkQueryMatch(entry, q);
-        }).map(function(entry) {
-            return h('li', {}, [listItem(entry, categories)]);
-        })),
-        h('a', {href: '#!create', className: 'button m-cta'}, 'Hinzufügen'),
-    ];
-};
-
-var detail = function(entry, categories) {
+var detail = function(model, entry) {
     if (!entry) {
         return error('404 Not Found');
     }
@@ -147,14 +153,14 @@ var detail = function(entry, categories) {
     var children = [
         h('header', {}, [
             h('span', {
-                className: 'category c' + indexOfKey(categories, entry.category, 'key')
+                className: 'category c' + indexOfKey(model.categories, entry.category, 'key')
             }, entry.category),
             ' ',
             h('span', {className: 'subcategory'}, entry.subcategory),
             h('h2', {}, entry.name),
             h('span', {className: 'lang'}, entry.lang),
         ]),
-        h('h3', {}, labels.address),
+        h('h3', {}, LABELS.address),
         h('p', {className: 'address'}, autourl(entry.address)),
     ];
 
@@ -162,7 +168,7 @@ var detail = function(entry, categories) {
     for (var i =0; i < optional.length; i++) {
         var key = optional[i];
         if (entry[key]) {
-            children.push(h('h3', {}, labels[key]));
+            children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {className: key}, autourl(entry[key])));
         }
     }
@@ -170,7 +176,7 @@ var detail = function(entry, categories) {
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
     }, children.concat([
-        h('h3', {}, labels.rev),
+        h('h3', {}, LABELS.rev),
         h('time', {
             className: 'rev',
             datetime: entry.rev,
@@ -207,19 +213,19 @@ var field = function(name, value, required, type) {
         });
     }
 
-    return h('label', {}, [labels[name], f]);
+    return h('label', {}, [LABELS[name], f]);
 };
 
-var form = function(entry, categories) {
+var form = function(model, entry) {
     return h('form', {}, [
         field('name', entry.name, true),
         h('label', {}, [
-            labels.category + '/' + labels.subcategory,
+            LABELS.category + '/' + LABELS.subcategory,
             h('select', {
                 name: 'subcategory',
                 value: entry.subcategory,
                 required: true,
-            }, categories.map(function(category) {
+            }, model.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
@@ -244,26 +250,26 @@ var form = function(entry, categories) {
     ]);
 };
 
-var template = function(entries, categories, q, view, id) {
+var template = function(model, path) {
     var main;
     var aside;
 
-    if (view === 'list') {
-        main = list(entries, categories, q);
-        aside = categoryFilters(categories);
-    } else if (view === 'detail') {
-        main = detail(findByKey(entries, id, 'id'), categories);
-    } else if (view === 'edit') {
-        main = form(findByKey(entries, id, 'id'), categories);
-    } else if (view === 'create') {
-        main = form({}, categories);
+    if (path[0] === 'list') {
+        main = list(model);
+        aside = categoryFilters(model);
+    } else if (path[0] === 'detail') {
+        main = detail(model, findByKey(model.entries, path[1], 'id'));
+    } else if (path[0] === 'edit') {
+        main = form(model, findByKey(model.entries, path[1], 'id'));
+    } else if (path[0] === 'create') {
+        main = form(model, {});
     } else {
         throw new Error('Invalid view');
     }
 
     return h('div', {}, [
         h('aside', {}, aside),
-        h('main', {className: view}, main),
+        h('main', {className: path[0]}, main),
     ]);
 };
 
