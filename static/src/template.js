@@ -31,6 +31,26 @@ var obAny = function(obj, fn) {
     return false;
 };
 
+var autourl = function(text) {
+    // http://blog.mattheworiordan.com/post/13174566389
+    var regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+
+    var match = text.match(regex);
+    if (match) {
+        var url = match[0];
+        var i = text.indexOf(url);
+        var before = text.substr(0, i);
+        var after = text.substr(i + url.length);
+        var surl = url;
+        if (!match[3]) {
+            surl = (url.indexOf('@') !== -1 ? 'mailto:' : 'http://') + surl;
+        }
+        return [before, h('a', {href: surl}, url)].concat(autourl(after));
+    } else {
+        return [text];
+    }
+};
+
 var error = function(msg) {
     return h('h2', {className: 'error'}, 'Fehler: ' + msg);
 }
@@ -135,13 +155,13 @@ var detail = function(entry, categories) {
         h('h2', {}, entry.name),
         h('span', {className: 'lang'}, entry.lang),
         h('h3', {}, labels.address),
-        h('p', {className: 'address'}, entry.address),
+        h('p', {className: 'address'}, autourl(entry.address)),
         h('h3', {}, labels.openinghours),
-        h('p', {className: 'openinghours'}, entry.openinghours),
+        h('p', {className: 'openinghours'}, autourl(entry.openinghours)),
         h('h3', {}, labels.contact),
-        h('p', {className: 'contact'}, entry.contact),
+        h('p', {className: 'contact'}, autourl(entry.contact)),
         h('h3', {}, labels.note),
-        h('p', {className: 'note'}, entry.note),
+        h('p', {className: 'note'}, autourl(entry.note)),
         h('h3', {}, labels.rev),
         h('time', {
             className: 'rev',
