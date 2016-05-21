@@ -12,6 +12,7 @@ var categories;
 var languages;
 var q;
 var update;
+var listScrollTop;
 
 
 var findByKey = function(list, key) {
@@ -42,6 +43,7 @@ var getValue = function(name) {
 
 /** Change URL from JavaScript. */
 var link = function(path, replace) {
+    onNavigate();
     var url = location.pathname + location.search + '#!' + path;
     if (replace) {
         history.replaceState(null, null, url);
@@ -182,6 +184,12 @@ var onFilterChange = function(event) {
     update();
 };
 
+var onNavigate = function() {
+    if (getPath()[0] === 'list') {
+        listScrollTop = scrollY;
+    }
+};
+
 var attachEventListeners = function() {
     attachEventListener('.filter', 'change', onFilter);
     attachEventListener('.filter', 'search', onFilter);
@@ -197,6 +205,7 @@ var attachEventListeners = function() {
     attachEventListener('.category-filters .all', 'click', onFilterAll);
     attachEventListener('.category-filters .none', 'click', onFilterAll);
     attachEventListener('.category-filters input[type=checkbox]', 'change', onFilterChange);
+    attachEventListener('[href^="#"]', 'click', onNavigate);
 };
 
 
@@ -222,4 +231,7 @@ update = function() {
     tree = newTree;
 };
 
-window.addEventListener('popstate', update, false);
+window.addEventListener('popstate', function() {
+    update();
+    scrollTo(0, getPath()[0] === 'list' ? listScrollTop : 0);
+}, false);
