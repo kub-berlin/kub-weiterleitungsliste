@@ -97,6 +97,12 @@ var resize = function(event) {
     }, 0);
 };
 
+var getPath = function() {
+    var path = location.hash.substr(2).split('/');
+    path[0] = path[0] || 'list';
+    return path;
+};
+
 
 // events
 var onFilter = function(event) {
@@ -145,9 +151,8 @@ var onSubmit = function(event) {
 var onDelete = function(event) {
     event.preventDefault();
     if (confirm("Wirklich löschen?")) {
-        var loc = location.hash.substr(2).split('/');
         xhr.post('api.php', JSON.stringify({
-            id: loc[1],
+            id: getPath()[1],
         })).then(updateEntries).then(function() {
             link('list');
         }).catch(function(err) {
@@ -197,8 +202,8 @@ var attachEventListeners = function() {
 
 // main
 var buildTree = function() {
-    var loc = location.hash.substr(2).split('/');
-    return template(entries, categories, languages, q, loc[0] || 'list', loc[1]);
+    var path = getPath();
+    return template(entries, categories, languages, q, path[0], path[1]);
 };
 
 updateEntries().then(function() {
