@@ -224,9 +224,9 @@ var template = function(entries, categories, languages, view, arg) {
         main = list(entries, categories, arg);
         aside = categoryFilters(categories);
     } else if (view === 'detail') {
-        main = detail(entries[arg - 1], categories);
+        main = detail(findByKey(entries, arg, 'id'), categories);
     } else if (view === 'edit') {
-        main = form(entries[arg - 1], categories);
+        main = form(findByKey(entries, arg, 'id'), categories);
     } else if (view === 'create') {
         main = form({}, categories);
     } else {
