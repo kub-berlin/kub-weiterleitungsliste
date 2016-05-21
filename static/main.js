@@ -8,20 +8,21 @@ var template = require('./template');
 // globals
 var element;
 var tree;
-var entries;
-var categories;
-var languages;
-var q;
-var update;
 var listScrollTop;
+var model = {
+    entries: [],
+    categories: [],
+    q: null,
+};
+
+var update;
+var onNavigate;
 
 
+// helpers
 var findByKey = function(list, key) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i].key === key) {
-            return list[i];
-        }
-    }
+    var i = list.map(function(x) {return x.key;}).indexOf(key);
+    return list[i];
 };
 
 /** Add event listener to all elements matching `selector` inside `element`. */
@@ -54,23 +55,22 @@ var link = function(path, replace) {
     window.dispatchEvent(new Event('popstate'));
 };
 
-/** Update `entries` from the server. */
-var updateEntries = function() {
-    return xhr.getJSON('api.php').then(function(data) {
-        entries = data;
-        categories = [];
-        languages = [];
+/** Update `model` from the server. */
+var updateModel = function() {
+    return xhr.getJSON('api.php').then(function(entries) {
+        model.entries = entries;
+        model.categories = [];
 
         for (var i = 0; i < entries.length; i++) {
             var entry = entries[i];
 
-            var category = findByKey(categories, entry.category);
+            var category = findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
                     key: entry.category,
                     children: [],
                 };
-                categories.push(category);
+                model.categories.push(category);
             }
 
             if (!findByKey(category.children, entry.subcategory)) {
@@ -78,13 +78,6 @@ var updateEntries = function() {
                     key: entry.subcategory,
                     active: true,
                 });
-            }
-
-            var l = entry.lang.split(/, /g);
-            for (var j = 0; j < l.length; j++) {
-                if (l[j] && languages.indexOf(l[j]) === -1) {
-                    languages.push(l[j]);
-                }
             }
         }
     });
@@ -108,8 +101,35 @@ var getPath = function() {
 
 
 // events
+onNavigate = function() {
+    if (getPath()[0] === 'list') {
+        listScrollTop = scrollY;
+    }
+};
+
 var onFilter = function(event) {
-    q = event.target.value;
+    model.q = event.target.value;
+    update();
+};
+
+var onFilterAll = function(event) {
+    event.preventDefault();
+    var key = event.target.parentElement.dataset.name;
+    var category = findByKey(model.categories, key);
+    var cats = category ? [category] : model.categories;
+    cats.forEach(function(category) {
+        category.children.forEach(function(subcategory) {
+            subcategory.active = event.target.className === 'all';
+        });
+    });
+    update();
+};
+
+var onFilterChange = function(event) {
+    var subkey = event.target.name;
+    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
+    var subcategory = findByKey(findByKey(model.categories, key).children, subkey);
+    subcategory.active = event.target.checked;
     update();
 };
 
@@ -131,9 +151,10 @@ var onSubmit = function(event) {
         rev: getValue('rev'),
     };
 
-    for (var i = 0; i < categories.length; i++) {
-        if (findByKey(categories[i].children, getValue('subcategory'))) {
-            data.category = categories[i].key;
+    for (var i = 0; i < model.categories.length; i++) {
+        var category = model.categories[i];
+        if (findByKey(category.children, getValue('subcategory'))) {
+            data.category = category.key;
         }
     }
 
@@ -142,7 +163,7 @@ var onSubmit = function(event) {
     }
 
     xhr.post('api.php', JSON.stringify(data)).then(function(result) {
-        return updateEntries().then(function() {
+        return updateModel().then(function() {
             var r = JSON.parse(result);
             link('detail/' + r.id);
         });
@@ -156,38 +177,11 @@ var onDelete = function(event) {
     if (confirm("Wirklich löschen?")) {
         xhr.post('api.php', JSON.stringify({
             id: getPath()[1],
-        })).then(updateEntries).then(function() {
+        })).then(updateModel).then(function() {
             link('list');
         }).catch(function(err) {
             // FIXME handle error
         });
-    }
-};
-
-var onFilterAll = function(event) {
-    event.preventDefault();
-    var key = event.target.parentElement.dataset.name;
-    var category = findByKey(categories, key);
-    var cats = category ? [category] : categories;
-    cats.forEach(function(category) {
-        category.children.forEach(function(subcategory) {
-            subcategory.active = event.target.className === 'all';
-        });
-    });
-    update();
-};
-
-var onFilterChange = function(event) {
-    var skey = event.target.name;
-    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = findByKey(findByKey(categories, key).children, skey);
-    subcategory.active = event.target.checked;
-    update();
-};
-
-var onNavigate = function() {
-    if (getPath()[0] === 'list') {
-        listScrollTop = scrollY;
     }
 };
 
@@ -199,9 +193,6 @@ var attachEventListeners = function() {
     attachEventListener('.delete', 'click', onDelete);
     attachEventListener('textarea', 'init', resize);
     attachEventListener('textarea', 'change', resize);
-    attachEventListener('textarea', 'cut', resize);
-    attachEventListener('textarea', 'paste', resize);
-    attachEventListener('textarea', 'drop', resize);
     attachEventListener('textarea', 'keydown', resize);
     attachEventListener('.category-filters .all', 'click', onFilterAll);
     attachEventListener('.category-filters .none', 'click', onFilterAll);
@@ -211,13 +202,8 @@ var attachEventListeners = function() {
 
 
 // main
-var buildTree = function() {
-    var path = getPath();
-    return template(entries, categories, languages, q, path[0], path[1]);
-};
-
-updateEntries().then(function() {
-    tree = buildTree();
+updateModel().then(function() {
+    tree = template(model, getPath());
     element = virtualDom.create(tree);
     attachEventListeners();
     document.body.innerHTML = '';
@@ -225,7 +211,7 @@ updateEntries().then(function() {
 });
 
 update = function() {
-    var newTree = buildTree();
+    var newTree = template(model, getPath());
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
     attachEventListeners();
@@ -235,7 +221,7 @@ update = function() {
 window.addEventListener('popstate', function() {
     update();
     scrollTo(0, getPath()[0] === 'list' ? listScrollTop : 0);
-}, false);
+});
 
 },{"./template":38,"promise-xhr":9,"virtual-dom":13}],2:[function(require,module,exports){
 
@@ -1989,7 +1975,9 @@ function isArray(obj) {
 },{}],38:[function(require,module,exports){
 var h = require('virtual-dom/h');
 
-var labels = {
+
+// constants
+var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
@@ -2001,6 +1989,10 @@ var labels = {
     rev: 'Stand der Info',
 };
 
+// derived from http://blog.mattheworiordan.com/post/13174566389
+var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+
+// helpers
 var indexOfKey = function(list, key, kkey) {
     return list.map(function(x) {return x[kkey];}).indexOf(key);
 };
@@ -2009,22 +2001,8 @@ var findByKey = function(list, key, kkey) {
     return list[indexOfKey(list, key, kkey)];
 };
 
-var obAny = function(obj, fn) {
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            if (fn(obj[key])) {
-                return true;
-            }
-        }
-    }
-    return false;
-};
-
 var autourl = function(text) {
-    // derived from http://blog.mattheworiordan.com/post/13174566389
-    var regex = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
-
-    var match = text.match(regex);
+    var match = text.match(RE_URL);
     if (match) {
         var url = match[0];
         var i = text.indexOf(url);
@@ -2040,63 +2018,6 @@ var autourl = function(text) {
     }
 };
 
-var error = function(msg) {
-    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
-}
-
-var listItem = function(entry, categories) {
-    return h('a', {
-        href: '#!detail/' + entry.id,
-        className: (entry.category || '').replace(/ /g, '-'),
-    }, [
-        h('span', {
-            className: 'category c' + indexOfKey(categories, entry.category, 'key')
-        }, entry.category),
-        ' ',
-        h('span', {className: 'subcategory'}, entry.subcategory),
-        h('h2', {}, entry.name),
-        h('span', {className: 'lang'}, entry.lang),
-    ]);
-};
-
-var categoryFilters = function(categories) {
-    return h('ul', {
-        className: 'category-filters'
-    }, [
-        h('li', {}, [
-            h('a', {href: '#', className: 'all'}, '(alle)'),
-            ' ',
-            h('a', {href: '#', className: 'none'}, '(keins)'),
-        ]),
-    ].concat(categories.map(function(category, i) {
-        return h('li', {
-            className: 'c' + i,
-            dataset: {
-                name: category.key,
-            },
-        }, [
-            category.key,
-            ' ',
-            h('a', {href: '#', className: 'all'}, '(alle)'),
-            ' ',
-            h('a', {href: '#', className: 'none'}, '(keins)'),
-            h('ul', {}, category.children.map(function(subcategory) {
-                return h('li', {}, [
-                    h('label', {}, [
-                        h('input', {
-                            type: 'checkbox',
-                            name: subcategory.key,
-                            checked: subcategory.active,
-                        }),
-                        ' ',
-                        subcategory.key,
-                    ])
-                ]);
-            })),
-        ]);
-    })));
-};
-
 var checkCategoryMatch = function(entry, categories) {
     var category = findByKey(categories, entry.category, 'key');
     var subcategory = findByKey(category.children, entry.subcategory, 'key');
@@ -2105,75 +2026,123 @@ var checkCategoryMatch = function(entry, categories) {
 
 var checkQueryMatch = function(entry, q) {
     return !q || (!q.split(/\s/g).some(function(qq) {
-        return !obAny(entry, function(s) {
+        return !Object.keys(entry).some(function(key) {
+            var s = entry[key];
             return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
         });
     }));
 };
 
-var list = function(entries, categories, q) {
+var categoryClass = function(model, entry) {
+    return 'c' + indexOfKey(model.categories, entry.category, 'key');
+};
+
+
+// templates
+var error = function(msg) {
+    return h('h2.error', {}, 'Fehler: ' + msg);
+};
+
+var listItem = function(model, entry) {
+    return h('a', {
+        href: '#!detail/' + entry.id,
+        className: (entry.category || '').replace(/ /g, '-'),
+    }, [
+        h('span.category.' + categoryClass(model, entry), {}, entry.category),
+        ' ',
+        h('span.subcategory', {}, entry.subcategory),
+        h('h2', {}, entry.name),
+        h('span.lang', {}, entry.lang),
+    ]);
+};
+
+var list = function(model) {
     return [
-        h('input', {
+        h('input.filter', {
             type: 'search',
-            className: 'filter',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
-            value: q,
+            value: model.q,
         }),
-        h('ul', {}, entries.filter(function(entry) {
-            return checkCategoryMatch(entry, categories) && checkQueryMatch(entry, q);
+        h('ul', {}, model.entries.filter(function(entry) {
+            return checkCategoryMatch(entry, model.categories) &&
+                checkQueryMatch(entry, model.q);
         }).map(function(entry) {
-            return h('li', {}, [listItem(entry, categories)]);
+            return h('li', {}, [listItem(model, entry)]);
         })),
-        h('a', {href: '#!create', className: 'button m-cta'}, 'Hinzufügen'),
+        h('a.button.m-cta', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
-var detail = function(entry, categories) {
+var categoryFilters = function(model) {
+    return h('ul.category-filters', {}, [
+        h('li', {}, [
+            h('a.all', {href: '#'}, '(alle)'),
+            ' ',
+            h('a.none', {href: '#'}, '(keins)'),
+        ]),
+    ].concat(model.categories.map(function(category, i) {
+        return h('li.c' + i, {
+            dataset: {
+                name: category.key,
+            },
+        }, [
+            category.key,
+            ' ',
+            h('a.all', {href: '#'}, '(alle)'),
+            ' ',
+            h('a.none', {href: '#'}, '(keins)'),
+            h('ul', {}, category.children.map(function(subcategory) {
+                return h('li', {}, [h('label', {}, [
+                    h('input', {
+                        type: 'checkbox',
+                        name: subcategory.key,
+                        checked: subcategory.active,
+                    }),
+                    ' ',
+                    subcategory.key,
+                ])]);
+            })),
+        ]);
+    })));
+};
+
+var detail = function(model, entry) {
     if (!entry) {
         return error('404 Not Found');
     }
 
     var children = [
         h('header', {}, [
-            h('span', {
-                className: 'category c' + indexOfKey(categories, entry.category, 'key')
-            }, entry.category),
+            h('span.category.' + categoryClass(model, entry), {}, entry.category),
             ' ',
-            h('span', {className: 'subcategory'}, entry.subcategory),
+            h('span.subcategory', {}, entry.subcategory),
             h('h2', {}, entry.name),
-            h('span', {className: 'lang'}, entry.lang),
+            h('span.lang', {}, entry.lang),
         ]),
-        h('h3', {}, labels.address),
-        h('p', {className: 'address'}, autourl(entry.address)),
+        h('h3', {}, LABELS.address),
+        h('p.address', {}, autourl(entry.address)),
     ];
 
     var optional = ['openinghours', 'contact', 'note'];
     for (var i =0; i < optional.length; i++) {
         var key = optional[i];
         if (entry[key]) {
-            children.push(h('h3', {}, labels[key]));
-            children.push(h('p', {className: key}, autourl(entry[key])));
+            children.push(h('h3', {}, LABELS[key]));
+            children.push(h('p.' + key, {}, autourl(entry[key])));
         }
     }
 
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
     }, children.concat([
-        h('h3', {}, labels.rev),
-        h('time', {
-            className: 'rev',
+        h('h3', {}, LABELS.rev),
+        h('time.rev', {
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')),
         h('nav', {}, [
-            h('a', {
-                href: '#!edit/' + entry.id,
-                className: 'button m-cta',
-            }, 'Bearbeiten'),
-            h('a', {
-                href: '#',
-                className: 'button m-cta delete',
-            }, 'Löschen'),
-            h('a', {className: 'back button', href: '#!list'}, 'Zurück'),
+            h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
+            h('a.back.button', {href: '#!list'}, 'Zurück'),
         ]),
     ]));
 };
@@ -2196,19 +2165,19 @@ var field = function(name, value, required, type) {
         });
     }
 
-    return h('label', {}, [labels[name], f]);
+    return h('label', {}, [LABELS[name], f]);
 };
 
-var form = function(entry, categories) {
+var form = function(model, entry) {
     return h('form', {}, [
         field('name', entry.name, true),
         h('label', {}, [
-            labels.category + '/' + labels.subcategory,
+            LABELS.category + '/' + LABELS.subcategory,
             h('select', {
                 name: 'subcategory',
                 value: entry.subcategory,
                 required: true,
-            }, categories.map(function(category) {
+            }, model.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
@@ -2225,34 +2194,33 @@ var form = function(entry, categories) {
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
-            h('a', {
-                className: 'back button',
+            h('a.back.button', {
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),
     ]);
 };
 
-var template = function(entries, categories, languages, q, view, id) {
+var template = function(model, path) {
     var main;
     var aside;
 
-    if (view === 'list') {
-        main = list(entries, categories, q);
-        aside = categoryFilters(categories);
-    } else if (view === 'detail') {
-        main = detail(findByKey(entries, id, 'id'), categories);
-    } else if (view === 'edit') {
-        main = form(findByKey(entries, id, 'id'), categories);
-    } else if (view === 'create') {
-        main = form({}, categories);
+    if (path[0] === 'list') {
+        main = list(model);
+        aside = categoryFilters(model);
+    } else if (path[0] === 'detail') {
+        main = detail(model, findByKey(model.entries, path[1], 'id'));
+    } else if (path[0] === 'edit') {
+        main = form(model, findByKey(model.entries, path[1], 'id'));
+    } else if (path[0] === 'create') {
+        main = form(model, {});
     } else {
         throw new Error('Invalid view');
     }
 
     return h('div', {}, [
         h('aside', {}, aside),
-        h('main', {className: view}, main),
+        h('main', {className: path[0]}, main),
     ]);
 };
 
