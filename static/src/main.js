@@ -8,7 +8,7 @@ var template = require('./template');
 var element;
 var tree;
 var listScrollTop;
-var model = {
+var state = {
     entries: [],
     categories: [],
     q: null,
@@ -54,20 +54,20 @@ var link = function(path, replace) {
     window.dispatchEvent(new Event('popstate'));
 };
 
-/** Update `model` from the server. */
+/** Update `state.entries` and `state.categories` from the server. */
 var updateModel = function() {
     return xhr.getJSON('api.php').then(function(entries) {
-        model.entries = entries;
-        model.categories = [];
+        state.entries = entries;
+        state.categories = [];
 
         entries.forEach(function(entry) {
-            var category = findByKey(model.categories, entry.category);
+            var category = findByKey(state.categories, entry.category);
             if (!category) {
                 category = {
                     key: entry.category,
                     children: [],
                 };
-                model.categories.push(category);
+                state.categories.push(category);
             }
 
             if (!findByKey(category.children, entry.subcategory)) {
@@ -105,15 +105,15 @@ onNavigate = function() {
 };
 
 var onFilter = function(event) {
-    model.q = event.target.value;
+    state.q = event.target.value;
     update();
 };
 
 var onFilterAll = function(event) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
-    var category = findByKey(model.categories, key);
-    var cats = category ? [category] : model.categories;
+    var category = findByKey(state.categories, key);
+    var cats = category ? [category] : state.categories;
     cats.forEach(function(category) {
         category.children.forEach(function(subcategory) {
             subcategory.active = event.target.className === 'all';
@@ -125,7 +125,7 @@ var onFilterAll = function(event) {
 var onFilterChange = function(event) {
     var subkey = event.target.name;
     var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = findByKey(findByKey(model.categories, key).children, subkey);
+    var subcategory = findByKey(findByKey(state.categories, key).children, subkey);
     subcategory.active = event.target.checked;
     update();
 };
@@ -144,8 +144,8 @@ var onSubmit = function(event) {
         data[key] = getValue(key);
     });
 
-    for (var i = 0; i < model.categories.length; i++) {
-        var category = model.categories[i];
+    for (var i = 0; i < state.categories.length; i++) {
+        var category = state.categories[i];
         if (findByKey(category.children, getValue('subcategory'))) {
             data.category = category.key;
             break;
@@ -199,9 +199,9 @@ var attachEventListeners = function() {
 updateModel().then(function() {
     var path = getPath();
     tree = template({
-        entries: model.entries,
-        categories: model.categories,
-        q: model.q,
+        entries: state.entries,
+        categories: state.categories,
+        q: state.q,
         view: path[0],
         id: path[1],
     });
@@ -214,9 +214,9 @@ updateModel().then(function() {
 update = function() {
     var path = getPath();
     var newTree = template({
-        entries: model.entries,
-        categories: model.categories,
-        q: model.q,
+        entries: state.entries,
+        categories: state.categories,
+        q: state.q,
         view: path[0],
         id: path[1],
     });
