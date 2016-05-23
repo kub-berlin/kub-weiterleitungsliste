@@ -1,5 +1,7 @@
 var h = require('virtual-dom/h');
 
+var _ = require('./helpers');
+
 
 // constants
 var LABELS = {
@@ -18,14 +20,6 @@ var LABELS = {
 var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
 // helpers
-var indexOfKey = function(list, key, kkey) {
-    return list.map(function(x) {return x[kkey];}).indexOf(key);
-};
-
-var findByKey = function(list, key, kkey) {
-    return list[indexOfKey(list, key, kkey)];
-};
-
 var autourl = function(text) {
     var match = text.match(RE_URL);
     if (match) {
@@ -44,8 +38,8 @@ var autourl = function(text) {
 };
 
 var checkCategoryMatch = function(entry, categories) {
-    var category = findByKey(categories, entry.category, 'key');
-    var subcategory = findByKey(category.children, entry.subcategory, 'key');
+    var category = _.findByKey(categories, entry.category);
+    var subcategory = _.findByKey(category.children, entry.subcategory);
     return subcategory.active;
 };
 
@@ -59,7 +53,7 @@ var checkQueryMatch = function(entry, q) {
 };
 
 var categoryClass = function(state, entry) {
-    return 'c' + indexOfKey(state.categories, entry.category, 'key');
+    return 'c' + _.indexOfKey(state.categories, entry.category, 'key');
 };
 
 
@@ -232,9 +226,9 @@ var template = function(state) {
         main = list(state);
         aside = categoryFilters(state);
     } else if (state.view === 'detail') {
-        main = detail(state, findByKey(state.entries, state.id, 'id'));
+        main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
-        main = form(state, findByKey(state.entries, state.id, 'id'));
+        main = form(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'create') {
         main = form(state, {});
     } else {

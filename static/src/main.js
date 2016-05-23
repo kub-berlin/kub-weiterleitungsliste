@@ -1,16 +1,12 @@
 var xhr = require('promise-xhr');
 var assign = require('lodash.assign');
 
+var _ = require('./helpers');
 var template = require('./template');
 var createApp = require('./app');
 
 
 // helpers
-var findByKey = function(list, key) {
-    var i = list.map(function(x) {return x.key;}).indexOf(key);
-    return list[i];
-};
-
 /** Get `entries` and `categories` from the server. */
 var updateModel = function() {
     return xhr.getJSON('api.php').then(function(entries) {
@@ -20,7 +16,7 @@ var updateModel = function() {
         };
 
         entries.forEach(function(entry) {
-            var category = findByKey(model.categories, entry.category);
+            var category = _.findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
                     key: entry.category,
@@ -29,7 +25,7 @@ var updateModel = function() {
                 model.categories.push(category);
             }
 
-            if (!findByKey(category.children, entry.subcategory)) {
+            if (!_.findByKey(category.children, entry.subcategory)) {
                 category.children.push({
                     key: entry.subcategory,
                     active: true,
@@ -69,7 +65,7 @@ var onFilter = function(event, state) {
 var onFilterAll = function(event, state) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
-    var category = findByKey(state.categories, key);
+    var category = _.findByKey(state.categories, key);
     var cats = category ? [category] : state.categories;
     cats.forEach(function(category) {
         category.children.forEach(function(subcategory) {
@@ -82,7 +78,7 @@ var onFilterAll = function(event, state) {
 var onFilterChange = function(event, state) {
     var subkey = event.target.name;
     var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = findByKey(findByKey(state.categories, key).children, subkey);
+    var subcategory = _.findByKey(_.findByKey(state.categories, key).children, subkey);
     subcategory.active = event.target.checked;
     return state;
 };
@@ -103,7 +99,7 @@ var onSubmit = function(event, state, app) {
 
     for (var i = 0; i < state.categories.length; i++) {
         var category = state.categories[i];
-        if (findByKey(category.children, app.getValue('subcategory'))) {
+        if (_.findByKey(category.children, app.getValue('subcategory'))) {
             data.category = category.key;
             break;
         }
