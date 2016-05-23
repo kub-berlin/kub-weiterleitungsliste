@@ -1,45 +1,14 @@
 var xhr = require('promise-xhr');
-var virtualDom = require('virtual-dom');
 var assign = require('lodash.assign');
 
 var template = require('./template');
-
-
-// globals
-var element;
-var tree;
-var listScrollTop;
-var state = {
-    entries: [],
-    categories: [],
-    q: null,
-};
-
-var update;
+var createApp = require('./app');
 
 
 // helpers
 var findByKey = function(list, key) {
     var i = list.map(function(x) {return x.key;}).indexOf(key);
     return list[i];
-};
-
-/** Add event listener to all elements matching `selector` inside `element`. */
-var attachEventListener = function(selector, eventName, fn) {
-    var elements = element.querySelectorAll(selector);
-    for (var i = 0; i < elements.length; i++) {
-        if (eventName === 'init') {
-            fn({target: elements[i]});
-        } else {
-            elements[i].addEventListener(eventName, fn);
-        }
-    }
-};
-
-/** Get value of form input. */
-var getValue = function(name) {
-    var el = element.querySelector('[name=' + name + ']');
-    return el ? el.value : null;
 };
 
 /** Get `entries` and `categories` from the server. */
@@ -92,12 +61,12 @@ var getPath = function(state) {
 
 
 // events
-var onFilter = function(event) {
+var onFilter = function(event, state) {
     state.q = event.target.value;
-    update();
+    return state;
 };
 
-var onFilterAll = function(event) {
+var onFilterAll = function(event, state) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
     var category = findByKey(state.categories, key);
@@ -107,18 +76,18 @@ var onFilterAll = function(event) {
             subcategory.active = event.target.className === 'all';
         });
     });
-    update();
+    return state;
 };
 
-var onFilterChange = function(event) {
+var onFilterChange = function(event, state) {
     var subkey = event.target.name;
     var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
     var subcategory = findByKey(findByKey(state.categories, key).children, subkey);
     subcategory.active = event.target.checked;
-    update();
+    return state;
 };
 
-var onSubmit = function(event) {
+var onSubmit = function(event, state, app) {
     event.preventDefault();
 
     // prevent double-submit
@@ -129,96 +98,80 @@ var onSubmit = function(event) {
 
     var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
     keys.forEach(function(key) {
-        data[key] = getValue(key);
+        data[key] = app.getValue(key);
     });
 
     for (var i = 0; i < state.categories.length; i++) {
         var category = state.categories[i];
-        if (findByKey(category.children, getValue('subcategory'))) {
+        if (findByKey(category.children, app.getValue('subcategory'))) {
             data.category = category.key;
             break;
         }
     }
 
-    if (getValue('id')) {
-        data.id = getValue('id');
+    if (app.getValue('id')) {
+        data.id = app.getValue('id');
     }
 
-    xhr.post('api.php', JSON.stringify(data)).then(function(result) {
+    return xhr.post('api.php', JSON.stringify(data)).then(function(result) {
         return updateModel().then(function(model) {
             var r = JSON.parse(result);
             history.pushState(null, null, '#!detail/' + r.id);
-            assign(state, model);
-            update();
+            return assign({}, state, model, getPath());
         });
     }).catch(function(err) {
         // FIXME handle error
     });
 };
 
-var onDelete = function(event) {
+var onDelete = function(event, state) {
     event.preventDefault();
     if (confirm("Wirklich löschen?")) {
-        xhr.post('api.php', JSON.stringify({
+        return xhr.post('api.php', JSON.stringify({
             id: state.id,
         })).then(updateModel).then(function(model) {
             history.pushState(null, null, '#!list');
-            assign(state, model);
-            update();
+            return assign({}, state, model, getPath());
         }).catch(function(err) {
             // FIXME handle error
         });
     }
 };
 
-var attachEventListeners = function() {
-    attachEventListener('.filter', 'change', onFilter);
-    attachEventListener('.filter', 'search', onFilter);
-    attachEventListener('.filter', 'keyup', onFilter);
-    attachEventListener('form', 'submit', onSubmit);
-    attachEventListener('.delete', 'click', onDelete);
-    attachEventListener('textarea', 'init', resize);
-    attachEventListener('textarea', 'change', resize);
-    attachEventListener('textarea', 'keydown', resize);
-    attachEventListener('.category-filters .all', 'click', onFilterAll);
-    attachEventListener('.category-filters .none', 'click', onFilterAll);
-    attachEventListener('.category-filters input[type=checkbox]', 'change', onFilterChange);
+var onPopState = function(event, state) {
+    return assign({}, state, getPath());
 };
 
 
 // main
-var beforeUpdate = function(oldState, newState) {
+var app = createApp(template);
+var listScrollTop;
+
+app.beforeUpdate = function(oldState, newState) {
     if (newState.view !== oldState.view && oldState.view === 'list') {
         listScrollTop = scrollY;
     }
 };
 
-var afterUpdate = function(oldState, newState) {
+app.afterUpdate = function(oldState, newState) {
     if (newState.view !== oldState.view) {
         scrollTo(0, newState.view === 'list' ? listScrollTop : 0);
     }
 };
 
+app.bindEvent('.filter', 'change', onFilter);
+app.bindEvent('.filter', 'search', onFilter);
+app.bindEvent('.filter', 'keyup', onFilter);
+app.bindEvent('form', 'submit', onSubmit);
+app.bindEvent('.delete', 'click', onDelete);
+app.bindEvent('textarea', 'init', resize);
+app.bindEvent('textarea', 'change', resize);
+app.bindEvent('textarea', 'keydown', resize);
+app.bindEvent('.category-filters .all', 'click', onFilterAll);
+app.bindEvent('.category-filters .none', 'click', onFilterAll);
+app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
+app.bindEvent(window, 'popstate', onPopState);
+
 updateModel().then(function(model) {
-    assign(state, model, getPath());
-    tree = template(state);
-    element = virtualDom.create(tree);
-    attachEventListeners();
-    document.body.innerHTML = '';
-    document.body.appendChild(element);
-});
-
-update = function() {
-    var newState = assign({}, state, getPath());
-    beforeUpdate(state, newState);
-    var newTree = template(newState);
-    var patches = virtualDom.diff(tree, newTree);
-    virtualDom.patch(element, patches);
-    attachEventListeners();
-    tree = newTree;
-    afterUpdate(state, newState);
-    state = newState;
-};
-
-window.addEventListener('popstate', update);
+    app.init(assign({}, model, getPath()), document.body);
 });
