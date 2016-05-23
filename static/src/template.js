@@ -58,8 +58,8 @@ var checkQueryMatch = function(entry, q) {
     }));
 };
 
-var categoryClass = function(model, entry) {
-    return 'c' + indexOfKey(model.categories, entry.category, 'key');
+var categoryClass = function(state, entry) {
+    return 'c' + indexOfKey(state.categories, entry.category, 'key');
 };
 
 
@@ -68,12 +68,12 @@ var error = function(msg) {
     return h('h2.error', {}, 'Fehler: ' + msg);
 };
 
-var listItem = function(model, entry) {
+var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span.category.' + categoryClass(model, entry), {}, entry.category),
+        h('span.category.' + categoryClass(state, entry), {}, entry.category),
         ' ',
         h('span.subcategory', {}, entry.subcategory),
         h('h2', {}, entry.name),
@@ -81,31 +81,31 @@ var listItem = function(model, entry) {
     ]);
 };
 
-var list = function(model) {
+var list = function(state) {
     return [
         h('input.filter', {
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
-            value: model.q,
+            value: state.q,
         }),
-        h('ul', {}, model.entries.filter(function(entry) {
-            return checkCategoryMatch(entry, model.categories) &&
-                checkQueryMatch(entry, model.q);
+        h('ul', {}, state.entries.filter(function(entry) {
+            return checkCategoryMatch(entry, state.categories) &&
+                checkQueryMatch(entry, state.q);
         }).map(function(entry) {
-            return h('li', {}, [listItem(model, entry)]);
+            return h('li', {}, [listItem(state, entry)]);
         })),
         h('a.button.m-cta', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
-var categoryFilters = function(model) {
+var categoryFilters = function(state) {
     return h('ul.category-filters', {}, [
         h('li', {}, [
             h('a.all', {href: '#'}, '(alle)'),
             ' ',
             h('a.none', {href: '#'}, '(keins)'),
         ]),
-    ].concat(model.categories.map(function(category, i) {
+    ].concat(state.categories.map(function(category, i) {
         return h('li.c' + i, {
             dataset: {
                 name: category.key,
@@ -131,14 +131,14 @@ var categoryFilters = function(model) {
     })));
 };
 
-var detail = function(model, entry) {
+var detail = function(state, entry) {
     if (!entry) {
         return error('404 Not Found');
     }
 
     var children = [
         h('header', {}, [
-            h('span.category.' + categoryClass(model, entry), {}, entry.category),
+            h('span.category.' + categoryClass(state, entry), {}, entry.category),
             ' ',
             h('span.subcategory', {}, entry.subcategory),
             h('h2', {}, entry.name),
@@ -191,7 +191,7 @@ var field = function(name, value, required, type) {
     return h('label', {}, [LABELS[name], f]);
 };
 
-var form = function(model, entry) {
+var form = function(state, entry) {
     return h('form', {}, [
         field('name', entry.name, true),
         h('label', {}, [
@@ -200,7 +200,7 @@ var form = function(model, entry) {
                 name: 'subcategory',
                 value: entry.subcategory,
                 required: true,
-            }, model.categories.map(function(category) {
+            }, state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
@@ -224,26 +224,26 @@ var form = function(model, entry) {
     ]);
 };
 
-var template = function(model, path) {
+var template = function(state) {
     var main;
     var aside;
 
-    if (path[0] === 'list') {
-        main = list(model);
-        aside = categoryFilters(model);
-    } else if (path[0] === 'detail') {
-        main = detail(model, findByKey(model.entries, path[1], 'id'));
-    } else if (path[0] === 'edit') {
-        main = form(model, findByKey(model.entries, path[1], 'id'));
-    } else if (path[0] === 'create') {
-        main = form(model, {});
+    if (state.view === 'list') {
+        main = list(state);
+        aside = categoryFilters(state);
+    } else if (state.view === 'detail') {
+        main = detail(state, findByKey(state.entries, state.id, 'id'));
+    } else if (state.view === 'edit') {
+        main = form(state, findByKey(state.entries, state.id, 'id'));
+    } else if (state.view === 'create') {
+        main = form(state, {});
     } else {
         main = error('Invalid view');
     }
 
     return h('div', {}, [
         h('aside', {}, aside),
-        h('main', {className: path[0]}, main),
+        h('main', {className: state.view}, main),
     ]);
 };
 

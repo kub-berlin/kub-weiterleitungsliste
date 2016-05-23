@@ -197,7 +197,14 @@ var attachEventListeners = function() {
 
 // main
 updateModel().then(function() {
-    tree = template(model, getPath());
+    var path = getPath();
+    tree = template({
+        entries: model.entries,
+        categories: model.categories,
+        q: model.q,
+        view: path[0],
+        id: path[1],
+    });
     element = virtualDom.create(tree);
     attachEventListeners();
     document.body.innerHTML = '';
@@ -205,7 +212,14 @@ updateModel().then(function() {
 });
 
 update = function() {
-    var newTree = template(model, getPath());
+    var path = getPath();
+    var newTree = template({
+        entries: model.entries,
+        categories: model.categories,
+        q: model.q,
+        view: path[0],
+        id: path[1],
+    });
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
     attachEventListeners();
