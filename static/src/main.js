@@ -1,5 +1,6 @@
 var xhr = require('promise-xhr');
 var virtualDom = require('virtual-dom');
+var assign = require('lodash.assign');
 
 var template = require('./template');
 
@@ -42,32 +43,22 @@ var getValue = function(name) {
     return el ? el.value : null;
 };
 
-/** Change URL from JavaScript. */
-var link = function(path, replace) {
-    onNavigate();
-    var url = location.pathname + location.search + '#!' + path;
-    if (replace) {
-        history.replaceState(null, null, url);
-    } else {
-        history.pushState(null, null, url);
-    }
-    window.dispatchEvent(new Event('popstate'));
-};
-
-/** Update `state.entries` and `state.categories` from the server. */
+/** Get `entries` and `categories` from the server. */
 var updateModel = function() {
     return xhr.getJSON('api.php').then(function(entries) {
-        state.entries = entries;
-        state.categories = [];
+        var model = {
+            entries: entries,
+            categories: [],
+        };
 
         entries.forEach(function(entry) {
-            var category = findByKey(state.categories, entry.category);
+            var category = findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
                     key: entry.category,
                     children: [],
                 };
-                state.categories.push(category);
+                model.categories.push(category);
             }
 
             if (!findByKey(category.children, entry.subcategory)) {
@@ -77,6 +68,8 @@ var updateModel = function() {
                 });
             }
         });
+
+        return model;
     });
 };
 
@@ -90,16 +83,18 @@ var resize = function(event) {
     }, 0);
 };
 
-var getPath = function() {
+var getPath = function(state) {
     var path = location.hash.substr(2).split('/');
-    path[0] = path[0] || 'list';
-    return path;
+    return {
+        view: path[0] || 'list',
+        id: path[1],
+    };
 };
 
 
 // events
 onNavigate = function() {
-    if (getPath()[0] === 'list') {
+    if (state.view === 'list') {
         listScrollTop = scrollY;
     }
 };
@@ -157,9 +152,11 @@ var onSubmit = function(event) {
     }
 
     xhr.post('api.php', JSON.stringify(data)).then(function(result) {
-        return updateModel().then(function() {
+        return updateModel().then(function(model) {
             var r = JSON.parse(result);
-            link('detail/' + r.id);
+            history.pushState(null, null, '#!detail/' + r.id);
+            assign(state, model);
+            update();
         });
     }).catch(function(err) {
         // FIXME handle error
@@ -170,9 +167,11 @@ var onDelete = function(event) {
     event.preventDefault();
     if (confirm("Wirklich löschen?")) {
         xhr.post('api.php', JSON.stringify({
-            id: getPath()[1],
-        })).then(updateModel).then(function() {
-            link('list');
+            id: state.id,
+        })).then(updateModel).then(function(model) {
+            history.pushState(null, null, '#!list');
+            assign(state, model);
+            update();
         }).catch(function(err) {
             // FIXME handle error
         });
@@ -196,15 +195,9 @@ var attachEventListeners = function() {
 
 
 // main
-updateModel().then(function() {
-    var path = getPath();
-    tree = template({
-        entries: state.entries,
-        categories: state.categories,
-        q: state.q,
-        view: path[0],
-        id: path[1],
-    });
+updateModel().then(function(model) {
+    assign(state, model, getPath());
+    tree = template(state);
     element = virtualDom.create(tree);
     attachEventListeners();
     document.body.innerHTML = '';
@@ -212,14 +205,8 @@ updateModel().then(function() {
 });
 
 update = function() {
-    var path = getPath();
-    var newTree = template({
-        entries: state.entries,
-        categories: state.categories,
-        q: state.q,
-        view: path[0],
-        id: path[1],
-    });
+    assign(state, getPath());
+    var newTree = template(state);
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
     attachEventListeners();
@@ -228,5 +215,5 @@ update = function() {
 
 window.addEventListener('popstate', function() {
     update();
-    scrollTo(0, getPath()[0] === 'list' ? listScrollTop : 0);
+    scrollTo(0, state.view === 'list' ? listScrollTop : 0);
 });

@@ -4,6 +4,7 @@
   "main": "main.js",
   "devDependencies": {
     "browserify": "^13.0.1",
+    "lodash.assign": "^4.0.9",
     "node-sass": "^3.4.2",
     "promise-xhr": "github:xi/promise-xhr#fix-get-json",
     "virtual-dom": "^2.1.1"
