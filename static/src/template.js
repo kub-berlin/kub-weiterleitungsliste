@@ -240,7 +240,7 @@ var template = function(model, path) {
     } else if (path[0] === 'create') {
         main = form(model, {});
     } else {
-        throw new Error('Invalid view');
+        main = error('Invalid view');
     }
 
     return h('div', {}, [
