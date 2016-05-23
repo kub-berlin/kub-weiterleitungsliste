@@ -16,7 +16,6 @@ var state = {
 };
 
 var update;
-var onNavigate;
 
 
 // helpers
@@ -93,12 +92,6 @@ var getPath = function(state) {
 
 
 // events
-onNavigate = function() {
-    if (state.view === 'list') {
-        listScrollTop = scrollY;
-    }
-};
-
 var onFilter = function(event) {
     state.q = event.target.value;
     update();
@@ -190,11 +183,22 @@ var attachEventListeners = function() {
     attachEventListener('.category-filters .all', 'click', onFilterAll);
     attachEventListener('.category-filters .none', 'click', onFilterAll);
     attachEventListener('.category-filters input[type=checkbox]', 'change', onFilterChange);
-    attachEventListener('[href^="#"]', 'click', onNavigate);
 };
 
 
 // main
+var beforeUpdate = function(oldState, newState) {
+    if (newState.view !== oldState.view && oldState.view === 'list') {
+        listScrollTop = scrollY;
+    }
+};
+
+var afterUpdate = function(oldState, newState) {
+    if (newState.view !== oldState.view) {
+        scrollTo(0, newState.view === 'list' ? listScrollTop : 0);
+    }
+};
+
 updateModel().then(function(model) {
     assign(state, model, getPath());
     tree = template(state);
@@ -205,15 +209,16 @@ updateModel().then(function(model) {
 });
 
 update = function() {
-    assign(state, getPath());
-    var newTree = template(state);
+    var newState = assign({}, state, getPath());
+    beforeUpdate(state, newState);
+    var newTree = template(newState);
     var patches = virtualDom.diff(tree, newTree);
     virtualDom.patch(element, patches);
     attachEventListeners();
     tree = newTree;
+    afterUpdate(state, newState);
+    state = newState;
 };
 
-window.addEventListener('popstate', function() {
-    update();
-    scrollTo(0, state.view === 'list' ? listScrollTop : 0);
+window.addEventListener('popstate', update);
 });
