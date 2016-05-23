@@ -60,9 +60,7 @@ var updateModel = function() {
         model.entries = entries;
         model.categories = [];
 
-        for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i];
-
+        entries.forEach(function(entry) {
             var category = findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
@@ -78,7 +76,7 @@ var updateModel = function() {
                     active: true,
                 });
             }
-        }
+        });
     });
 };
 
@@ -139,21 +137,18 @@ var onSubmit = function(event) {
     var submit = event.target.querySelector('input[type=submit]');
     submit.disabled = true;
 
-    var data = {
-        name: getValue('name'),
-        subcategory: getValue('subcategory'),
-        address: getValue('address'),
-        openinghours: getValue('openinghours'),
-        contact: getValue('contact'),
-        lang: getValue('lang'),
-        note: getValue('note'),
-        rev: getValue('rev'),
-    };
+    var data = {};
+
+    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
+    keys.forEach(function(key) {
+        data[key] = getValue(key);
+    });
 
     for (var i = 0; i < model.categories.length; i++) {
         var category = model.categories[i];
         if (findByKey(category.children, getValue('subcategory'))) {
             data.category = category.key;
+            break;
         }
     }
 

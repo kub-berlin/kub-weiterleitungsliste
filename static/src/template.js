@@ -148,14 +148,12 @@ var detail = function(model, entry) {
         h('p.address', {}, autourl(entry.address)),
     ];
 
-    var optional = ['openinghours', 'contact', 'note'];
-    for (var i =0; i < optional.length; i++) {
-        var key = optional[i];
+    ['openinghours', 'contact', 'note'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p.' + key, {}, autourl(entry[key])));
         }
-    }
+    });
 
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
