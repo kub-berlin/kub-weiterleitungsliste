@@ -1,5 +1,6 @@
 var virtualDom = require('virtual-dom');
-var assign = require('lodash.assign');
+
+var _ = require('./helpers');
 
 
 module.exports = function(template) {
@@ -45,7 +46,7 @@ module.exports = function(template) {
 
     var eventWrapper = function(fn) {
         return function(event) {
-            var val = fn(event, assign({}, state), self);
+            var val = fn(event, _.assign({}, state), self);
             Promise.resolve(val).then(function(newState) {
                 if (newState) {
                     update(newState);

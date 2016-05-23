@@ -1,5 +1,4 @@
 var xhr = require('promise-xhr');
-var assign = require('lodash.assign');
 
 var _ = require('./helpers');
 var template = require('./template');
@@ -113,7 +112,7 @@ var onSubmit = function(event, state, app) {
         return updateModel().then(function(model) {
             var r = JSON.parse(result);
             history.pushState(null, null, '#!detail/' + r.id);
-            return assign({}, state, model, getPath());
+            return _.assign({}, state, model, getPath());
         });
     }).catch(function(err) {
         // FIXME handle error
@@ -127,7 +126,7 @@ var onDelete = function(event, state) {
             id: state.id,
         })).then(updateModel).then(function(model) {
             history.pushState(null, null, '#!list');
-            return assign({}, state, model, getPath());
+            return _.assign({}, state, model, getPath());
         }).catch(function(err) {
             // FIXME handle error
         });
@@ -135,7 +134,7 @@ var onDelete = function(event, state) {
 };
 
 var onPopState = function(event, state) {
-    return assign({}, state, getPath());
+    return _.assign({}, state, getPath());
 };
 
 
@@ -169,5 +168,5 @@ app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
-    app.init(assign({}, model, getPath()), document.body);
+    app.init(_.assign({}, model, getPath()), document.body);
 });
