@@ -7,11 +7,11 @@ module.exports.findByKey = function(list, key, kkey) {
 };
 
 module.exports.assign = function(target) {
-    var sources = Array.prototype.slice.call(arguments, 1);
-    for (var i = 0; i < sources.length; i++) {
-        for (var key in sources[i]) {
-            if (sources[i].hasOwnProperty(key)) {
-                target[key] = sources[i][key];
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
+        for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+                target[key] = source[key];
             }
         }
     }

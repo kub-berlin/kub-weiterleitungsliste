@@ -12,15 +12,13 @@ module.exports = function(template) {
 
     var attachEventListeners = function() {
         events.forEach(function(ev) {
-            var elements;
             var selector = ev[0];
             var eventName = ev[1];
             var fn = ev[2];
 
+            var elements = [selector];
             if (typeof selector === 'string') {
                 elements = element.querySelectorAll(selector);
-            } else {
-                elements = [selector];
             }
 
             for (var i = 0; i < elements.length; i++) {
