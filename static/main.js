@@ -1,70 +1,122 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var xhr = require('promise-xhr');
 var virtualDom = require('virtual-dom');
 
-var template = require('./template');
+var _ = require('./helpers');
 
 
-// globals
-var element;
-var tree;
-var listScrollTop;
-var model = {
-    entries: [],
-    categories: [],
-    q: null,
+module.exports = function(template) {
+    var element;
+    var tree;
+    var state;
+    var events = [];
+    var self = {};
+
+    var attachEventListeners = function() {
+        events.forEach(function(ev) {
+            var selector = ev[0];
+            var eventName = ev[1];
+            var fn = ev[2];
+
+            var elements = [selector];
+            if (typeof selector === 'string') {
+                elements = element.querySelectorAll(selector);
+            }
+
+            for (var i = 0; i < elements.length; i++) {
+                if (eventName === 'init') {
+                    fn({target: elements[i]});
+                } else {
+                    elements[i].addEventListener(eventName, fn);
+                }
+            }
+        });
+    };
+
+    var update = function(newState) {
+        var newTree = template(newState);
+        var patches = virtualDom.diff(tree, newTree);
+        virtualDom.patch(element, patches);
+        attachEventListeners();
+        tree = newTree;
+        state = newState;
+    };
+
+    var eventWrapper = function(fn) {
+        return function(event) {
+            var val = fn(event, _.assign({}, state), self);
+            Promise.resolve(val).then(function(newState) {
+                if (newState != null) {
+                    update(newState);
+                }
+                if (newState.$scrollTop != null) {
+                    scrollTo(0, newState.$scrollTop);
+                    delete newState['$scrollTop'];
+                }
+            });
+        };
+    };
+
+    self.init = function(newState, wrapper) {
+        tree = template(newState);
+        element = virtualDom.create(tree);
+        attachEventListeners();
+        wrapper.innerHTML = '';
+        wrapper.appendChild(element);
+        state = newState;
+    };
+
+    self.bindEvent = function(selector, eventName, fn) {
+        events.push([selector, eventName, eventWrapper(fn)]);
+    };
+
+    self.getValue = function(name) {
+        var el = element.querySelector('[name=' + name + ']');
+        return el ? el.value : null;
+    };
+
+    return self;
 };
 
-var update;
-var onNavigate;
+},{"./helpers":2,"virtual-dom":15}],2:[function(require,module,exports){
+module.exports.indexOfKey = function(list, key, kkey) {
+    return list.map(function(x) {return x[kkey];}).indexOf(key);
+};
+
+module.exports.findByKey = function(list, key, kkey) {
+    return list[module.exports.indexOfKey(list, key, kkey || 'key')];
+};
+
+module.exports.assign = function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
+        for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+};
+
+},{}],3:[function(require,module,exports){
+var xhr = require('promise-xhr');
+
+var _ = require('./helpers');
+var template = require('./template');
+var createApp = require('./app');
 
 
 // helpers
-var findByKey = function(list, key) {
-    var i = list.map(function(x) {return x.key;}).indexOf(key);
-    return list[i];
-};
-
-/** Add event listener to all elements matching `selector` inside `element`. */
-var attachEventListener = function(selector, eventName, fn) {
-    var elements = element.querySelectorAll(selector);
-    for (var i = 0; i < elements.length; i++) {
-        if (eventName === 'init') {
-            fn({target: elements[i]});
-        } else {
-            elements[i].addEventListener(eventName, fn);
-        }
-    }
-};
-
-/** Get value of form input. */
-var getValue = function(name) {
-    var el = element.querySelector('[name=' + name + ']');
-    return el ? el.value : null;
-};
-
-/** Change URL from JavaScript. */
-var link = function(path, replace) {
-    onNavigate();
-    var url = location.pathname + location.search + '#!' + path;
-    if (replace) {
-        history.replaceState(null, null, url);
-    } else {
-        history.pushState(null, null, url);
-    }
-    window.dispatchEvent(new Event('popstate'));
-};
-
-/** Update `model` from the server. */
+/** Get `entries` and `categories` from the server. */
 var updateModel = function() {
     return xhr.getJSON('api.php').then(function(entries) {
-        model.entries = entries;
-        model.categories = [];
+        var model = {
+            entries: entries,
+            categories: [],
+        };
 
-        for (var i = 0; i < entries.length; i++) {
-            var entry = entries[i];
-
-            var category = findByKey(model.categories, entry.category);
+        entries.forEach(function(entry) {
+            var category = _.findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
                     key: entry.category,
@@ -73,13 +125,15 @@ var updateModel = function() {
                 model.categories.push(category);
             }
 
-            if (!findByKey(category.children, entry.subcategory)) {
+            if (!_.findByKey(category.children, entry.subcategory)) {
                 category.children.push({
                     key: entry.subcategory,
                     active: true,
                 });
             }
-        }
+        });
+
+        return model;
     });
 };
 
@@ -93,139 +147,132 @@ var resize = function(event) {
     }, 0);
 };
 
-var getPath = function() {
+var getPath = function(state) {
     var path = location.hash.substr(2).split('/');
-    path[0] = path[0] || 'list';
-    return path;
+    return {
+        view: path[0] || 'list',
+        id: path[1],
+    };
 };
 
 
 // events
-onNavigate = function() {
-    if (getPath()[0] === 'list') {
-        listScrollTop = scrollY;
-    }
+var onFilter = function(event, state) {
+    state.q = event.target.value;
+    return state;
 };
 
-var onFilter = function(event) {
-    model.q = event.target.value;
-    update();
-};
-
-var onFilterAll = function(event) {
+var onFilterAll = function(event, state) {
     event.preventDefault();
     var key = event.target.parentElement.dataset.name;
-    var category = findByKey(model.categories, key);
-    var cats = category ? [category] : model.categories;
+    var category = _.findByKey(state.categories, key);
+    var cats = category ? [category] : state.categories;
     cats.forEach(function(category) {
         category.children.forEach(function(subcategory) {
             subcategory.active = event.target.className === 'all';
         });
     });
-    update();
+    return state;
 };
 
-var onFilterChange = function(event) {
+var onFilterChange = function(event, state) {
     var subkey = event.target.name;
     var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = findByKey(findByKey(model.categories, key).children, subkey);
+    var subcategory = _.findByKey(_.findByKey(state.categories, key).children, subkey);
     subcategory.active = event.target.checked;
-    update();
+    return state;
 };
 
-var onSubmit = function(event) {
+var onPopState = function(event, state) {
+    var newState = _.assign({}, state, getPath());
+    if (state.view !== newState.view) {
+        if (newState.view === 'list') {
+            newState.$scrollTop = state._listScrollTop;
+        } else {
+            newState.$scrollTop = 0;
+        }
+        if (state.view === 'list') {
+            newState._listScrollTop = scrollY;
+        }
+    }
+    return newState;
+};
+
+var onSubmit = function(event, state, app) {
     event.preventDefault();
 
     // prevent double-submit
     var submit = event.target.querySelector('input[type=submit]');
     submit.disabled = true;
 
-    var data = {
-        name: getValue('name'),
-        subcategory: getValue('subcategory'),
-        address: getValue('address'),
-        openinghours: getValue('openinghours'),
-        contact: getValue('contact'),
-        lang: getValue('lang'),
-        note: getValue('note'),
-        rev: getValue('rev'),
-    };
+    var data = {};
 
-    for (var i = 0; i < model.categories.length; i++) {
-        var category = model.categories[i];
-        if (findByKey(category.children, getValue('subcategory'))) {
+    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
+    keys.forEach(function(key) {
+        data[key] = app.getValue(key);
+    });
+
+    for (var i = 0; i < state.categories.length; i++) {
+        var category = state.categories[i];
+        if (_.findByKey(category.children, app.getValue('subcategory'))) {
             data.category = category.key;
+            break;
         }
     }
 
-    if (getValue('id')) {
-        data.id = getValue('id');
+    if (app.getValue('id')) {
+        data.id = app.getValue('id');
     }
 
-    xhr.post('api.php', JSON.stringify(data)).then(function(result) {
-        return updateModel().then(function() {
+    return xhr.post('api.php', JSON.stringify(data)).then(function(result) {
+        return updateModel().then(function(model) {
             var r = JSON.parse(result);
-            link('detail/' + r.id);
+            history.pushState(null, null, '#!detail/' + r.id);
+            return onPopState(null, _.assign({}, state, model));
         });
     }).catch(function(err) {
         // FIXME handle error
     });
 };
 
-var onDelete = function(event) {
+var onDelete = function(event, state) {
     event.preventDefault();
     if (confirm("Wirklich löschen?")) {
-        xhr.post('api.php', JSON.stringify({
-            id: getPath()[1],
-        })).then(updateModel).then(function() {
-            link('list');
+        return xhr.post('api.php', JSON.stringify({
+            id: state.id,
+        })).then(updateModel).then(function(model) {
+            history.pushState(null, null, '#!list');
+            return onPopState(null, _.assign({}, state, model));
         }).catch(function(err) {
             // FIXME handle error
         });
     }
 };
 
-var attachEventListeners = function() {
-    attachEventListener('.filter', 'change', onFilter);
-    attachEventListener('.filter', 'search', onFilter);
-    attachEventListener('.filter', 'keyup', onFilter);
-    attachEventListener('form', 'submit', onSubmit);
-    attachEventListener('.delete', 'click', onDelete);
-    attachEventListener('textarea', 'init', resize);
-    attachEventListener('textarea', 'change', resize);
-    attachEventListener('textarea', 'keydown', resize);
-    attachEventListener('.category-filters .all', 'click', onFilterAll);
-    attachEventListener('.category-filters .none', 'click', onFilterAll);
-    attachEventListener('.category-filters input[type=checkbox]', 'change', onFilterChange);
-    attachEventListener('[href^="#"]', 'click', onNavigate);
-};
-
 
 // main
-updateModel().then(function() {
-    tree = template(model, getPath());
-    element = virtualDom.create(tree);
-    attachEventListeners();
-    document.body.innerHTML = '';
-    document.body.appendChild(element);
+var app = createApp(template);
+
+app.bindEvent('.filter', 'change', onFilter);
+app.bindEvent('.filter', 'search', onFilter);
+app.bindEvent('.filter', 'keyup', onFilter);
+app.bindEvent('form', 'submit', onSubmit);
+app.bindEvent('.delete', 'click', onDelete);
+app.bindEvent('textarea', 'init', resize);
+app.bindEvent('textarea', 'change', resize);
+app.bindEvent('textarea', 'keydown', resize);
+app.bindEvent('.category-filters .all', 'click', onFilterAll);
+app.bindEvent('.category-filters .none', 'click', onFilterAll);
+app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
+app.bindEvent(window, 'popstate', onPopState);
+
+updateModel().then(function(model) {
+    app.init(_.assign({}, model, getPath()), document.body);
 });
 
-update = function() {
-    var newTree = template(model, getPath());
-    var patches = virtualDom.diff(tree, newTree);
-    virtualDom.patch(element, patches);
-    attachEventListeners();
-    tree = newTree;
-};
+},{"./app":1,"./helpers":2,"./template":40,"promise-xhr":11}],4:[function(require,module,exports){
 
-window.addEventListener('popstate', function() {
-    update();
-    scrollTo(0, getPath()[0] === 'list' ? listScrollTop : 0);
-});
-
-},{"./template":38,"promise-xhr":9,"virtual-dom":13}],2:[function(require,module,exports){
-
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -333,7 +380,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var OneVersionConstraint = require('individual/one-version');
@@ -355,7 +402,7 @@ function EvStore(elem) {
     return hash;
 }
 
-},{"individual/one-version":7}],5:[function(require,module,exports){
+},{"individual/one-version":9}],7:[function(require,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -374,7 +421,7 @@ if (typeof document !== 'undefined') {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":2}],6:[function(require,module,exports){
+},{"min-document":4}],8:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -397,7 +444,7 @@ function Individual(key, value) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var Individual = require('./index.js');
@@ -421,14 +468,14 @@ function OneVersion(moduleName, version, defaultValue) {
     return Individual(key, defaultValue);
 }
 
-},{"./index.js":6}],8:[function(require,module,exports){
+},{"./index.js":8}],10:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     define([], factory);
@@ -511,22 +558,22 @@ xhr.post = function (url, data) {
 return xhr;
 }));
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var createElement = require("./vdom/create-element.js")
 
 module.exports = createElement
 
-},{"./vdom/create-element.js":16}],11:[function(require,module,exports){
+},{"./vdom/create-element.js":18}],13:[function(require,module,exports){
 var diff = require("./vtree/diff.js")
 
 module.exports = diff
 
-},{"./vtree/diff.js":36}],12:[function(require,module,exports){
+},{"./vtree/diff.js":38}],14:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
 
-},{"./virtual-hyperscript/index.js":23}],13:[function(require,module,exports){
+},{"./virtual-hyperscript/index.js":25}],15:[function(require,module,exports){
 var diff = require("./diff.js")
 var patch = require("./patch.js")
 var h = require("./h.js")
@@ -543,12 +590,12 @@ module.exports = {
     VText: VText
 }
 
-},{"./create-element.js":10,"./diff.js":11,"./h.js":12,"./patch.js":14,"./vnode/vnode.js":32,"./vnode/vtext.js":34}],14:[function(require,module,exports){
+},{"./create-element.js":12,"./diff.js":13,"./h.js":14,"./patch.js":16,"./vnode/vnode.js":34,"./vnode/vtext.js":36}],16:[function(require,module,exports){
 var patch = require("./vdom/patch.js")
 
 module.exports = patch
 
-},{"./vdom/patch.js":19}],15:[function(require,module,exports){
+},{"./vdom/patch.js":21}],17:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook.js")
 
@@ -647,7 +694,7 @@ function getPrototype(value) {
     }
 }
 
-},{"../vnode/is-vhook.js":27,"is-object":8}],16:[function(require,module,exports){
+},{"../vnode/is-vhook.js":29,"is-object":10}],18:[function(require,module,exports){
 var document = require("global/document")
 
 var applyProperties = require("./apply-properties")
@@ -695,7 +742,7 @@ function createElement(vnode, opts) {
     return node
 }
 
-},{"../vnode/handle-thunk.js":25,"../vnode/is-vnode.js":28,"../vnode/is-vtext.js":29,"../vnode/is-widget.js":30,"./apply-properties":15,"global/document":5}],17:[function(require,module,exports){
+},{"../vnode/handle-thunk.js":27,"../vnode/is-vnode.js":30,"../vnode/is-vtext.js":31,"../vnode/is-widget.js":32,"./apply-properties":17,"global/document":7}],19:[function(require,module,exports){
 // Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
 // We don't want to read all of the DOM nodes in the tree so we use
 // the in-order tree indexing to eliminate recursion down certain branches.
@@ -782,7 +829,7 @@ function ascending(a, b) {
     return a > b ? 1 : -1
 }
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var applyProperties = require("./apply-properties")
 
 var isWidget = require("../vnode/is-widget.js")
@@ -935,7 +982,7 @@ function replaceRoot(oldRoot, newRoot) {
     return newRoot;
 }
 
-},{"../vnode/is-widget.js":30,"../vnode/vpatch.js":33,"./apply-properties":15,"./update-widget":20}],19:[function(require,module,exports){
+},{"../vnode/is-widget.js":32,"../vnode/vpatch.js":35,"./apply-properties":17,"./update-widget":22}],21:[function(require,module,exports){
 var document = require("global/document")
 var isArray = require("x-is-array")
 
@@ -1017,7 +1064,7 @@ function patchIndices(patches) {
     return indices
 }
 
-},{"./create-element":16,"./dom-index":17,"./patch-op":18,"global/document":5,"x-is-array":37}],20:[function(require,module,exports){
+},{"./create-element":18,"./dom-index":19,"./patch-op":20,"global/document":7,"x-is-array":39}],22:[function(require,module,exports){
 var isWidget = require("../vnode/is-widget.js")
 
 module.exports = updateWidget
@@ -1034,7 +1081,7 @@ function updateWidget(a, b) {
     return false
 }
 
-},{"../vnode/is-widget.js":30}],21:[function(require,module,exports){
+},{"../vnode/is-widget.js":32}],23:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -1063,7 +1110,7 @@ EvHook.prototype.unhook = function(node, propertyName) {
     es[propName] = undefined;
 };
 
-},{"ev-store":4}],22:[function(require,module,exports){
+},{"ev-store":6}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = SoftSetHook;
@@ -1082,7 +1129,7 @@ SoftSetHook.prototype.hook = function (node, propertyName) {
     }
 };
 
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var isArray = require('x-is-array');
@@ -1221,7 +1268,7 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":26,"../vnode/is-vhook":27,"../vnode/is-vnode":28,"../vnode/is-vtext":29,"../vnode/is-widget":30,"../vnode/vnode.js":32,"../vnode/vtext.js":34,"./hooks/ev-hook.js":21,"./hooks/soft-set-hook.js":22,"./parse-tag.js":24,"x-is-array":37}],24:[function(require,module,exports){
+},{"../vnode/is-thunk":28,"../vnode/is-vhook":29,"../vnode/is-vnode":30,"../vnode/is-vtext":31,"../vnode/is-widget":32,"../vnode/vnode.js":34,"../vnode/vtext.js":36,"./hooks/ev-hook.js":23,"./hooks/soft-set-hook.js":24,"./parse-tag.js":26,"x-is-array":39}],26:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
@@ -1277,7 +1324,7 @@ function parseTag(tag, props) {
     return props.namespace ? tagName : tagName.toUpperCase();
 }
 
-},{"browser-split":3}],25:[function(require,module,exports){
+},{"browser-split":5}],27:[function(require,module,exports){
 var isVNode = require("./is-vnode")
 var isVText = require("./is-vtext")
 var isWidget = require("./is-widget")
@@ -1319,14 +1366,14 @@ function renderThunk(thunk, previous) {
     return renderedThunk
 }
 
-},{"./is-thunk":26,"./is-vnode":28,"./is-vtext":29,"./is-widget":30}],26:[function(require,module,exports){
+},{"./is-thunk":28,"./is-vnode":30,"./is-vtext":31,"./is-widget":32}],28:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
     return t && t.type === "Thunk"
 }
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -1335,7 +1382,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -1344,7 +1391,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":31}],29:[function(require,module,exports){
+},{"./version":33}],31:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -1353,17 +1400,17 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":31}],30:[function(require,module,exports){
+},{"./version":33}],32:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports = "2"
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -1437,7 +1484,7 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":26,"./is-vhook":27,"./is-vnode":28,"./is-widget":30,"./version":31}],33:[function(require,module,exports){
+},{"./is-thunk":28,"./is-vhook":29,"./is-vnode":30,"./is-widget":32,"./version":33}],35:[function(require,module,exports){
 var version = require("./version")
 
 VirtualPatch.NONE = 0
@@ -1461,7 +1508,7 @@ function VirtualPatch(type, vNode, patch) {
 VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 
-},{"./version":31}],34:[function(require,module,exports){
+},{"./version":33}],36:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -1473,7 +1520,7 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":31}],35:[function(require,module,exports){
+},{"./version":33}],37:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook")
 
@@ -1533,7 +1580,7 @@ function getPrototype(value) {
   }
 }
 
-},{"../vnode/is-vhook":27,"is-object":8}],36:[function(require,module,exports){
+},{"../vnode/is-vhook":29,"is-object":10}],38:[function(require,module,exports){
 var isArray = require("x-is-array")
 
 var VPatch = require("../vnode/vpatch")
@@ -1962,7 +2009,7 @@ function appendPatch(apply, patch) {
     }
 }
 
-},{"../vnode/handle-thunk":25,"../vnode/is-thunk":26,"../vnode/is-vnode":28,"../vnode/is-vtext":29,"../vnode/is-widget":30,"../vnode/vpatch":33,"./diff-props":35,"x-is-array":37}],37:[function(require,module,exports){
+},{"../vnode/handle-thunk":27,"../vnode/is-thunk":28,"../vnode/is-vnode":30,"../vnode/is-vtext":31,"../vnode/is-widget":32,"../vnode/vpatch":35,"./diff-props":37,"x-is-array":39}],39:[function(require,module,exports){
 var nativeIsArray = Array.isArray
 var toString = Object.prototype.toString
 
@@ -1972,8 +2019,10 @@ function isArray(obj) {
     return toString.call(obj) === "[object Array]"
 }
 
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 var h = require('virtual-dom/h');
+
+var _ = require('./helpers');
 
 
 // constants
@@ -1993,14 +2042,6 @@ var LABELS = {
 var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
 // helpers
-var indexOfKey = function(list, key, kkey) {
-    return list.map(function(x) {return x[kkey];}).indexOf(key);
-};
-
-var findByKey = function(list, key, kkey) {
-    return list[indexOfKey(list, key, kkey)];
-};
-
 var autourl = function(text) {
     var match = text.match(RE_URL);
     if (match) {
@@ -2019,8 +2060,8 @@ var autourl = function(text) {
 };
 
 var checkCategoryMatch = function(entry, categories) {
-    var category = findByKey(categories, entry.category, 'key');
-    var subcategory = findByKey(category.children, entry.subcategory, 'key');
+    var category = _.findByKey(categories, entry.category);
+    var subcategory = _.findByKey(category.children, entry.subcategory);
     return subcategory.active;
 };
 
@@ -2033,8 +2074,8 @@ var checkQueryMatch = function(entry, q) {
     }));
 };
 
-var categoryClass = function(model, entry) {
-    return 'c' + indexOfKey(model.categories, entry.category, 'key');
+var categoryClass = function(state, entry) {
+    return 'c' + _.indexOfKey(state.categories, entry.category, 'key');
 };
 
 
@@ -2043,12 +2084,12 @@ var error = function(msg) {
     return h('h2.error', {}, 'Fehler: ' + msg);
 };
 
-var listItem = function(model, entry) {
+var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
         className: (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span.category.' + categoryClass(model, entry), {}, entry.category),
+        h('span.category.' + categoryClass(state, entry), {}, entry.category),
         ' ',
         h('span.subcategory', {}, entry.subcategory),
         h('h2', {}, entry.name),
@@ -2056,31 +2097,31 @@ var listItem = function(model, entry) {
     ]);
 };
 
-var list = function(model) {
+var list = function(state) {
     return [
         h('input.filter', {
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
-            value: model.q,
+            value: state.q,
         }),
-        h('ul', {}, model.entries.filter(function(entry) {
-            return checkCategoryMatch(entry, model.categories) &&
-                checkQueryMatch(entry, model.q);
+        h('ul', {}, state.entries.filter(function(entry) {
+            return checkCategoryMatch(entry, state.categories) &&
+                checkQueryMatch(entry, state.q);
         }).map(function(entry) {
-            return h('li', {}, [listItem(model, entry)]);
+            return h('li', {}, [listItem(state, entry)]);
         })),
         h('a.button.m-cta', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
-var categoryFilters = function(model) {
+var categoryFilters = function(state) {
     return h('ul.category-filters', {}, [
         h('li', {}, [
             h('a.all', {href: '#'}, '(alle)'),
             ' ',
             h('a.none', {href: '#'}, '(keins)'),
         ]),
-    ].concat(model.categories.map(function(category, i) {
+    ].concat(state.categories.map(function(category, i) {
         return h('li.c' + i, {
             dataset: {
                 name: category.key,
@@ -2106,14 +2147,14 @@ var categoryFilters = function(model) {
     })));
 };
 
-var detail = function(model, entry) {
+var detail = function(state, entry) {
     if (!entry) {
         return error('404 Not Found');
     }
 
     var children = [
         h('header', {}, [
-            h('span.category.' + categoryClass(model, entry), {}, entry.category),
+            h('span.category.' + categoryClass(state, entry), {}, entry.category),
             ' ',
             h('span.subcategory', {}, entry.subcategory),
             h('h2', {}, entry.name),
@@ -2123,14 +2164,12 @@ var detail = function(model, entry) {
         h('p.address', {}, autourl(entry.address)),
     ];
 
-    var optional = ['openinghours', 'contact', 'note'];
-    for (var i =0; i < optional.length; i++) {
-        var key = optional[i];
+    ['openinghours', 'contact', 'note'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p.' + key, {}, autourl(entry[key])));
         }
-    }
+    });
 
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
@@ -2168,7 +2207,7 @@ var field = function(name, value, required, type) {
     return h('label', {}, [LABELS[name], f]);
 };
 
-var form = function(model, entry) {
+var form = function(state, entry) {
     return h('form', {}, [
         field('name', entry.name, true),
         h('label', {}, [
@@ -2177,7 +2216,7 @@ var form = function(model, entry) {
                 name: 'subcategory',
                 value: entry.subcategory,
                 required: true,
-            }, model.categories.map(function(category) {
+            }, state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
@@ -2201,29 +2240,29 @@ var form = function(model, entry) {
     ]);
 };
 
-var template = function(model, path) {
+var template = function(state) {
     var main;
     var aside;
 
-    if (path[0] === 'list') {
-        main = list(model);
-        aside = categoryFilters(model);
-    } else if (path[0] === 'detail') {
-        main = detail(model, findByKey(model.entries, path[1], 'id'));
-    } else if (path[0] === 'edit') {
-        main = form(model, findByKey(model.entries, path[1], 'id'));
-    } else if (path[0] === 'create') {
-        main = form(model, {});
+    if (state.view === 'list') {
+        main = list(state);
+        aside = categoryFilters(state);
+    } else if (state.view === 'detail') {
+        main = detail(state, _.findByKey(state.entries, state.id, 'id'));
+    } else if (state.view === 'edit') {
+        main = form(state, _.findByKey(state.entries, state.id, 'id'));
+    } else if (state.view === 'create') {
+        main = form(state, {});
     } else {
-        throw new Error('Invalid view');
+        main = error('Invalid view');
     }
 
     return h('div', {}, [
         h('aside', {}, aside),
-        h('main', {className: path[0]}, main),
+        h('main', {className: state.view}, main),
     ]);
 };
 
 module.exports = template;
 
-},{"virtual-dom/h":12}]},{},[1]);
+},{"./helpers":2,"virtual-dom/h":14}]},{},[3]);
