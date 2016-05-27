@@ -82,6 +82,21 @@ var onFilterChange = function(event, state) {
     return state;
 };
 
+var onPopState = function(event, state) {
+    var newState = _.assign({}, state, getPath());
+    if (state.view !== newState.view) {
+        if (newState.view === 'list') {
+            newState.$scrollTop = state._listScrollTop;
+        } else {
+            newState.$scrollTop = 0;
+        }
+        if (state.view === 'list') {
+            newState._listScrollTop = scrollY;
+        }
+    }
+    return newState;
+};
+
 var onSubmit = function(event, state, app) {
     event.preventDefault();
 
@@ -112,7 +127,7 @@ var onSubmit = function(event, state, app) {
         return updateModel().then(function(model) {
             var r = JSON.parse(result);
             history.pushState(null, null, '#!detail/' + r.id);
-            return _.assign({}, state, model, getPath());
+            return onPopState(null, _.assign({}, state, model));
         });
     }).catch(function(err) {
         // FIXME handle error
@@ -126,33 +141,16 @@ var onDelete = function(event, state) {
             id: state.id,
         })).then(updateModel).then(function(model) {
             history.pushState(null, null, '#!list');
-            return _.assign({}, state, model, getPath());
+            return onPopState(null, _.assign({}, state, model));
         }).catch(function(err) {
             // FIXME handle error
         });
     }
 };
 
-var onPopState = function(event, state) {
-    return _.assign({}, state, getPath());
-};
-
 
 // main
 var app = createApp(template);
-var listScrollTop;
-
-app.beforeUpdate = function(oldState, newState) {
-    if (newState.view !== oldState.view && oldState.view === 'list') {
-        listScrollTop = scrollY;
-    }
-};
-
-app.afterUpdate = function(oldState, newState) {
-    if (newState.view !== oldState.view) {
-        scrollTo(0, newState.view === 'list' ? listScrollTop : 0);
-    }
-};
 
 app.bindEvent('.filter', 'change', onFilter);
 app.bindEvent('.filter', 'search', onFilter);

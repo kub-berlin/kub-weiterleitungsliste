@@ -32,13 +32,11 @@ module.exports = function(template) {
     };
 
     var update = function(newState) {
-        if (self.beforeUpdate) self.beforeUpdate(state, newState);
         var newTree = template(newState);
         var patches = virtualDom.diff(tree, newTree);
         virtualDom.patch(element, patches);
         attachEventListeners();
         tree = newTree;
-        if (self.afterUpdate) self.afterUpdate(state, newState);
         state = newState;
     };
 
@@ -46,8 +44,12 @@ module.exports = function(template) {
         return function(event) {
             var val = fn(event, _.assign({}, state), self);
             Promise.resolve(val).then(function(newState) {
-                if (newState) {
+                if (newState != null) {
                     update(newState);
+                }
+                if (newState.$scrollTop != null) {
+                    scrollTo(0, newState.$scrollTop);
+                    delete newState['$scrollTop'];
                 }
             });
         };
