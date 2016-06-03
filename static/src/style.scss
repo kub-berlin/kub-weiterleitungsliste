@@ -3,7 +3,18 @@
 @import "bower_components/sass-planifolia/sass/contrast";
 
 @import "scss/variables";
-@import "scss/base";
+@import "bower_components/mfbs/src/base";
+
+html {
+    background: $color-bg-tint2;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+}
+
 @import "scss/layout";
 @import "scss/form";
 @import "scss/entry";

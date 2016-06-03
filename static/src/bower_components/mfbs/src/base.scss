@@ -1,0 +1,133 @@
+@viewport {
+    width: device-width;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+    max-width: 100%;
+}
+
+p, address, blockquote, pre, table, dl, ul, ol, figure {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+html {
+    overflow-y: scroll;
+    background-color: $color-bg;
+    box-sizing: border-box;
+    color: $color-fg;
+    font-size: $font-size-max;
+    font-family: sans-serif;
+    line-height: 1.4;
+}
+body {
+    margin: 2em auto;
+    max-width: 36em;
+    padding: 0 0.5em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    margin-top: 1em;
+}
+
+a {
+    color: $color-link;
+    text-decoration: underline;
+
+    &:hover, &:focus, &:active {
+        color: $color-link-focus;
+    }
+}
+
+*::selection {
+    background: $color-link;
+    color: $color-bg;
+}
+
+hr {
+    border: 0;
+    border-bottom: 1px solid $color-border;
+    margin: 1em 0;
+}
+
+pre, code {
+    font-size: 90%;
+    font-family: monospace;
+    background-color: $color-bg-tint;
+    color: $color-fg;
+    border: 1px solid $color-border;
+}
+code {
+    padding: 0 0.25em;
+}
+pre {
+    margin-bottom: 1.4em;
+    padding: 0.5em;
+    overflow: auto;
+
+    code {
+        background: none;
+        border: none;
+        font-size: 100%;
+        padding: 0;
+    }
+}
+
+ol, ul {
+    padding-left: 2rem;
+
+    ol, ul {
+        margin-bottom: 0;
+    }
+    li {
+        line-height: 1.4;
+    }
+}
+dt {
+    font-weight: bold;
+}
+dd {
+    margin-left: 2rem;
+}
+
+blockquote {
+    font-style: italic;
+    margin-left: 2rem;
+    margin-right: 0;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    td, th {
+        text-align: start;
+        padding: 0.5em;
+        border-top: 1px solid $color-border;
+        vertical-align: top;
+    }
+}
+
+textarea {
+    resize: vertical;
+}
+
+fieldset {
+    border: 1px solid $color-border;
+}
+
+@media print {
+    html {
+        background: transparent;
+        color: #000;  // Black prints faster:
+    }
+
+    h2, h3 {
+        page-break-after: avoid;
+    }
+}
