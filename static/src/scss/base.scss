@@ -16,7 +16,7 @@ html {
     color: $color-fg;
     line-height: 1.4;
     background: $color-bg-tint2;
-    font-size: 90%;
+    font-size: $font-size-max;
 }
 
 body {
@@ -25,16 +25,16 @@ body {
 }
 
 a {
-    color: $color-focus;
+    color: $color-link;
 
     &:focus, &:hover {
-        color: $color-focus-tint;
+        color: $color-link-focus;
     }
 }
 
 *::selection {
-    background: $color-focus;
-    color: contrast-color($color-focus);
+    background: $color-link;
+    color: contrast-color($color-link);
 }
 
 textarea {
