@@ -131,6 +131,13 @@ var detail = function(state, entry) {
         return error('404 Not Found');
     }
 
+    var clientToggle;
+    if (state.view === 'client') {
+        clientToggle = h('a.clientToggle', {href: '#!detail/' + entry.id}, 'Standardansicht');
+    } else {
+        clientToggle = h('a.clientToggle', {href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+    }
+
     var children = [
         h('header', {}, [
             h('span.category.' + categoryClass(state, entry), {}, entry.category),
@@ -138,36 +145,47 @@ var detail = function(state, entry) {
             h('span.subcategory', {}, entry.subcategory),
             h('h2', {}, entry.name),
             h('span.lang', {}, entry.lang),
+            clientToggle,
         ]),
         h('h3', {}, LABELS.address),
         h('p.address', {}, autourl(entry.address)),
     ];
 
-    ['openinghours', 'contact', 'note'].forEach(function(key) {
+    ['openinghours'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p.' + key, {}, autourl(entry[key])));
         }
     });
 
-    if (entry.map) {
-        children.push(h('h3', {}, LABELS.map));
-        children.push(h('div.map', {dataset: {value: entry.map}}));
+    if (state.view === 'client') {
+        if (entry.map) {
+            children.push(h('h3', {}, LABELS.map));
+            children.push(h('div.map', {dataset: {value: entry.map}}));
+        }
+    } else {
+        ['contact', 'note'].forEach(function(key) {
+            if (entry[key]) {
+                children.push(h('h3', {}, LABELS[key]));
+                children.push(h('p.' + key, {}, autourl(entry[key])));
+            }
+        });
+
+        children.push(h('h3', {}, LABELS.rev));
+        children.push(h('time.rev', {
+            datetime: entry.rev,
+        }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
+
+        children.push(h('nav', {}, [
+            h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
+            h('a.back.button', {href: '#!list'}, 'Zurück'),
+        ]));
     }
 
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
-    }, children.concat([
-        h('h3', {}, LABELS.rev),
-        h('time.rev', {
-            datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString('de-DE')),
-        h('nav', {}, [
-            h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
-            h('a.back.button', {href: '#!list'}, 'Zurück'),
-        ]),
-    ]));
+    }, children);
 };
 
 var field = function(name, value, required, type) {
@@ -232,7 +250,7 @@ var template = function(state) {
     if (state.view === 'list') {
         main = list(state);
         aside = categoryFilters(state);
-    } else if (state.view === 'detail') {
+    } else if (state.view === 'detail' || state.view === 'client') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));

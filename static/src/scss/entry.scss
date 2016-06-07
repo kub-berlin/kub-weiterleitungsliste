@@ -19,6 +19,7 @@ p {
 .detail header,
 .list > ul > li > a {
     display: block;
+    position: relative;
     color: inherit;
     text-decoration: inherit;
     padding: 0.5em;
@@ -28,6 +29,10 @@ p {
 
 .detail header {
     border-bottom: 2px solid $color-link;
+}
+
+.client {
+    @extend .detail;
 }
 
 .list > ul > li > a {
@@ -48,4 +53,15 @@ p {
 .lang {
     font-size: 80%;
     color: $color-border;
+}
+
+.clientToggle {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    font-size: 90%;
+
+    @media print {
+        display: none;
+    }
 }
