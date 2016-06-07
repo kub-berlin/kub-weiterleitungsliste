@@ -13,6 +13,7 @@ var LABELS = {
     contact: 'Ansprechpartner_in',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
+    map: 'Karte',
     rev: 'Stand der Info',
 };
 
@@ -207,6 +208,7 @@ var form = function(state, entry) {
         field('contact', entry.contact, false, 'textarea'),
         field('lang', entry.lang, false, 'textarea'),
         field('note', entry.note, false, 'textarea'),
+        field('map', entry.map, false, 'url'),
         field('rev', entry.rev, true, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [

@@ -106,7 +106,7 @@ var onSubmit = function(event, state, app) {
 
     var data = {};
 
-    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
+    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
