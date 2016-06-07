@@ -150,6 +150,11 @@ var detail = function(state, entry) {
         }
     });
 
+    if (entry.map) {
+        children.push(h('h3', {}, LABELS.map));
+        children.push(h('div.map', {dataset: {value: entry.map}}));
+    }
+
     return h('div', {
         className: (entry.category || '').replace(/ /g, '-'),
     }, children.concat([

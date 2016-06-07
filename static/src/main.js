@@ -148,6 +148,26 @@ var onDelete = function(event, state) {
     }
 };
 
+var onMapInit = function(event) {
+    var geoUri = event.target.dataset.value;
+    var match = geoUri.match(/geo:([0-9\.-]+),([0-9\.-]+)\?z=([0-9]+)/);
+
+    if (match && window.L) {
+        var lng = parseFloat(match[1]);
+        var lat = parseFloat(match[2]);
+        var zoom = parseInt(match[3]);
+
+        setTimeout(function() {
+            var map = L.map(event.target, {
+                scrollWheelZoom: false
+            }).setView([lng, lat], zoom);
+
+            L.tileLayer("https://b.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18}).addTo(map);
+            L.marker([lng, lat]).addTo(map);
+        });
+    }
+};
+
 
 // main
 var app = createApp(template);
@@ -163,6 +183,7 @@ app.bindEvent('textarea', 'keydown', resize);
 app.bindEvent('.category-filters .all', 'click', onFilterAll);
 app.bindEvent('.category-filters .none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
+app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
