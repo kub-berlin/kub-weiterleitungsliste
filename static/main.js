@@ -24,7 +24,10 @@ module.exports = function(template) {
 
             for (var i = 0; i < elements.length; i++) {
                 if (eventName === 'init') {
-                    fn({target: elements[i]});
+                    if (!elements[i].$init) {
+                        fn({target: elements[i]});
+                        elements[i].$init = true;
+                    }
                 } else {
                     elements[i].addEventListener(eventName, fn);
                 }
@@ -47,10 +50,11 @@ module.exports = function(template) {
             Promise.resolve(val).then(function(newState) {
                 if (newState != null) {
                     update(newState);
-                }
-                if (newState.$scrollTop != null) {
-                    scrollTo(0, newState.$scrollTop);
-                    delete newState['$scrollTop'];
+
+                    if (newState.$scrollTop != null) {
+                        scrollTo(0, newState.$scrollTop);
+                        delete newState['$scrollTop'];
+                    }
                 }
             });
         };
@@ -207,7 +211,7 @@ var onSubmit = function(event, state, app) {
 
     var data = {};
 
-    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
+    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
@@ -249,6 +253,26 @@ var onDelete = function(event, state) {
     }
 };
 
+var onMapInit = function(event) {
+    var geoUri = event.target.dataset.value;
+    var match = geoUri.match(/geo:([0-9\.-]+),([0-9\.-]+)\?z=([0-9]+)/);
+
+    if (match && window.L) {
+        var lng = parseFloat(match[1]);
+        var lat = parseFloat(match[2]);
+        var zoom = parseInt(match[3]);
+
+        setTimeout(function() {
+            var map = L.map(event.target, {
+                scrollWheelZoom: false
+            }).setView([lng, lat], zoom);
+
+            L.tileLayer("https://b.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18}).addTo(map);
+            L.marker([lng, lat]).addTo(map);
+        });
+    }
+};
+
 
 // main
 var app = createApp(template);
@@ -264,6 +288,7 @@ app.bindEvent('textarea', 'keydown', resize);
 app.bindEvent('.category-filters .all', 'click', onFilterAll);
 app.bindEvent('.category-filters .none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
+app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
@@ -2035,6 +2060,7 @@ var LABELS = {
     contact: 'Ansprechpartner_in',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
+    map: 'Karte',
     rev: 'Stand der Info',
 };
 
@@ -2152,6 +2178,13 @@ var detail = function(state, entry) {
         return error('404 Not Found');
     }
 
+    var clientToggle;
+    if (state.view === 'client') {
+        clientToggle = h('a.clientToggle', {href: '#!detail/' + entry.id}, 'Standardansicht');
+    } else {
+        clientToggle = h('a.clientToggle', {href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+    }
+
     var children = [
         h('header', {}, [
             h('span.category.' + categoryClass(state, entry), {}, entry.category),
@@ -2159,31 +2192,47 @@ var detail = function(state, entry) {
             h('span.subcategory', {}, entry.subcategory),
             h('h2', {}, entry.name),
             h('span.lang', {}, entry.lang),
+            clientToggle,
         ]),
         h('h3', {}, LABELS.address),
         h('p.address', {}, autourl(entry.address)),
     ];
 
-    ['openinghours', 'contact', 'note'].forEach(function(key) {
+    ['openinghours'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p.' + key, {}, autourl(entry[key])));
         }
     });
 
-    return h('div', {
-        className: (entry.category || '').replace(/ /g, '-'),
-    }, children.concat([
-        h('h3', {}, LABELS.rev),
-        h('time.rev', {
+    if (state.view === 'client') {
+        if (entry.map) {
+            children.push(h('h3', {}, LABELS.map));
+            children.push(h('div.map', {dataset: {value: entry.map}}));
+        }
+    } else {
+        ['contact', 'note'].forEach(function(key) {
+            if (entry[key]) {
+                children.push(h('h3', {}, LABELS[key]));
+                children.push(h('p.' + key, {}, autourl(entry[key])));
+            }
+        });
+
+        children.push(h('h3', {}, LABELS.rev));
+        children.push(h('time.rev', {
             datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString('de-DE')),
-        h('nav', {}, [
+        }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
+
+        children.push(h('nav', {}, [
             h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
             h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
             h('a.back.button', {href: '#!list'}, 'Zurück'),
-        ]),
-    ]));
+        ]));
+    }
+
+    return h('div', {
+        className: (entry.category || '').replace(/ /g, '-'),
+    }, children);
 };
 
 var field = function(name, value, required, type) {
@@ -2229,6 +2278,7 @@ var form = function(state, entry) {
         field('contact', entry.contact, false, 'textarea'),
         field('lang', entry.lang, false, 'textarea'),
         field('note', entry.note, false, 'textarea'),
+        field('map', entry.map, false, 'url'),
         field('rev', entry.rev, true, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
@@ -2247,7 +2297,7 @@ var template = function(state) {
     if (state.view === 'list') {
         main = list(state);
         aside = categoryFilters(state);
-    } else if (state.view === 'detail') {
+    } else if (state.view === 'detail' || state.view === 'client') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));
