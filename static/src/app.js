@@ -46,10 +46,11 @@ module.exports = function(template) {
             Promise.resolve(val).then(function(newState) {
                 if (newState != null) {
                     update(newState);
-                }
-                if (newState.$scrollTop != null) {
-                    scrollTo(0, newState.$scrollTop);
-                    delete newState['$scrollTop'];
+
+                    if (newState.$scrollTop != null) {
+                        scrollTo(0, newState.$scrollTop);
+                        delete newState['$scrollTop'];
+                    }
                 }
             });
         };
