@@ -23,7 +23,10 @@ module.exports = function(template) {
 
             for (var i = 0; i < elements.length; i++) {
                 if (eventName === 'init') {
-                    fn({target: elements[i]});
+                    if (!elements[i].$init) {
+                        fn({target: elements[i]});
+                        elements[i].$init = true;
+                    }
                 } else {
                     elements[i].addEventListener(eventName, fn);
                 }
