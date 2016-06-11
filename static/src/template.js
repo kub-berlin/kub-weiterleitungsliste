@@ -66,12 +66,12 @@ var error = function(msg) {
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
-        className: (entry.category || '').replace(/ /g, '-'),
+        className: 'listItem ' + (entry.category || '').replace(/ /g, '-'),
     }, [
         h('span.category.' + categoryClass(state, entry), {}, entry.category),
         ' ',
         h('span.subcategory', {}, entry.subcategory),
-        h('h2', {}, entry.name),
+        h('h2.listItem-title', {}, entry.name),
         h('span.lang', {}, entry.lang),
     ]);
 };
@@ -139,7 +139,7 @@ var detail = function(state, entry) {
     }
 
     var children = [
-        h('header', {}, [
+        h('header.detail-header', {}, [
             h('span.category.' + categoryClass(state, entry), {}, entry.category),
             ' ',
             h('span.subcategory', {}, entry.subcategory),

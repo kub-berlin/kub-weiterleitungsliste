@@ -17,7 +17,7 @@ p {
 }
 
 .detail header,
-.list > ul > li > a {
+.listItem {
     display: block;
     position: relative;
     color: inherit;
@@ -35,10 +35,10 @@ p {
     @extend .detail;
 }
 
-.list > ul > li > a {
+.listItem {
     border-left: 2px solid $color-link;
 
-    h2 {
+    .listItem-title {
         font-size: 120%;
     }
 
