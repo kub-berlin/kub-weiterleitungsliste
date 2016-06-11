@@ -113,7 +113,7 @@ var onSubmit = function(event, state, app) {
 
     var categoryParts = app.getValue('category').split('--');
     data.category = categoryParts[0];
-    data.subcategory = categoryParts[1];
+    data.subcategory = categoryParts[1] || app.getValue('subcategory');
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
@@ -164,6 +164,12 @@ var onMapInit = function(event) {
     }
 };
 
+var onCategoryChange = function(event, state, app) {
+    var parts = app.getValue('category').split('--');
+    state.subcategory = parts[1];
+    return state;
+};
+
 
 // main
 var app = createApp(template);
@@ -180,6 +186,8 @@ app.bindEvent('.categoryFilters .all', 'click', onFilterAll);
 app.bindEvent('.categoryFilters .none', 'click', onFilterAll);
 app.bindEvent('.categoryFilters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
+app.bindEvent('[name=category]', 'change', onCategoryChange);
+app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {

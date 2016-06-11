@@ -224,10 +224,18 @@ var form = function(state, entry) {
                     return h('option', {
                         value: category.key + '--' + subcategory.key,
                     }, subcategory.key);
-                }));
+                }).concat([
+                    h('option', {
+                        value: category.key + '--',
+                    }, 'neu ...'),
+                ]));
             })),
         ]),
     ];
+
+    if (state.subcategory === '') {
+        categoryFields.push(field('subcategory', '', true));
+    }
 
     return h('form', {}, [
         field('name', entry.name, true),
