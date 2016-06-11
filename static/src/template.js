@@ -210,22 +210,28 @@ var field = function(name, value, required, type) {
 };
 
 var form = function(state, entry) {
-    return h('form', {}, [
-        field('name', entry.name, true),
+    var categoryFields = [
         h('label', {}, [
             LABELS.category + '/' + LABELS.subcategory,
             h('select', {
-                name: 'subcategory',
+                name: 'category',
                 value: entry.subcategory,
                 required: true,
             }, state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
-                    return h('option', {}, subcategory.key);
+                    return h('option', {
+                        value: category.key + '--' + subcategory.key,
+                    }, subcategory.key);
                 }));
             })),
         ]),
+    ];
+
+    return h('form', {}, [
+        field('name', entry.name, true),
+        h('div', {}, categoryFields),
         field('address', entry.address, true, 'textarea'),
         field('openinghours', entry.openinghours, false, 'textarea'),
         field('contact', entry.contact, false, 'textarea'),

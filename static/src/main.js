@@ -106,18 +106,14 @@ var onSubmit = function(event, state, app) {
 
     var data = {};
 
-    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
+    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
 
-    for (var i = 0; i < state.categories.length; i++) {
-        var category = state.categories[i];
-        if (_.findByKey(category.children, app.getValue('subcategory'))) {
-            data.category = category.key;
-            break;
-        }
-    }
+    var categoryParts = app.getValue('category').split('--');
+    data.category = categoryParts[0];
+    data.subcategory = categoryParts[1];
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
