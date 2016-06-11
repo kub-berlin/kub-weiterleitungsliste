@@ -8,8 +8,8 @@ If you want to use a different database, just edit the relevant parts in
 
 # development
 
-This repository contains re-build static files. If you want to edit them, you
-will need node.js. The run the following commands to set up the development
+This repository contains pre-build static files. If you want to edit them, you
+will need node.js. Then run the following commands to set up the development
 envorinment:
 
     $ cd static/src
