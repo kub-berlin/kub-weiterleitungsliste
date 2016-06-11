@@ -285,9 +285,9 @@ app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'change', resize);
 app.bindEvent('textarea', 'keydown', resize);
-app.bindEvent('.category-filters .all', 'click', onFilterAll);
-app.bindEvent('.category-filters .none', 'click', onFilterAll);
-app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
+app.bindEvent('.categoryFilters .all', 'click', onFilterAll);
+app.bindEvent('.categoryFilters .none', 'click', onFilterAll);
+app.bindEvent('.categoryFilters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent(window, 'popstate', onPopState);
 
@@ -2113,12 +2113,12 @@ var error = function(msg) {
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
-        className: (entry.category || '').replace(/ /g, '-'),
+        className: 'listItem ' + (entry.category || '').replace(/ /g, '-'),
     }, [
         h('span.category.' + categoryClass(state, entry), {}, entry.category),
         ' ',
         h('span.subcategory', {}, entry.subcategory),
-        h('h2', {}, entry.name),
+        h('h2.listItem-title', {}, entry.name),
         h('span.lang', {}, entry.lang),
     ]);
 };
@@ -2136,12 +2136,12 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a.button.m-cta', {href: '#!create'}, 'Hinzufügen'),
+        h('a.button--cta', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul.category-filters', {}, [
+    return h('ul.categoryFilters', {}, [
         h('li', {}, [
             h('a.all', {href: '#'}, '(alle)'),
             ' ',
@@ -2186,7 +2186,7 @@ var detail = function(state, entry) {
     }
 
     var children = [
-        h('header', {}, [
+        h('header.detail-header', {}, [
             h('span.category.' + categoryClass(state, entry), {}, entry.category),
             ' ',
             h('span.subcategory', {}, entry.subcategory),
@@ -2224,8 +2224,8 @@ var detail = function(state, entry) {
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
+            h('a.button--cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a.delete.button--cta', {href: '#'}, 'Löschen'),
             h('a.back.button', {href: '#!list'}, 'Zurück'),
         ]));
     }
