@@ -155,7 +155,7 @@ var onMapInit = function(event) {
     if (match && window.L) {
         var lng = parseFloat(match[1]);
         var lat = parseFloat(match[2]);
-        var zoom = parseInt(match[3]);
+        var zoom = Math.min(parseInt(match[3]), 18);
 
         setTimeout(function() {
             var map = L.map(event.target, {
