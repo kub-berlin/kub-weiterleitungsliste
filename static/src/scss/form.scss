@@ -8,28 +8,29 @@ input, textarea, select {
 }
 
 
-@mixin button($color, $color-tint) {
-    border: 0;
+@mixin button-color($color, $color-tint) {
     background: $color;
     color: contrast-color($color);
-    line-height: 2;
-    font-size: 110%;
 
     &:hover, &:focus {
         background: $color-tint;
         color: contrast-color($color-tint);
     }
+}
+
+.button {
+    @include button-color($color-border, $color-fg);
+    border: 0;
+    line-height: 2;
+    font-size: 110%;
 
     @media print {
         display: none;
     }
 }
 
-.button {
-    @include button($color-border, $color-fg);
-}
-
 .button--cta,
-input[type=submit] {
-    @include button($color-link, $color-link-focus);
+[type=submit] {
+    @extend .button;
+    @include button-color($color-link, $color-link-focus);
 }
