@@ -10,6 +10,15 @@ module.exports = function(template) {
     var events = [];
     var self = {};
 
+    var initEvent = function(element, fn) {
+        if (!element.$init) {
+            setTimeout(function() {
+                fn({target: element});
+            });
+            element.$init = true;
+        }
+    };
+
     var attachEventListeners = function() {
         events.forEach(function(ev) {
             var selector = ev[0];
@@ -23,10 +32,7 @@ module.exports = function(template) {
 
             for (var i = 0; i < elements.length; i++) {
                 if (eventName === 'init') {
-                    if (!elements[i].$init) {
-                        fn({target: elements[i]});
-                        elements[i].$init = true;
-                    }
+                    initEvent(elements[i], fn);
                 } else {
                     elements[i].addEventListener(eventName, fn);
                 }
