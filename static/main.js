@@ -11,6 +11,15 @@ module.exports = function(template) {
     var events = [];
     var self = {};
 
+    var initEvent = function(element, fn) {
+        if (!element.$init) {
+            setTimeout(function() {
+                fn({target: element});
+            });
+            element.$init = true;
+        }
+    };
+
     var attachEventListeners = function() {
         events.forEach(function(ev) {
             var selector = ev[0];
@@ -24,10 +33,7 @@ module.exports = function(template) {
 
             for (var i = 0; i < elements.length; i++) {
                 if (eventName === 'init') {
-                    if (!elements[i].$init) {
-                        fn({target: elements[i]});
-                        elements[i].$init = true;
-                    }
+                    initEvent(elements[i], fn);
                 } else {
                     elements[i].addEventListener(eventName, fn);
                 }
@@ -211,18 +217,14 @@ var onSubmit = function(event, state, app) {
 
     var data = {};
 
-    var keys = ['name', 'subcategory', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
+    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
 
-    for (var i = 0; i < state.categories.length; i++) {
-        var category = state.categories[i];
-        if (_.findByKey(category.children, app.getValue('subcategory'))) {
-            data.category = category.key;
-            break;
-        }
-    }
+    var categoryParts = app.getValue('category').split('--');
+    data.category = categoryParts[0];
+    data.subcategory = categoryParts[1] || app.getValue('subcategory');
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
@@ -260,7 +262,7 @@ var onMapInit = function(event) {
     if (match && window.L) {
         var lng = parseFloat(match[1]);
         var lat = parseFloat(match[2]);
-        var zoom = parseInt(match[3]);
+        var zoom = Math.min(parseInt(match[3]), 18);
 
         setTimeout(function() {
             var map = L.map(event.target, {
@@ -271,6 +273,12 @@ var onMapInit = function(event) {
             L.marker([lng, lat]).addTo(map);
         });
     }
+};
+
+var onCategoryChange = function(event, state, app) {
+    var parts = app.getValue('category').split('--');
+    state.subcategory = parts[1];
+    return state;
 };
 
 
@@ -289,6 +297,8 @@ app.bindEvent('.categoryFilters .all', 'click', onFilterAll);
 app.bindEvent('.categoryFilters .none', 'click', onFilterAll);
 app.bindEvent('.categoryFilters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
+app.bindEvent('[name=category]', 'change', onCategoryChange);
+app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
@@ -2257,22 +2267,36 @@ var field = function(name, value, required, type) {
 };
 
 var form = function(state, entry) {
-    return h('form', {}, [
-        field('name', entry.name, true),
+    var categoryFields = [
         h('label', {}, [
             LABELS.category + '/' + LABELS.subcategory,
             h('select', {
-                name: 'subcategory',
+                name: 'category',
                 value: entry.subcategory,
                 required: true,
             }, state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
-                    return h('option', {}, subcategory.key);
-                }));
+                    return h('option', {
+                        value: category.key + '--' + subcategory.key,
+                    }, subcategory.key);
+                }).concat([
+                    h('option', {
+                        value: category.key + '--',
+                    }, 'neu ...'),
+                ]));
             })),
         ]),
+    ];
+
+    if (state.subcategory === '') {
+        categoryFields.push(field('subcategory', '', true));
+    }
+
+    return h('form', {}, [
+        field('name', entry.name, true),
+        h('div', {}, categoryFields),
         field('address', entry.address, true, 'textarea'),
         field('openinghours', entry.openinghours, false, 'textarea'),
         field('contact', entry.contact, false, 'textarea'),
