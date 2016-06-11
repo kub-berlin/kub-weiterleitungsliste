@@ -89,12 +89,12 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a.button.m-cta', {href: '#!create'}, 'Hinzufügen'),
+        h('a.button--cta', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul.category-filters', {}, [
+    return h('ul.categoryFilters', {}, [
         h('li', {}, [
             h('a.all', {href: '#'}, '(alle)'),
             ' ',
@@ -177,8 +177,8 @@ var detail = function(state, entry) {
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a.button.m-cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('a.delete.button.m-cta', {href: '#'}, 'Löschen'),
+            h('a.button--cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a.delete.button--cta', {href: '#'}, 'Löschen'),
             h('a.back.button', {href: '#!list'}, 'Zurück'),
         ]));
     }

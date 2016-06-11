@@ -180,9 +180,9 @@ app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'change', resize);
 app.bindEvent('textarea', 'keydown', resize);
-app.bindEvent('.category-filters .all', 'click', onFilterAll);
-app.bindEvent('.category-filters .none', 'click', onFilterAll);
-app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
+app.bindEvent('.categoryFilters .all', 'click', onFilterAll);
+app.bindEvent('.categoryFilters .none', 'click', onFilterAll);
+app.bindEvent('.categoryFilters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent(window, 'popstate', onPopState);
 
