@@ -192,10 +192,12 @@ aside {
     margin: 2em auto;
     padding: 0.5em; }
   main {
-    width: 66.33333%; }
+    width: 66%;
+    width: calc((100% + 1rem) * 0.66667 - 1rem); }
   aside {
-    display: block;
-    width: 32.66667%;
+    width: 32%;
+    width: calc((100% + 1rem) * 0.33333 - 1rem);
+    display: initial;
     float: right; } }
 
 label {
