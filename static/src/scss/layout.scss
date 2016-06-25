@@ -1,6 +1,6 @@
 main, aside:not(:empty) {
     background: $color-bg;
-    padding: 0.5em;
+    padding: $padding;
 }
 
 aside {
@@ -11,7 +11,7 @@ aside {
     body {
         max-width: 70em;
         margin: 2em auto;
-        padding: 0.5em;
+        padding: $padding;
     }
 
     main {

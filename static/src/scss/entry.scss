@@ -22,8 +22,8 @@ p {
     position: relative;
     color: inherit;
     text-decoration: inherit;
-    padding: 0.5em;
-    margin: 0 0 1em;
+    padding: $padding;
+    margin: 0 0 $spacer;
     background: $color-bg-tint;
 }
 
@@ -57,8 +57,8 @@ p {
 
 .clientToggle {
     position: absolute;
-    top: 0.5em;
-    right: 0.5em;
+    top: $padding;
+    right: $padding;
     font-size: 90%;
 
     @media print {
