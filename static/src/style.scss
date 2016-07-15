@@ -3,10 +3,10 @@
 @import "bower_components/sass-planifolia/sass/contrast";
 @import "bower_components/sass-planifolia/sass/grid";
 
-@import "bower_components/mfbs/src/variables";
+@import "bower_components/mfbs/sass/variables";
 @import "scss/variables";
-@import "bower_components/mfbs/src/base";
-@import "bower_components/mfbs/src/form";
+@import "bower_components/mfbs/sass/base";
+@import "bower_components/mfbs/sass/form";
 
 html {
     background: $color-bg-tint2;
