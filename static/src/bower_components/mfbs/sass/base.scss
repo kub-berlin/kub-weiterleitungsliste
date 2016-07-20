@@ -44,6 +44,15 @@ a {
     }
 }
 
+a:not([href]) {
+    color: inherit;
+    text-decoration: inherit;
+
+    &:hover, &:focus, &:active {
+        color: inherit;
+    }
+}
+
 *::selection {
     background: $color-link;
     color: $color-bg;
@@ -77,13 +86,6 @@ pre {
 
 ol, ul {
     padding-left: $indentation;
-
-    li > :last-child {
-        margin-bottom: 0;
-    }
-    li {
-        line-height: 1.4;
-    }
 }
 dt {
     font-weight: bold;
@@ -116,6 +118,11 @@ textarea {
 
 fieldset {
     border: 1px solid $color-border;
+}
+
+// Prevent sub and sup affecting line-height.
+sub, sup {
+    line-height: 0;
 }
 
 @media print {
