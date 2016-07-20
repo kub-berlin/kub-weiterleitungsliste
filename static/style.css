@@ -36,6 +36,12 @@ a {
   a:hover, a:focus, a:active {
     color: #396acb; }
 
+a:not([href]) {
+  color: inherit;
+  text-decoration: inherit; }
+  a:not([href]):hover, a:not([href]):focus, a:not([href]):active {
+    color: inherit; }
+
 *::selection {
   background: #0052af;
   color: #fff; }
@@ -64,10 +70,6 @@ pre {
 
 ol, ul {
   padding-left: 2rem; }
-  ol li > :last-child, ul li > :last-child {
-    margin-bottom: 0; }
-  ol li, ul li {
-    line-height: 1.4; }
 
 dt {
   font-weight: bold; }
@@ -95,6 +97,9 @@ textarea {
 fieldset {
   border: 1px solid #666; }
 
+sub, sup {
+  line-height: 0; }
+
 @media print {
   html {
     background: transparent;
@@ -105,32 +110,30 @@ fieldset {
 label {
   display: block; }
 
-input, .button, .button--cta,
+input,
+textarea,
+select, .button,
 button,
 [type=button],
-[type=submit],
-textarea,
-select {
+[type=submit] {
   margin: 0 0 1em;
   border: 1px solid #666;
   border-radius: 0.2em;
   padding: 0.3em 0.75em;
   font-family: inherit;
-  font-size: inherit;
-  color: #333;
-  background: #fff; }
-  input:invalid, .button:invalid, .button--cta:invalid,
-  button:invalid,
-  [type=button]:invalid,
-  [type=submit]:invalid,
+  font-size: inherit; }
+
+input,
+textarea,
+select {
+  background: #fff;
+  color: #333; }
+  input:invalid,
   textarea:invalid,
   select:invalid {
     border-color: #a31757;
     color: #a31757; }
-  input:disabled, .button:disabled, .button--cta:disabled,
-  button:disabled,
-  [type=button]:disabled,
-  [type=submit]:disabled,
+  input:disabled,
   textarea:disabled,
   select:disabled {
     background: #f2f5f6 !important;
@@ -138,8 +141,7 @@ select {
     border-color: #666 !important;
     cursor: not-allowed; }
 
-.button, .button--cta,
-[type=submit],
+.button,
 button,
 [type=button],
 [type=submit] {
@@ -147,28 +149,35 @@ button,
   display: inline-block;
   cursor: pointer;
   line-height: 1.8;
-  background: transparent;
   text-align: center;
   border-color: #0052af;
-  color: #0052af; }
-  .button:hover, .button--cta:hover,
-  [type=submit]:hover, .button:focus, .button--cta:focus,
-  [type=submit]:focus,
+  background: #0052af;
+  color: #fff; }
+  .button:hover, .button:focus,
   button:hover,
   button:focus,
   [type=button]:hover,
   [type=button]:focus,
   [type=submit]:hover,
   [type=submit]:focus {
-    background: #0052af;
+    border-color: #1d5ebd;
+    background: #1d5ebd;
     color: #fff; }
-  .button:active, .button--cta:active,
-  [type=submit]:active,
+  .button:active,
   button:active,
   [type=button]:active,
   [type=submit]:active {
     border-color: #396acb;
-    background: #396acb; }
+    background: #396acb;
+    color: #fff; }
+  .button:disabled,
+  button:disabled,
+  [type=button]:disabled,
+  [type=submit]:disabled {
+    border-color: #80a9d7;
+    background: #80a9d7;
+    color: #e6eef7;
+    cursor: not-allowed; }
 
 html {
   background: #dde4ea; }
@@ -202,39 +211,41 @@ aside {
 label {
   margin: 0 0 1em; }
 
-input, .button, .button--cta,
-button,
-[type=button],
-[type=submit], textarea, select {
+input, textarea, select {
   display: block;
   width: 100%; }
 
-.button, .button--cta,
+.button,
+button,
+[type=button],
 [type=submit] {
-  background: #666;
-  color: #fff;
-  border: 0;
+  display: block;
   line-height: 2;
   font-size: 110%; }
-  .button:hover, .button--cta:hover,
-  [type=submit]:hover, .button:focus, .button--cta:focus,
-  [type=submit]:focus {
-    background: #333;
-    color: #fff; }
   @media print {
-    .button, .button--cta,
+    .button,
+    button,
+    [type=button],
     [type=submit] {
       display: none; } }
 
-.button--cta,
-[type=submit] {
-  background: #0052af;
+.button--secondary {
+  border-color: #666;
+  background: #666;
   color: #fff; }
-  .button--cta:hover, .button--cta:focus,
-  [type=submit]:hover,
-  [type=submit]:focus {
-    background: #396acb;
+  .button--secondary:hover, .button--secondary:focus {
+    border-color: #4d4d4d;
+    background: #4d4d4d;
     color: #fff; }
+  .button--secondary:active {
+    border-color: #333;
+    background: #333;
+    color: #fff; }
+  .button--secondary:disabled {
+    border-color: #b3b3b3;
+    background: #b3b3b3;
+    color: #f0f0f0;
+    cursor: not-allowed; }
 
 h2 {
   font-size: 150%;
@@ -365,10 +376,7 @@ p {
   list-style: none;
   margin: 0;
   padding: 0; }
-  .categoryFilters input[type=checkbox], .categoryFilters [type=checkbox].button, .categoryFilters [type=checkbox].button--cta, .categoryFilters
-  button[type=checkbox], .categoryFilters
-  [type=checkbox][type=button], .categoryFilters
-  [type=checkbox][type=submit] {
+  .categoryFilters input[type=checkbox] {
     display: inline;
     margin: 0;
     padding: 0;
