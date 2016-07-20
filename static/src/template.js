@@ -89,7 +89,7 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a.button--cta', {href: '#!create'}, 'Hinzufügen'),
+        h('a.button', {href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
@@ -177,9 +177,9 @@ var detail = function(state, entry) {
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a.button--cta', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('a.delete.button--cta', {href: '#'}, 'Löschen'),
-            h('a.back.button', {href: '#!list'}, 'Zurück'),
+            h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('a.delete.button', {href: '#'}, 'Löschen'),
+            h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
         ]));
     }
 
@@ -250,7 +250,7 @@ var form = function(state, entry) {
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
-            h('a.back.button', {
+            h('a.back.button.button--secondary', {
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),

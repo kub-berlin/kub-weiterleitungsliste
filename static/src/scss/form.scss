@@ -8,19 +8,11 @@ input, textarea, select {
 }
 
 
-@mixin button-color($color, $color-tint) {
-    background: $color;
-    color: contrast-color($color);
-
-    &:hover, &:focus {
-        background: $color-tint;
-        color: contrast-color($color-tint);
-    }
-}
-
-.button {
-    @include button-color($color-border, $color-fg);
-    border: 0;
+.button,
+button,
+[type=button],
+[type=submit] {
+    display: block;
     line-height: 2;
     font-size: 110%;
 
@@ -29,8 +21,6 @@ input, textarea, select {
     }
 }
 
-.button--cta,
-[type=submit] {
-    @extend .button;
-    @include button-color($color-link, $color-link-focus);
+.button--secondary {
+    @include button-color($color-border, contrast-color($color-border), $color-fg);
 }
