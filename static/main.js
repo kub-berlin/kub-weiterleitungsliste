@@ -179,7 +179,7 @@ var onFilterAll = function(event, state) {
     var cats = category ? [category] : state.categories;
     cats.forEach(function(category) {
         category.children.forEach(function(subcategory) {
-            subcategory.active = event.target.className === 'all';
+            subcategory.active = event.target.classList.contains('all');
         });
     });
     return state;
@@ -2153,9 +2153,9 @@ var list = function(state) {
 var categoryFilters = function(state) {
     return h('ul.categoryFilters', {}, [
         h('li', {}, [
-            h('a.all', {href: '#'}, '(alle)'),
+            h('button.all.button--secondary.button--small', 'alle'),
             ' ',
-            h('a.none', {href: '#'}, '(keins)'),
+            h('button.none.button--secondary.button--small', 'keins'),
         ]),
     ].concat(state.categories.map(function(category, i) {
         return h('li.c' + i, {
@@ -2165,9 +2165,9 @@ var categoryFilters = function(state) {
         }, [
             category.key,
             ' ',
-            h('a.all', {href: '#'}, '(alle)'),
+            h('button.all.button--secondary.button--small', 'alle'),
             ' ',
-            h('a.none', {href: '#'}, '(keins)'),
+            h('button.none.button--secondary.button--small', 'keins'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [h('label', {}, [
                     h('input', {
@@ -2235,7 +2235,7 @@ var detail = function(state, entry) {
 
         children.push(h('nav', {}, [
             h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('a.delete.button', {href: '#'}, 'Löschen'),
+            h('button.delete', 'Löschen'),
             h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
         ]));
     }

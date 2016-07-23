@@ -136,9 +136,9 @@ select {
   input:disabled,
   textarea:disabled,
   select:disabled {
-    background: #f2f5f6 !important;
-    color: #666 !important;
-    border-color: #666 !important;
+    border-color: #666;
+    background: #f2f5f6;
+    color: #666;
     cursor: not-allowed; }
 
 .button,
@@ -220,6 +220,7 @@ button,
 [type=button],
 [type=submit] {
   display: block;
+  width: 100%;
   line-height: 2;
   font-size: 110%; }
   @media print {
@@ -246,6 +247,13 @@ button,
     background: #b3b3b3;
     color: #f0f0f0;
     cursor: not-allowed; }
+
+.button--small {
+  font-size: 80%;
+  display: inline-block;
+  width: auto;
+  line-height: inherit;
+  padding: 0 0.2em; }
 
 h2 {
   font-size: 150%;
@@ -389,11 +397,6 @@ p {
     margin: 0 0 1em;
     list-style: none;
     padding: 0; }
-
-.all,
-.none {
-  font-size: 90%;
-  font-weight: initial; }
 
 .map {
   width: 100%;
