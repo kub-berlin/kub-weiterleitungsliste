@@ -178,7 +178,7 @@ var detail = function(state, entry) {
 
         children.push(h('nav', {}, [
             h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('a.delete.button', {href: '#'}, 'Löschen'),
+            h('button.delete', 'Löschen'),
             h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
         ]));
     }
