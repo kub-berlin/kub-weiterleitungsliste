@@ -25,3 +25,11 @@ button,
 .button--secondary {
     @include button-color($color-border, contrast-color($color-border), $color-fg);
 }
+
+.button--small {
+    font-size: 80%;
+    display: inline-block;
+    width: auto;
+    line-height: inherit;
+    padding: 0 0.2em;
+}

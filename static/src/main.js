@@ -68,7 +68,7 @@ var onFilterAll = function(event, state) {
     var cats = category ? [category] : state.categories;
     cats.forEach(function(category) {
         category.children.forEach(function(subcategory) {
-            subcategory.active = event.target.className === 'all';
+            subcategory.active = event.target.classList.contains('all');
         });
     });
     return state;
