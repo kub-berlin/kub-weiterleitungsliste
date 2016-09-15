@@ -86,6 +86,8 @@ var list = function(state) {
         h('ul', {}, state.entries.filter(function(entry) {
             return checkCategoryMatch(entry, state.categories) &&
                 checkQueryMatch(entry, state.q);
+        }).sort(function(a, b) {
+            return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
