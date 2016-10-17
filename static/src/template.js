@@ -77,7 +77,7 @@ var listItem = function(state, entry) {
 };
 
 var list = function(state) {
-    return [
+    var l = [
         h('input.filter', {
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
@@ -91,8 +91,13 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a.button', {href: '#!create'}, 'Hinzufügen'),
     ];
+
+    if (navigator.onLine) {
+        l.push(h('a.button', {href: '#!create'}, 'Hinzufügen'));
+    }
+
+    return l;
 };
 
 var categoryFilters = function(state) {
@@ -178,11 +183,14 @@ var detail = function(state, entry) {
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
-        children.push(h('nav', {}, [
-            h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button.delete', 'Löschen'),
-            h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
-        ]));
+        var buttons = [];
+        if (navigator.onLine) {
+            buttons.push(h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'));
+            buttons.push(h('button.delete', 'Löschen'));
+        }
+        buttons.push(h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'));
+
+        children.push(h('nav', {}, buttons));
     }
 
     return h('div', {
