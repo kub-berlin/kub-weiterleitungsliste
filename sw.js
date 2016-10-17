@@ -1,17 +1,7 @@
 var CACHE = 'v1';
 
-var _fetch = function(request) {
-    return fetch(request).then(function(response) {
-        if (response.ok) {
-            return response;
-        } else {
-            throw response;
-        }
-    });
-};
-
 var fromNetwork = function(request) {
-    return _fetch(request).then(function(response) {
+    return fetch(request).then(function(response) {
         return caches.open(CACHE).then(function(cache) {
             return cache.put(request, response.clone());
         }).then(function() {
