@@ -18,7 +18,7 @@ var LABELS = {
 };
 
 // derived from http://blog.mattheworiordan.com/post/13174566389
-var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-ÄÖÜäöüß]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-ÄÖÜäöüß]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
 // helpers
 var autourl = function(text) {
