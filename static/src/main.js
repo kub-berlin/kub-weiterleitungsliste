@@ -6,11 +6,7 @@ var createApp = require('./app');
 
 
 var extractJSON = function(response) {
-    if (response.ok) {
-        return response.json();
-    } else {
-        throw response;
-    }
+    return response.ok ? response.json() : Promise.reject(response);
 };
 
 // helpers
