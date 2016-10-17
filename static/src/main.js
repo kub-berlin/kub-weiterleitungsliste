@@ -1,14 +1,22 @@
-var xhr = require('promise-xhr');
+var fetch = require('promise-xhr');
 
 var _ = require('./helpers');
 var template = require('./template');
 var createApp = require('./app');
 
 
+var extractJSON = function(response) {
+    if (response.ok) {
+        return response.json();
+    } else {
+        throw response;
+    }
+};
+
 // helpers
 /** Get `entries` and `categories` from the server. */
 var updateModel = function() {
-    return xhr.getJSON('api.php').then(function(entries) {
+    return fetch('api.php').then(extractJSON).then(function(entries) {
         var model = {
             entries: entries,
             categories: [],
@@ -119,10 +127,12 @@ var onSubmit = function(event, state, app) {
         data.id = app.getValue('id');
     }
 
-    return xhr.post('api.php', JSON.stringify(data)).then(function(result) {
+    return fetch('api.php', {
+        method: 'POST',
+        data: JSON.stringify(data)
+    }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
-            var r = JSON.parse(result);
-            history.pushState(null, null, '#!detail/' + r.id);
+            history.pushState(null, null, '#!detail/' + result.id);
             return onPopState(null, _.assign({}, state, model));
         });
     }).catch(function(err) {
@@ -133,9 +143,15 @@ var onSubmit = function(event, state, app) {
 var onDelete = function(event, state) {
     event.preventDefault();
     if (confirm("Wirklich löschen?")) {
-        return xhr.post('api.php', JSON.stringify({
-            id: state.id,
-        })).then(updateModel).then(function(model) {
+        return fetch('api.php', {
+            method: 'POST',
+            data: JSON.stringify({
+                id: state.id,
+            })
+        })
+        .then(extractJSON)
+        .then(updateModel)
+        .then(function(model) {
             history.pushState(null, null, '#!list');
             return onPopState(null, _.assign({}, state, model));
         }).catch(function(err) {
