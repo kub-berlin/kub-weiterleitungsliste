@@ -109,17 +109,25 @@ module.exports.assign = function(target) {
 };
 
 },{}],3:[function(require,module,exports){
-var xhr = require('promise-xhr');
+var fetch = require('promise-xhr');
 
 var _ = require('./helpers');
 var template = require('./template');
 var createApp = require('./app');
 
 
+var extractJSON = function(response) {
+    if (response.ok) {
+        return response.json();
+    } else {
+        throw response;
+    }
+};
+
 // helpers
 /** Get `entries` and `categories` from the server. */
 var updateModel = function() {
-    return xhr.getJSON('api.php').then(function(entries) {
+    return fetch('api.php').then(extractJSON).then(function(entries) {
         var model = {
             entries: entries,
             categories: [],
@@ -230,10 +238,12 @@ var onSubmit = function(event, state, app) {
         data.id = app.getValue('id');
     }
 
-    return xhr.post('api.php', JSON.stringify(data)).then(function(result) {
+    return fetch('api.php', {
+        method: 'POST',
+        data: JSON.stringify(data)
+    }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
-            var r = JSON.parse(result);
-            history.pushState(null, null, '#!detail/' + r.id);
+            history.pushState(null, null, '#!detail/' + result.id);
             return onPopState(null, _.assign({}, state, model));
         });
     }).catch(function(err) {
@@ -244,9 +254,15 @@ var onSubmit = function(event, state, app) {
 var onDelete = function(event, state) {
     event.preventDefault();
     if (confirm("Wirklich löschen?")) {
-        return xhr.post('api.php', JSON.stringify({
-            id: state.id,
-        })).then(updateModel).then(function(model) {
+        return fetch('api.php', {
+            method: 'POST',
+            data: JSON.stringify({
+                id: state.id,
+            })
+        })
+        .then(extractJSON)
+        .then(updateModel)
+        .then(function(model) {
             history.pushState(null, null, '#!list');
             return onPopState(null, _.assign({}, state, model));
         }).catch(function(err) {
@@ -281,6 +297,15 @@ var onCategoryChange = function(event, state, app) {
     return state;
 };
 
+
+// register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/weiterleitung/sw.js').then(function(reg) {
+    console.log('Registration succeeded. Scope is ' + reg.scope);
+  }).catch(function(error) {
+    console.log('Registration failed with ' + error);
+  });
+}
 
 // main
 var app = createApp(template);
@@ -520,77 +545,61 @@ module.exports = function isObject(x) {
     root.PromiseXHR = factory();
   }
 }(this, function() {
-"use strict";
+  "use strict";
 
-/**
- * Send an HTTP request
- *
- * Options:
- *     url     (string) the URL to open
- *     method  (string) request method
- *     headers (object) request headers
- *     data    (mixed)  request data
- */
-function xhr(options) {
+  function Response(request) {
+    this.ok = request.status < 400;
+    this.status = request.status;
+    this.statusText = request.statusText;
+    this.url = request.responseUrl
+
+    this.text = function() {
+      return Promise.resolve(request.responseText);
+    };
+
+    this.json = function() {
+      return this.text().then(function(text) {
+        return JSON.parse(text);
+      });
+    };
+  }
+
+  /**
+   * Send an HTTP request
+   *
+   * Options:
+   *     method  (string) request method [GET]
+   *     headers (object) request headers
+   *     data    (mixed)  request data
+   */
+  function fetch(url, options) {
+    options = options || {};
+
     var req = new XMLHttpRequest();
 
     return new Promise(function (resolve, reject) {
-        req.onreadystatechange = function (e) {
-            if (req.readyState !== 4) {
-                return;
-            }
+      req.onreadystatechange = function (e) {
+        if (req.readyState !== 4) {
+          return;
+        }
 
-            if (req.status >= 400) {
-                reject(e);
-            } else {
-                resolve(e.target.response);
-            }
-        };
+        if (req.status === 0) {
+          reject(e);
+        } else {
+          resolve(new Response(req));
+        }
+      };
 
-        Object.keys(options.headers || {}).forEach(function (key) {
-            req.setRequestHeader(key, options.headers[key]);
-        });
+      Object.keys(options.headers || {}).forEach(function (key) {
+        req.setRequestHeader(key, options.headers[key]);
+      });
 
-        req.open(options.method, options.url, true);
-        req.send(options.data);
+      req.open(options.method || 'GET', url, true);
+      req.send(options.data);
     });
-}
+  }
 
-/**
- * Send a GET HTTP request
- *
- * @param  {string} url
- * @return {Promise}
- */
-xhr.get = function (url) {
-    return xhr({ method: "GET", url: url });
-};
-
-/**
- * Send a GET HTTP request, returning a JSON-decoded response
- *
- * @param  {string} url
- * @return {Promise}
- */
-xhr.getJSON = function (url) {
-    return new Promise(function (resolve, reject) {
-        xhr.get(url).then(function (response) {
-            resolve(JSON.parse(response));
-        });
-    });
-};
-
-/**
- * Send a POST HTTP request
- *
- * @param  {string} url
- * @param  {*} data
- * @return {Promise}
- */
-xhr.post = function (url, data) {
-    return xhr({ method: "POST", url: url, data: data });
-};
-return xhr;
+  return fetch;
 }));
 
 },{}],12:[function(require,module,exports){
@@ -2075,7 +2084,7 @@ var LABELS = {
 };
 
 // derived from http://blog.mattheworiordan.com/post/13174566389
-var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-ÄÖÜäöüß]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-ÄÖÜäöüß]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
 
 // helpers
 var autourl = function(text) {
@@ -2134,7 +2143,7 @@ var listItem = function(state, entry) {
 };
 
 var list = function(state) {
-    return [
+    var l = [
         h('input.filter', {
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
@@ -2148,8 +2157,13 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a.button', {href: '#!create'}, 'Hinzufügen'),
     ];
+
+    if (navigator.onLine) {
+        l.push(h('a.button', {href: '#!create'}, 'Hinzufügen'));
+    }
+
+    return l;
 };
 
 var categoryFilters = function(state) {
@@ -2235,11 +2249,14 @@ var detail = function(state, entry) {
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
-        children.push(h('nav', {}, [
-            h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button.delete', 'Löschen'),
-            h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
-        ]));
+        var buttons = [];
+        if (navigator.onLine) {
+            buttons.push(h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'));
+            buttons.push(h('button.delete', 'Löschen'));
+        }
+        buttons.push(h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'));
+
+        children.push(h('nav', {}, buttons));
     }
 
     return h('div', {
