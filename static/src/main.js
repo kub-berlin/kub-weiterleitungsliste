@@ -58,6 +58,25 @@ var getPath = function() {
     };
 };
 
+var getTitle = function(state) {
+    var stack = ['Weiterleitungsmöglichkeiten'];
+
+    if (state.view === 'list') {
+        // do nothing
+    } else if (state.view === 'detail' || state.view === 'client') {
+        var entry = _.findByKey(state.entries, state.id, 'id');
+        stack.push(entry.name || '404');
+    } else if (state.view === 'edit') {
+        stack.push('edit');
+    } else if (state.view === 'create') {
+        stack.push('create');
+    } else {
+        stack.push('error');
+    }
+
+    return stack.join(' - ');
+};
+
 
 // events
 var onFilter = function(event, state) {
@@ -98,6 +117,7 @@ var onPopState = function(event, state) {
             newState._listScrollTop = scrollY;
         }
     }
+    document.title = getTitle(newState);
     return newState;
 };
 
