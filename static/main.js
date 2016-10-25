@@ -117,11 +117,7 @@ var createApp = require('./app');
 
 
 var extractJSON = function(response) {
-    if (response.ok) {
-        return response.json();
-    } else {
-        throw response;
-    }
+    return response.ok ? response.json() : Promise.reject(response);
 };
 
 // helpers
@@ -297,15 +293,6 @@ var onCategoryChange = function(event, state, app) {
     return state;
 };
 
-
-// register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/weiterleitung/sw.js').then(function(reg) {
-    console.log('Registration succeeded. Scope is ' + reg.scope);
-  }).catch(function(error) {
-    console.log('Registration failed with ' + error);
-  });
-}
 
 // main
 var app = createApp(template);
@@ -2143,7 +2130,7 @@ var listItem = function(state, entry) {
 };
 
 var list = function(state) {
-    var l = [
+    return [
         h('input.filter', {
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
@@ -2157,13 +2144,8 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
+        h('a.button', {href: '#!create'}, 'Hinzufügen'),
     ];
-
-    if (navigator.onLine) {
-        l.push(h('a.button', {href: '#!create'}, 'Hinzufügen'));
-    }
-
-    return l;
 };
 
 var categoryFilters = function(state) {
@@ -2249,14 +2231,11 @@ var detail = function(state, entry) {
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
-        var buttons = [];
-        if (navigator.onLine) {
-            buttons.push(h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'));
-            buttons.push(h('button.delete', 'Löschen'));
-        }
-        buttons.push(h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'));
-
-        children.push(h('nav', {}, buttons));
+        children.push(h('nav', {}, [
+            h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('button.delete', 'Löschen'),
+            h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
+        ]));
     }
 
     return h('div', {
