@@ -50,7 +50,7 @@ var resize = function(event) {
     }, 0);
 };
 
-var getPath = function(state) {
+var getPath = function() {
     var path = location.hash.substr(2).split('/');
     return {
         view: path[0] || 'list',
