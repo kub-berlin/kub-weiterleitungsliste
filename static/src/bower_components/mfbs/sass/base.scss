@@ -23,11 +23,6 @@ html {
     font-family: sans-serif;
     line-height: 1.4;
 }
-body {
-    margin: 2em auto;
-    max-width: 36em;
-    padding: 0 $padding;
-}
 
 h1, h2, h3, h4, h5, h6 {
     line-height: 1.2;
@@ -103,13 +98,18 @@ blockquote {
 table {
     border-collapse: collapse;
     border-spacing: 0;
+}
+tr {
+    border-top: 1px solid $color-border;
 
-    td, th {
-        text-align: start;
-        padding: $padding;
-        border-top: 1px solid $color-border;
-        vertical-align: top;
+    &:last-child {
+        border-bottom: 1px solid $color-border;
     }
+}
+td, th {
+    text-align: start;
+    padding: $padding / 2;
+    vertical-align: top;
 }
 
 textarea {
