@@ -217,21 +217,21 @@ var form = function(state, entry) {
             LABELS.category + '/' + LABELS.subcategory,
             h('select', {
                 name: 'category',
-                value: entry.subcategory,
                 required: true,
-            }, state.categories.map(function(category) {
+            }, [h('option')].concat(state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
                     return h('option', {
                         value: category.key + '--' + subcategory.key,
+                        selected: entry.subcategory === subcategory.key,
                     }, subcategory.key);
                 }).concat([
                     h('option', {
                         value: category.key + '--',
                     }, 'neu ...'),
                 ]));
-            })),
+            }))),
         ]),
     ];
 
