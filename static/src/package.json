@@ -7,7 +7,9 @@
     "node-sass": "^3.4.2"
   },
   "dependencies": {
+    "mfbs": "^3.1.1",
     "promise-xhr": "github:xi/promise-xhr#1.0.2",
+    "sass-planifolia": "^0.4.2",
     "virtual-dom": "^2.1.1"
   },
   "scripts": {

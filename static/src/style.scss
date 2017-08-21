@@ -1,12 +1,12 @@
-@import "bower_components/sass-planifolia/sass/math";
-@import "bower_components/sass-planifolia/sass/color";
-@import "bower_components/sass-planifolia/sass/contrast";
-@import "bower_components/sass-planifolia/sass/grid";
+@import "node_modules/sass-planifolia/sass/math";
+@import "node_modules/sass-planifolia/sass/color";
+@import "node_modules/sass-planifolia/sass/contrast";
+@import "node_modules/sass-planifolia/sass/grid";
 
-@import "bower_components/mfbs/sass/variables";
+@import "node_modules/mfbs/sass/variables";
 @import "scss/variables";
-@import "bower_components/mfbs/sass/base";
-@import "bower_components/mfbs/sass/form";
+@import "node_modules/mfbs/sass/base";
+@import "node_modules/mfbs/sass/form";
 
 html {
     background: $color-bg-tint2;
