@@ -68,7 +68,7 @@ var listItem = function(state, entry) {
         href: '#!detail/' + entry.id,
         className: 'listItem ' + (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {className: 'category.' + categoryClass(state, entry)}, entry.category),
+        h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
         h('h2', {className: 'listItem-title'}, entry.name),
@@ -144,7 +144,7 @@ var detail = function(state, entry) {
 
     var children = [
         h('header', {className: 'detail-header'}, [
-            h('span', {className: 'category.' + categoryClass(state, entry)}, entry.category),
+            h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
             ' ',
             h('span', {className: 'subcategory'}, entry.subcategory),
             h('h2', {}, entry.name),
