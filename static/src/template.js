@@ -60,7 +60,7 @@ var categoryClass = function(state, entry) {
 
 // templates
 var error = function(msg) {
-    return h('h2.error', {}, 'Fehler: ' + msg);
+    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
 };
 
 var listItem = function(state, entry) {
@@ -68,17 +68,18 @@ var listItem = function(state, entry) {
         href: '#!detail/' + entry.id,
         className: 'listItem ' + (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span.category.' + categoryClass(state, entry), {}, entry.category),
+        h('span', {className: 'category.' + categoryClass(state, entry)}, entry.category),
         ' ',
-        h('span.subcategory', {}, entry.subcategory),
-        h('h2.listItem-title', {}, entry.name),
-        h('span.lang', {}, entry.lang),
+        h('span', {className: 'subcategory'}, entry.subcategory),
+        h('h2', {className: 'listItem-title'}, entry.name),
+        h('span', {className: 'lang'}, entry.lang),
     ]);
 };
 
 var list = function(state) {
     return [
-        h('input.filter', {
+        h('input', {
+            className: 'filter',
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
             value: state.q,
@@ -91,28 +92,29 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a.button', {href: '#!create'}, 'Hinzufügen'),
+        h('a', {className: 'button', href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul.categoryFilters', {}, [
+    return h('ul', {className: 'categoryFilters'}, [
         h('li', {}, [
-            h('button.all.button--secondary.button--small', 'alle'),
+            h('button', {className: 'all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button.none.button--secondary.button--small', 'keins'),
+            h('button', {className: 'none button--secondary button--small'}, 'keins'),
         ]),
     ].concat(state.categories.map(function(category, i) {
-        return h('li.c' + i, {
+        return h('li', {
+            className: 'c' + i,
             dataset: {
                 name: category.key,
             },
         }, [
             category.key,
             ' ',
-            h('button.all.button--secondary.button--small', 'alle'),
+            h('button', {className: 'all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button.none.button--secondary.button--small', 'keins'),
+            h('button', {className: 'none button--secondary button--small'}, 'keins'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [h('label', {}, [
                     h('input', {
@@ -135,22 +137,22 @@ var detail = function(state, entry) {
 
     var clientToggle;
     if (state.view === 'client') {
-        clientToggle = h('a.clientToggle', {href: '#!detail/' + entry.id}, 'Standardansicht');
+        clientToggle = h('a', {className: 'clientToggle', href: '#!detail/' + entry.id}, 'Standardansicht');
     } else {
-        clientToggle = h('a.clientToggle', {href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+        clientToggle = h('a', {className: 'clientToggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
     }
 
     var children = [
-        h('header.detail-header', {}, [
-            h('span.category.' + categoryClass(state, entry), {}, entry.category),
+        h('header', {className: 'detail-header'}, [
+            h('span', {className: 'category.' + categoryClass(state, entry)}, entry.category),
             ' ',
-            h('span.subcategory', {}, entry.subcategory),
+            h('span', {className: 'subcategory'}, entry.subcategory),
             h('h2', {}, entry.name),
-            h('span.lang', {}, entry.lang),
+            h('span', {className: 'lang'}, entry.lang),
             clientToggle,
         ]),
         h('h3', {}, LABELS.address),
-        h('p.address', {}, autourl(entry.address)),
+        h('p', {className: 'address'}, autourl(entry.address)),
     ];
 
     ['openinghours'].forEach(function(key) {
@@ -163,7 +165,7 @@ var detail = function(state, entry) {
     if (state.view === 'client') {
         if (entry.map) {
             children.push(h('h3', {}, LABELS.map));
-            children.push(h('div.map', {dataset: {value: entry.map}}));
+            children.push(h('div', {className: 'map', dataset: {value: entry.map}}));
         }
     } else {
         ['contact', 'note'].forEach(function(key) {
@@ -174,14 +176,15 @@ var detail = function(state, entry) {
         });
 
         children.push(h('h3', {}, LABELS.rev));
-        children.push(h('time.rev', {
+        children.push(h('time', {
+            className: 'rev',
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a.button', {href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button.delete', 'Löschen'),
-            h('a.back.button.button--secondary', {href: '#!list'}, 'Zurück'),
+            h('a', {className: 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('button', {className: 'delete'}, 'Löschen'),
+            h('a', {className: 'back button button--secondary', href: '#!list'}, 'Zurück'),
         ]));
     }
 
@@ -259,7 +262,8 @@ var form = function(state, entry) {
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
-            h('a.back.button.button--secondary', {
+            h('a', {
+                className: 'back button button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),
