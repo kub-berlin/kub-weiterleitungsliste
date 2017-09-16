@@ -66,12 +66,12 @@ var error = function(msg) {
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
-        className: 'listItem ' + (entry.category || '').replace(/ /g, '-'),
+        className: 'list-item ' + (entry.category || '').replace(/ /g, '-'),
     }, [
         h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
         ' ',
         h('span', {className: 'subcategory'}, entry.subcategory),
-        h('h2', {className: 'listItem-title'}, entry.name),
+        h('h2', {className: 'list-item__title'}, entry.name),
         h('span', {className: 'lang'}, entry.lang),
     ]);
 };
@@ -97,7 +97,7 @@ var list = function(state) {
 };
 
 var categoryFilters = function(state) {
-    return h('ul', {className: 'categoryFilters'}, [
+    return h('ul', {className: 'category-filters'}, [
         h('li', {}, [
             h('button', {className: 'all button--secondary button--small'}, 'alle'),
             ' ',
@@ -135,13 +135,13 @@ var detail = function(state, entry) {
 
     var clientToggle;
     if (state.view === 'client') {
-        clientToggle = h('a', {className: 'clientToggle', href: '#!detail/' + entry.id}, 'Standardansicht');
+        clientToggle = h('a', {className: 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
     } else {
-        clientToggle = h('a', {className: 'clientToggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+        clientToggle = h('a', {className: 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
     }
 
     var children = [
-        h('header', {className: 'detail-header'}, [
+        h('header', {className: 'detail__header'}, [
             h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
             ' ',
             h('span', {className: 'subcategory'}, entry.subcategory),

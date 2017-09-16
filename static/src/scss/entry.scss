@@ -16,8 +16,8 @@ p {
     white-space: pre-line;
 }
 
-.detail header,
-.listItem {
+.detail__header,
+.list-item {
     display: block;
     position: relative;
     color: inherit;
@@ -27,25 +27,21 @@ p {
     background: $color-bg-tint;
 }
 
-.detail header {
+.detail__header {
     border-bottom: 2px solid $color-link;
 }
 
-.client {
-    @extend .detail;
-}
-
-.listItem {
+.list-item {
     border-left: 2px solid $color-link;
-
-    .listItem-title {
-        font-size: 120%;
-    }
 
     &:hover h2,
     &:focus h2 {
         color: $color-link;
     }
+}
+
+.list-item__title {
+    font-size: 120%;
 }
 
 .category,
@@ -55,7 +51,7 @@ p {
     color: $color-border;
 }
 
-.clientToggle {
+.client-toggle {
     position: absolute;
     top: $padding;
     right: $padding;
