@@ -106,9 +106,7 @@ var categoryFilters = function(state) {
     ].concat(state.categories.map(function(category, i) {
         return h('li', {
             className: 'c' + i,
-            dataset: {
-                name: category.key,
-            },
+            'data-name': category.key,
         }, [
             category.key,
             ' ',
@@ -165,7 +163,7 @@ var detail = function(state, entry) {
     if (state.view === 'client') {
         if (entry.map) {
             children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {className: 'map', dataset: {value: entry.map}}));
+            children.push(h('div', {className: 'map', 'data-value': entry.map}));
         }
     } else {
         ['contact', 'note'].forEach(function(key) {
