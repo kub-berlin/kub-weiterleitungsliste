@@ -1,11 +1,10 @@
-var virtualDom = require('virtual-dom');
+var preact = require('preact');
 
 var _ = require('./helpers');
 
 
 module.exports = function(template) {
     var element;
-    var tree;
     var state;
     var events = [];
     var self = {};
@@ -42,10 +41,8 @@ module.exports = function(template) {
 
     var update = function(newState) {
         var newTree = template(newState);
-        var patches = virtualDom.diff(tree, newTree);
-        virtualDom.patch(element, patches);
+        preact.render(newTree, element.parentNode, element);
         attachEventListeners();
-        tree = newTree;
         state = newState;
     };
 
@@ -66,11 +63,10 @@ module.exports = function(template) {
     };
 
     self.init = function(newState, wrapper) {
-        tree = template(newState);
-        element = virtualDom.create(tree);
-        attachEventListeners();
         wrapper.innerHTML = '';
-        wrapper.appendChild(element);
+        var tree = template(newState);
+        element = preact.render(tree, wrapper);
+        attachEventListeners();
         state = newState;
     };
 

@@ -1,4 +1,4 @@
-var h = require('virtual-dom/h');
+var h = require('preact').h;
 
 var _ = require('./helpers');
 
