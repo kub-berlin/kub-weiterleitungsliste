@@ -24,7 +24,7 @@ Here are some things that might be interesting:
     that is automatically passed to a template function to re-render the
     complete app.
 -   There are no HTML templates. Instead, we use a library called
-    [virtual-hyperscript](https://github.com/Matt-Esch/virtual-dom/tree/master/virtual-hyperscript).
+    [preact](https://github.com/developit/preact/).
     All the template code is in `static/src/template.js`.
 -   Example of how to add a new database column:
     [cbc8b550](https://github.com/xi/kub-weiterleitungsliste/commit/cbc8b550e3c21a2127b68f0e3db1586a34b9e18c)
