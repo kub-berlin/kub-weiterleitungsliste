@@ -91,7 +91,7 @@ var onFilterAll = function(event, state) {
     var cats = category ? [category] : state.categories;
     cats.forEach(function(category) {
         category.children.forEach(function(subcategory) {
-            subcategory.active = event.target.classList.contains('all');
+            subcategory.active = event.target.classList.contains('js-all');
         });
     });
     return state;
@@ -214,8 +214,8 @@ app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'change', resize);
 app.bindEvent('textarea', 'keydown', resize);
-app.bindEvent('.category-filters .all', 'click', onFilterAll);
-app.bindEvent('.category-filters .none', 'click', onFilterAll);
+app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
+app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name=category]', 'change', onCategoryChange);

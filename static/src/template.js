@@ -99,9 +99,9 @@ var list = function(state) {
 var categoryFilters = function(state) {
     return h('ul', {className: 'category-filters'}, [
         h('li', {}, [
-            h('button', {className: 'all button--secondary button--small'}, 'alle'),
+            h('button', {className: 'js-all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button', {className: 'none button--secondary button--small'}, 'keins'),
+            h('button', {className: 'js-none button--secondary button--small'}, 'keins'),
         ]),
     ].concat(state.categories.map(function(category, i) {
         return h('li', {
@@ -110,9 +110,9 @@ var categoryFilters = function(state) {
         }, [
             category.key,
             ' ',
-            h('button', {className: 'all button--secondary button--small'}, 'alle'),
+            h('button', {className: 'js-all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button', {className: 'none button--secondary button--small'}, 'keins'),
+            h('button', {className: 'js-none button--secondary button--small'}, 'keins'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [h('label', {}, [
                     h('input', {
