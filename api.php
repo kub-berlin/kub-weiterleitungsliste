@@ -1,7 +1,8 @@
 <?php
 // ini_set('display_errors', 'On');
 
-function get_database() {
+function get_database()
+{
     $db = new PDO('sqlite:db.sqlite');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
@@ -74,4 +75,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 } else {
     header("HTTP/1.1 405 Method Not Allowed");
 }
-?>
