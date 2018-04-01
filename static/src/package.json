@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "main": "main.js",
   "devDependencies": {
-    "browserify": "^14.4.0",
-    "node-sass": "^4.5.3"
+    "browserify": "^16.1.1",
+    "node-sass": "^4.8.3"
   },
   "dependencies": {
-    "mfbs": "^3.1.1",
-    "preact": "^8.2.5",
+    "mfbs": "^4.0.0",
+    "preact": "^8.2.7",
     "promise-xhr": "github:xi/promise-xhr#1.0.2",
-    "sass-planifolia": "^0.4.2"
+    "sass-planifolia": "^0.5.0"
   },
   "scripts": {
     "build-js": "browserify main.js > ../main.js",
