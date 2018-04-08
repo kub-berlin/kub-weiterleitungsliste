@@ -1,7 +1,7 @@
 @mixin category($k, $n, $chroma) {
     $l: pf-lightness($color-link);
     $c: pf-chroma($color-link);
-    $h: pf-hue($color-link) + pi() * 2 / $n * $k;
+    $h: pf-hue($color-link) + 360deg / $n * $k;
 
     $color1: lch($l, $c * $chroma, $h);
     $color2: lch(90, 10 * $chroma, $h);
