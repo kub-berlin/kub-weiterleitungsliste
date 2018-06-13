@@ -1,5 +1,3 @@
-var fetch = require('promise-xhr');
-
 var _ = require('./helpers');
 var template = require('./template');
 var createApp = require('./app');
@@ -145,7 +143,7 @@ var onSubmit = function(event, state, app) {
 
     return fetch('api.php', {
         method: 'POST',
-        data: JSON.stringify(data)
+        body: JSON.stringify(data)
     }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);

@@ -9,7 +9,6 @@
   "dependencies": {
     "mfbs": "^4.0.0",
     "preact": "^8.2.0",
-    "promise-xhr": "github:xi/promise-xhr#1.0.2",
     "sass-planifolia": "^0.6.0"
   },
   "scripts": {
