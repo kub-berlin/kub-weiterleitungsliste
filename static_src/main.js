@@ -10,7 +10,9 @@ var extractJSON = function(response) {
 // helpers
 /** Get `entries` and `categories` from the server. */
 var updateModel = function() {
-    return fetch('api.php').then(extractJSON).then(function(entries) {
+    return fetch('api.php', {
+        credentials: 'same-origin',
+    }).then(extractJSON).then(function(entries) {
         var model = {
             entries: entries,
             categories: [],
@@ -143,7 +145,8 @@ var onSubmit = function(event, state, app) {
 
     return fetch('api.php', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        credentials: 'same-origin',
     }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
@@ -161,7 +164,8 @@ var onDelete = function(event, state) {
             method: 'POST',
             data: JSON.stringify({
                 id: state.id,
-            })
+            }),
+            credentials: 'same-origin',
         })
         .then(extractJSON)
         .then(updateModel)
