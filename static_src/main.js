@@ -162,7 +162,7 @@ var onDelete = function(event, state) {
     if (confirm("Wirklich löschen?")) {
         return fetch('api.php', {
             method: 'POST',
-            data: JSON.stringify({
+            body: JSON.stringify({
                 id: state.id,
             }),
             credentials: 'same-origin',
