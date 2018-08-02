@@ -153,7 +153,7 @@ var onSubmit = function(event, state, app) {
             return onPopState(null, _.assign({}, state, model));
         });
     }).catch(function(err) {
-        // FIXME handle error
+        console.error(err);
     });
 };
 
@@ -173,7 +173,7 @@ var onDelete = function(event, state) {
             history.pushState(null, null, '#!list');
             return onPopState(null, _.assign({}, state, model));
         }).catch(function(err) {
-            // FIXME handle error
+            console.error(err);
         });
     }
 };
