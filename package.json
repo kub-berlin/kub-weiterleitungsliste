@@ -11,10 +11,6 @@
     "preact": "^8.2.0",
     "sass-planifolia": "^0.6.0"
   },
-  "scripts": {
-    "build-js": "browserify static_src/main.js > static/main.js",
-    "build-css": "node-sass static_src/style.scss > static/style.css"
-  },
   "author": "Tobias Bengfort <tobias.bengfort@posteo.de>",
   "license": "GPL-2.0+"
 }
