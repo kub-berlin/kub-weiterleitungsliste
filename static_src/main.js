@@ -106,7 +106,7 @@ var onFilterChange = function(event, state) {
 };
 
 var onPopState = function(event, state) {
-    var newState = _.assign({}, state, getPath());
+    var newState = Object.assign({}, state, getPath());
     if (state.view !== newState.view) {
         if (newState.view === 'list') {
             newState.$scrollTop = state._listScrollTop;
@@ -150,7 +150,7 @@ var onSubmit = function(event, state, app) {
     }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
-            return onPopState(null, _.assign({}, state, model));
+            return onPopState(null, Object.assign({}, state, model));
         });
     }).catch(function(err) {
         console.error(err);
@@ -171,7 +171,7 @@ var onDelete = function(event, state) {
         .then(updateModel)
         .then(function(model) {
             history.pushState(null, null, '#!list');
-            return onPopState(null, _.assign({}, state, model));
+            return onPopState(null, Object.assign({}, state, model));
         }).catch(function(err) {
             console.error(err);
         });
@@ -225,5 +225,5 @@ app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
-    app.init(_.assign({}, model, getPath()), document.body);
+    app.init(Object.assign({}, model, getPath()), document.body);
 });

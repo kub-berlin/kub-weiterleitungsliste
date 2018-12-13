@@ -48,7 +48,7 @@ module.exports = function(template) {
 
     var eventWrapper = function(fn) {
         return function(event) {
-            var val = fn(event, _.assign({}, state), self);
+            var val = fn(event, Object.assign({}, state), self);
             Promise.resolve(val).then(function(newState) {
                 if (newState != null) {
                     update(newState);
