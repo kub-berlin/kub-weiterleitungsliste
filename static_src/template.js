@@ -60,26 +60,26 @@ var categoryClass = function(state, entry) {
 
 // templates
 var error = function(msg) {
-    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
+    return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
-        className: 'list-item ' + (entry.category || '').replace(/ /g, '-'),
+        'class': 'list-item ' + (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
+        h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
         ' ',
-        h('span', {className: 'subcategory'}, entry.subcategory),
-        h('h2', {className: 'list-item__title'}, entry.name),
-        h('span', {className: 'lang'}, entry.lang),
+        h('span', {'class': 'subcategory'}, entry.subcategory),
+        h('h2', {'class': 'list-item__title'}, entry.name),
+        h('span', {'class': 'lang'}, entry.lang),
     ]);
 };
 
 var list = function(state) {
     return [
         h('input', {
-            className: 'filter',
+            'class': 'filter',
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
             value: state.q,
@@ -92,27 +92,27 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a', {className: 'button', href: '#!create'}, 'Hinzufügen'),
+        h('a', {'class': 'button', href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul', {className: 'category-filters'}, [
+    return h('ul', {'class': 'category-filters'}, [
         h('li', {}, [
-            h('button', {className: 'js-all button--secondary button--small'}, 'alle'),
+            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button', {className: 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
         ]),
     ].concat(state.categories.map(function(category, i) {
         return h('li', {
-            className: 'c' + i,
+            'class': 'c' + i,
             'data-name': category.key,
         }, [
             category.key,
             ' ',
-            h('button', {className: 'js-all button--secondary button--small'}, 'alle'),
+            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button', {className: 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [h('label', {}, [
                     h('input', {
@@ -135,22 +135,22 @@ var detail = function(state, entry) {
 
     var clientToggle;
     if (state.view === 'client') {
-        clientToggle = h('a', {className: 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
+        clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
     } else {
-        clientToggle = h('a', {className: 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
     }
 
     var children = [
-        h('header', {className: 'detail__header'}, [
-            h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
+        h('header', {'class': 'detail__header'}, [
+            h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
             ' ',
-            h('span', {className: 'subcategory'}, entry.subcategory),
+            h('span', {'class': 'subcategory'}, entry.subcategory),
             h('h2', {}, entry.name),
-            h('span', {className: 'lang'}, entry.lang),
+            h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
         ]),
         h('h3', {}, LABELS.address),
-        h('p', {className: 'address'}, autourl(entry.address)),
+        h('p', {'class': 'address'}, autourl(entry.address)),
     ];
 
     ['openinghours'].forEach(function(key) {
@@ -163,7 +163,7 @@ var detail = function(state, entry) {
     if (state.view === 'client') {
         if (entry.map) {
             children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {className: 'map', 'data-value': entry.map}));
+            children.push(h('div', {'class': 'map', 'data-value': entry.map}));
         }
     } else {
         ['contact', 'note'].forEach(function(key) {
@@ -175,19 +175,19 @@ var detail = function(state, entry) {
 
         children.push(h('h3', {}, LABELS.rev));
         children.push(h('time', {
-            className: 'rev',
+            'class': 'rev',
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a', {className: 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {className: 'delete'}, 'Löschen'),
-            h('a', {className: 'back button button--secondary', href: '#!list'}, 'Zurück'),
+            h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('button', {'class': 'delete'}, 'Löschen'),
+            h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
         ]));
     }
 
     return h('div', {
-        className: (entry.category || '').replace(/ /g, '-'),
+        'class': (entry.category || '').replace(/ /g, '-'),
     }, children);
 };
 
@@ -261,7 +261,7 @@ var form = function(state, entry) {
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
             h('a', {
-                className: 'back button button--secondary',
+                'class': 'back button button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),
@@ -287,7 +287,7 @@ var template = function(state) {
 
     return h('div', {}, [
         h('aside', {}, aside),
-        h('main', {className: state.view}, main),
+        h('main', {'class': state.view}, main),
     ]);
 };
 
