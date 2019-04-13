@@ -1,420 +1,16 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-!function() {
-    'use strict';
-    function VNode() {}
-    function h(nodeName, attributes) {
-        var lastSimple, child, simple, i, children = EMPTY_CHILDREN;
-        for (i = arguments.length; i-- > 2; ) stack.push(arguments[i]);
-        if (attributes && null != attributes.children) {
-            if (!stack.length) stack.push(attributes.children);
-            delete attributes.children;
-        }
-        while (stack.length) if ((child = stack.pop()) && void 0 !== child.pop) for (i = child.length; i--; ) stack.push(child[i]); else {
-            if ('boolean' == typeof child) child = null;
-            if (simple = 'function' != typeof nodeName) if (null == child) child = ''; else if ('number' == typeof child) child = String(child); else if ('string' != typeof child) simple = !1;
-            if (simple && lastSimple) children[children.length - 1] += child; else if (children === EMPTY_CHILDREN) children = [ child ]; else children.push(child);
-            lastSimple = simple;
-        }
-        var p = new VNode();
-        p.nodeName = nodeName;
-        p.children = children;
-        p.attributes = null == attributes ? void 0 : attributes;
-        p.key = null == attributes ? void 0 : attributes.key;
-        if (void 0 !== options.vnode) options.vnode(p);
-        return p;
-    }
-    function extend(obj, props) {
-        for (var i in props) obj[i] = props[i];
-        return obj;
-    }
-    function cloneElement(vnode, props) {
-        return h(vnode.nodeName, extend(extend({}, vnode.attributes), props), arguments.length > 2 ? [].slice.call(arguments, 2) : vnode.children);
-    }
-    function enqueueRender(component) {
-        if (!component.__d && (component.__d = !0) && 1 == items.push(component)) (options.debounceRendering || defer)(rerender);
-    }
-    function rerender() {
-        var p, list = items;
-        items = [];
-        while (p = list.pop()) if (p.__d) renderComponent(p);
-    }
-    function isSameNodeType(node, vnode, hydrating) {
-        if ('string' == typeof vnode || 'number' == typeof vnode) return void 0 !== node.splitText;
-        if ('string' == typeof vnode.nodeName) return !node._componentConstructor && isNamedNode(node, vnode.nodeName); else return hydrating || node._componentConstructor === vnode.nodeName;
-    }
-    function isNamedNode(node, nodeName) {
-        return node.__n === nodeName || node.nodeName.toLowerCase() === nodeName.toLowerCase();
-    }
-    function getNodeProps(vnode) {
-        var props = extend({}, vnode.attributes);
-        props.children = vnode.children;
-        var defaultProps = vnode.nodeName.defaultProps;
-        if (void 0 !== defaultProps) for (var i in defaultProps) if (void 0 === props[i]) props[i] = defaultProps[i];
-        return props;
-    }
-    function createNode(nodeName, isSvg) {
-        var node = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', nodeName) : document.createElement(nodeName);
-        node.__n = nodeName;
-        return node;
-    }
-    function removeNode(node) {
-        var parentNode = node.parentNode;
-        if (parentNode) parentNode.removeChild(node);
-    }
-    function setAccessor(node, name, old, value, isSvg) {
-        if ('className' === name) name = 'class';
-        if ('key' === name) ; else if ('ref' === name) {
-            if (old) old(null);
-            if (value) value(node);
-        } else if ('class' === name && !isSvg) node.className = value || ''; else if ('style' === name) {
-            if (!value || 'string' == typeof value || 'string' == typeof old) node.style.cssText = value || '';
-            if (value && 'object' == typeof value) {
-                if ('string' != typeof old) for (var i in old) if (!(i in value)) node.style[i] = '';
-                for (var i in value) node.style[i] = 'number' == typeof value[i] && !1 === IS_NON_DIMENSIONAL.test(i) ? value[i] + 'px' : value[i];
-            }
-        } else if ('dangerouslySetInnerHTML' === name) {
-            if (value) node.innerHTML = value.__html || '';
-        } else if ('o' == name[0] && 'n' == name[1]) {
-            var useCapture = name !== (name = name.replace(/Capture$/, ''));
-            name = name.toLowerCase().substring(2);
-            if (value) {
-                if (!old) node.addEventListener(name, eventProxy, useCapture);
-            } else node.removeEventListener(name, eventProxy, useCapture);
-            (node.__l || (node.__l = {}))[name] = value;
-        } else if ('list' !== name && 'type' !== name && !isSvg && name in node) {
-            setProperty(node, name, null == value ? '' : value);
-            if (null == value || !1 === value) node.removeAttribute(name);
-        } else {
-            var ns = isSvg && name !== (name = name.replace(/^xlink:?/, ''));
-            if (null == value || !1 === value) if (ns) node.removeAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase()); else node.removeAttribute(name); else if ('function' != typeof value) if (ns) node.setAttributeNS('http://www.w3.org/1999/xlink', name.toLowerCase(), value); else node.setAttribute(name, value);
-        }
-    }
-    function setProperty(node, name, value) {
-        try {
-            node[name] = value;
-        } catch (e) {}
-    }
-    function eventProxy(e) {
-        return this.__l[e.type](options.event && options.event(e) || e);
-    }
-    function flushMounts() {
-        var c;
-        while (c = mounts.pop()) {
-            if (options.afterMount) options.afterMount(c);
-            if (c.componentDidMount) c.componentDidMount();
-        }
-    }
-    function diff(dom, vnode, context, mountAll, parent, componentRoot) {
-        if (!diffLevel++) {
-            isSvgMode = null != parent && void 0 !== parent.ownerSVGElement;
-            hydrating = null != dom && !('__preactattr_' in dom);
-        }
-        var ret = idiff(dom, vnode, context, mountAll, componentRoot);
-        if (parent && ret.parentNode !== parent) parent.appendChild(ret);
-        if (!--diffLevel) {
-            hydrating = !1;
-            if (!componentRoot) flushMounts();
-        }
-        return ret;
-    }
-    function idiff(dom, vnode, context, mountAll, componentRoot) {
-        var out = dom, prevSvgMode = isSvgMode;
-        if (null == vnode || 'boolean' == typeof vnode) vnode = '';
-        if ('string' == typeof vnode || 'number' == typeof vnode) {
-            if (dom && void 0 !== dom.splitText && dom.parentNode && (!dom._component || componentRoot)) {
-                if (dom.nodeValue != vnode) dom.nodeValue = vnode;
-            } else {
-                out = document.createTextNode(vnode);
-                if (dom) {
-                    if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
-                    recollectNodeTree(dom, !0);
-                }
-            }
-            out.__preactattr_ = !0;
-            return out;
-        }
-        var vnodeName = vnode.nodeName;
-        if ('function' == typeof vnodeName) return buildComponentFromVNode(dom, vnode, context, mountAll);
-        isSvgMode = 'svg' === vnodeName ? !0 : 'foreignObject' === vnodeName ? !1 : isSvgMode;
-        vnodeName = String(vnodeName);
-        if (!dom || !isNamedNode(dom, vnodeName)) {
-            out = createNode(vnodeName, isSvgMode);
-            if (dom) {
-                while (dom.firstChild) out.appendChild(dom.firstChild);
-                if (dom.parentNode) dom.parentNode.replaceChild(out, dom);
-                recollectNodeTree(dom, !0);
-            }
-        }
-        var fc = out.firstChild, props = out.__preactattr_, vchildren = vnode.children;
-        if (null == props) {
-            props = out.__preactattr_ = {};
-            for (var a = out.attributes, i = a.length; i--; ) props[a[i].name] = a[i].value;
-        }
-        if (!hydrating && vchildren && 1 === vchildren.length && 'string' == typeof vchildren[0] && null != fc && void 0 !== fc.splitText && null == fc.nextSibling) {
-            if (fc.nodeValue != vchildren[0]) fc.nodeValue = vchildren[0];
-        } else if (vchildren && vchildren.length || null != fc) innerDiffNode(out, vchildren, context, mountAll, hydrating || null != props.dangerouslySetInnerHTML);
-        diffAttributes(out, vnode.attributes, props);
-        isSvgMode = prevSvgMode;
-        return out;
-    }
-    function innerDiffNode(dom, vchildren, context, mountAll, isHydrating) {
-        var j, c, f, vchild, child, originalChildren = dom.childNodes, children = [], keyed = {}, keyedLen = 0, min = 0, len = originalChildren.length, childrenLen = 0, vlen = vchildren ? vchildren.length : 0;
-        if (0 !== len) for (var i = 0; i < len; i++) {
-            var _child = originalChildren[i], props = _child.__preactattr_, key = vlen && props ? _child._component ? _child._component.__k : props.key : null;
-            if (null != key) {
-                keyedLen++;
-                keyed[key] = _child;
-            } else if (props || (void 0 !== _child.splitText ? isHydrating ? _child.nodeValue.trim() : !0 : isHydrating)) children[childrenLen++] = _child;
-        }
-        if (0 !== vlen) for (var i = 0; i < vlen; i++) {
-            vchild = vchildren[i];
-            child = null;
-            var key = vchild.key;
-            if (null != key) {
-                if (keyedLen && void 0 !== keyed[key]) {
-                    child = keyed[key];
-                    keyed[key] = void 0;
-                    keyedLen--;
-                }
-            } else if (!child && min < childrenLen) for (j = min; j < childrenLen; j++) if (void 0 !== children[j] && isSameNodeType(c = children[j], vchild, isHydrating)) {
-                child = c;
-                children[j] = void 0;
-                if (j === childrenLen - 1) childrenLen--;
-                if (j === min) min++;
-                break;
-            }
-            child = idiff(child, vchild, context, mountAll);
-            f = originalChildren[i];
-            if (child && child !== dom && child !== f) if (null == f) dom.appendChild(child); else if (child === f.nextSibling) removeNode(f); else dom.insertBefore(child, f);
-        }
-        if (keyedLen) for (var i in keyed) if (void 0 !== keyed[i]) recollectNodeTree(keyed[i], !1);
-        while (min <= childrenLen) if (void 0 !== (child = children[childrenLen--])) recollectNodeTree(child, !1);
-    }
-    function recollectNodeTree(node, unmountOnly) {
-        var component = node._component;
-        if (component) unmountComponent(component); else {
-            if (null != node.__preactattr_ && node.__preactattr_.ref) node.__preactattr_.ref(null);
-            if (!1 === unmountOnly || null == node.__preactattr_) removeNode(node);
-            removeChildren(node);
-        }
-    }
-    function removeChildren(node) {
-        node = node.lastChild;
-        while (node) {
-            var next = node.previousSibling;
-            recollectNodeTree(node, !0);
-            node = next;
-        }
-    }
-    function diffAttributes(dom, attrs, old) {
-        var name;
-        for (name in old) if ((!attrs || null == attrs[name]) && null != old[name]) setAccessor(dom, name, old[name], old[name] = void 0, isSvgMode);
-        for (name in attrs) if (!('children' === name || 'innerHTML' === name || name in old && attrs[name] === ('value' === name || 'checked' === name ? dom[name] : old[name]))) setAccessor(dom, name, old[name], old[name] = attrs[name], isSvgMode);
-    }
-    function collectComponent(component) {
-        var name = component.constructor.name;
-        (components[name] || (components[name] = [])).push(component);
-    }
-    function createComponent(Ctor, props, context) {
-        var inst, list = components[Ctor.name];
-        if (Ctor.prototype && Ctor.prototype.render) {
-            inst = new Ctor(props, context);
-            Component.call(inst, props, context);
-        } else {
-            inst = new Component(props, context);
-            inst.constructor = Ctor;
-            inst.render = doRender;
-        }
-        if (list) for (var i = list.length; i--; ) if (list[i].constructor === Ctor) {
-            inst.__b = list[i].__b;
-            list.splice(i, 1);
-            break;
-        }
-        return inst;
-    }
-    function doRender(props, state, context) {
-        return this.constructor(props, context);
-    }
-    function setComponentProps(component, props, opts, context, mountAll) {
-        if (!component.__x) {
-            component.__x = !0;
-            if (component.__r = props.ref) delete props.ref;
-            if (component.__k = props.key) delete props.key;
-            if (!component.base || mountAll) {
-                if (component.componentWillMount) component.componentWillMount();
-            } else if (component.componentWillReceiveProps) component.componentWillReceiveProps(props, context);
-            if (context && context !== component.context) {
-                if (!component.__c) component.__c = component.context;
-                component.context = context;
-            }
-            if (!component.__p) component.__p = component.props;
-            component.props = props;
-            component.__x = !1;
-            if (0 !== opts) if (1 === opts || !1 !== options.syncComponentUpdates || !component.base) renderComponent(component, 1, mountAll); else enqueueRender(component);
-            if (component.__r) component.__r(component);
-        }
-    }
-    function renderComponent(component, opts, mountAll, isChild) {
-        if (!component.__x) {
-            var rendered, inst, cbase, props = component.props, state = component.state, context = component.context, previousProps = component.__p || props, previousState = component.__s || state, previousContext = component.__c || context, isUpdate = component.base, nextBase = component.__b, initialBase = isUpdate || nextBase, initialChildComponent = component._component, skip = !1;
-            if (isUpdate) {
-                component.props = previousProps;
-                component.state = previousState;
-                component.context = previousContext;
-                if (2 !== opts && component.shouldComponentUpdate && !1 === component.shouldComponentUpdate(props, state, context)) skip = !0; else if (component.componentWillUpdate) component.componentWillUpdate(props, state, context);
-                component.props = props;
-                component.state = state;
-                component.context = context;
-            }
-            component.__p = component.__s = component.__c = component.__b = null;
-            component.__d = !1;
-            if (!skip) {
-                rendered = component.render(props, state, context);
-                if (component.getChildContext) context = extend(extend({}, context), component.getChildContext());
-                var toUnmount, base, childComponent = rendered && rendered.nodeName;
-                if ('function' == typeof childComponent) {
-                    var childProps = getNodeProps(rendered);
-                    inst = initialChildComponent;
-                    if (inst && inst.constructor === childComponent && childProps.key == inst.__k) setComponentProps(inst, childProps, 1, context, !1); else {
-                        toUnmount = inst;
-                        component._component = inst = createComponent(childComponent, childProps, context);
-                        inst.__b = inst.__b || nextBase;
-                        inst.__u = component;
-                        setComponentProps(inst, childProps, 0, context, !1);
-                        renderComponent(inst, 1, mountAll, !0);
-                    }
-                    base = inst.base;
-                } else {
-                    cbase = initialBase;
-                    toUnmount = initialChildComponent;
-                    if (toUnmount) cbase = component._component = null;
-                    if (initialBase || 1 === opts) {
-                        if (cbase) cbase._component = null;
-                        base = diff(cbase, rendered, context, mountAll || !isUpdate, initialBase && initialBase.parentNode, !0);
-                    }
-                }
-                if (initialBase && base !== initialBase && inst !== initialChildComponent) {
-                    var baseParent = initialBase.parentNode;
-                    if (baseParent && base !== baseParent) {
-                        baseParent.replaceChild(base, initialBase);
-                        if (!toUnmount) {
-                            initialBase._component = null;
-                            recollectNodeTree(initialBase, !1);
-                        }
-                    }
-                }
-                if (toUnmount) unmountComponent(toUnmount);
-                component.base = base;
-                if (base && !isChild) {
-                    var componentRef = component, t = component;
-                    while (t = t.__u) (componentRef = t).base = base;
-                    base._component = componentRef;
-                    base._componentConstructor = componentRef.constructor;
-                }
-            }
-            if (!isUpdate || mountAll) mounts.unshift(component); else if (!skip) {
-                if (component.componentDidUpdate) component.componentDidUpdate(previousProps, previousState, previousContext);
-                if (options.afterUpdate) options.afterUpdate(component);
-            }
-            if (null != component.__h) while (component.__h.length) component.__h.pop().call(component);
-            if (!diffLevel && !isChild) flushMounts();
-        }
-    }
-    function buildComponentFromVNode(dom, vnode, context, mountAll) {
-        var c = dom && dom._component, originalComponent = c, oldDom = dom, isDirectOwner = c && dom._componentConstructor === vnode.nodeName, isOwner = isDirectOwner, props = getNodeProps(vnode);
-        while (c && !isOwner && (c = c.__u)) isOwner = c.constructor === vnode.nodeName;
-        if (c && isOwner && (!mountAll || c._component)) {
-            setComponentProps(c, props, 3, context, mountAll);
-            dom = c.base;
-        } else {
-            if (originalComponent && !isDirectOwner) {
-                unmountComponent(originalComponent);
-                dom = oldDom = null;
-            }
-            c = createComponent(vnode.nodeName, props, context);
-            if (dom && !c.__b) {
-                c.__b = dom;
-                oldDom = null;
-            }
-            setComponentProps(c, props, 1, context, mountAll);
-            dom = c.base;
-            if (oldDom && dom !== oldDom) {
-                oldDom._component = null;
-                recollectNodeTree(oldDom, !1);
-            }
-        }
-        return dom;
-    }
-    function unmountComponent(component) {
-        if (options.beforeUnmount) options.beforeUnmount(component);
-        var base = component.base;
-        component.__x = !0;
-        if (component.componentWillUnmount) component.componentWillUnmount();
-        component.base = null;
-        var inner = component._component;
-        if (inner) unmountComponent(inner); else if (base) {
-            if (base.__preactattr_ && base.__preactattr_.ref) base.__preactattr_.ref(null);
-            component.__b = base;
-            removeNode(base);
-            collectComponent(component);
-            removeChildren(base);
-        }
-        if (component.__r) component.__r(null);
-    }
-    function Component(props, context) {
-        this.__d = !0;
-        this.context = context;
-        this.props = props;
-        this.state = this.state || {};
-    }
-    function render(vnode, parent, merge) {
-        return diff(merge, vnode, {}, !1, parent, !1);
-    }
-    var options = {};
-    var stack = [];
-    var EMPTY_CHILDREN = [];
-    var defer = 'function' == typeof Promise ? Promise.resolve().then.bind(Promise.resolve()) : setTimeout;
-    var IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
-    var items = [];
-    var mounts = [];
-    var diffLevel = 0;
-    var isSvgMode = !1;
-    var hydrating = !1;
-    var components = {};
-    extend(Component.prototype, {
-        setState: function(state, callback) {
-            var s = this.state;
-            if (!this.__s) this.__s = extend({}, s);
-            extend(s, 'function' == typeof state ? state(s, this.props) : state);
-            if (callback) (this.__h = this.__h || []).push(callback);
-            enqueueRender(this);
-        },
-        forceUpdate: function(callback) {
-            if (callback) (this.__h = this.__h || []).push(callback);
-            renderComponent(this, 2);
-        },
-        render: function() {}
-    });
-    var preact = {
-        h: h,
-        createElement: h,
-        cloneElement: cloneElement,
-        Component: Component,
-        render: render,
-        rerender: rerender,
-        options: options
-    };
-    if ('undefined' != typeof module) module.exports = preact; else self.preact = preact;
-}();
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+!function(e,n){"object"==typeof exports&&"undefined"!=typeof module?n(exports):"function"==typeof define&&define.amd?define(["exports"],n):n(e.petitDom=e.petitDom||{})}(this,function(e){"use strict";function n(e,n){for(var t=1,r=e.length-1;t<=r;){var o=Math.ceil((t+r)/2);n<e[o]?r=o-1:t=o+1}return t}function t(e,n,t,r,o,i,l){for(var f=o,u=-1,a=i-o+1;t<=r;){if(l(e[t],n[f])){if(u<0&&(u=t),++f>i)return u}else{if(t+a>r)return-1;u=-1,f=o}t++}return-1}function r(e,n){for(var t=0;t<e.length;t++){var r=e[t];if(S(r))return o(e,t,e.slice(0,t),n);V(r)?n&&!r.isSVG&&(r.isSVG=!0):e[t]={_text:null==r?"":r}}return e}function o(e,n,t,r){for(var i=n;i<e.length;i++){var l=e[i];S(l)?o(l,0,t,r):V(l)?(r&&!l.isSVG&&(l.isSVG=!0),t.push(l)):t.push({_text:null==l?"":l})}return t}function i(e,n,t,r){if(t!==r)return!0;for(var o in e)if(e[o]!==n[o])return!0;return!1}function l(e){var n;if(null!=e._text)n=document.createTextNode(e._text);else if(!0===e._vnode){var t=e.type,r=e.props,o=e.content,i=e.isSVG;if("string"==typeof t){var u;u=d(n=i?document.createElementNS(G,t):document.createElement(t),r,void 0,i),S(o)?f(n,o):n.appendChild(l(o)),null!=u&&v(n,r,void 0,u)}else if(b(t))n=t.mount(r,o);else if("function"==typeof t)if(b(t.prototype)){var a=new t(r,o);n=a.mount(r,o),e._data=a}else{var p=t(r,o);n=l(p),e._data=p}}if(null==n)throw new Error("Unkown node type!");return e._node=n,n}function f(e,n){for(var t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:0,r=arguments.length>3&&void 0!==arguments[3]?arguments[3]:n.length-1,o=arguments[4];t<=r;){var i=n[t++];e.insertBefore(l(i),o)}}function u(e,n){var t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:0,r=arguments.length>3&&void 0!==arguments[3]?arguments[3]:n.length-1,o=void 0;for(e.childNodes.length===r-t+1&&(e.textContent="",o=!0);t<=r;){var i=n[t++];o||e.removeChild(i._node),a(i)}}function a(e){if(S(e))for(var n=0;n<e.length;n++)a(e[n]);else!0===e._vnode&&(b(e.type)?e.type.unmount(e._node):"function"==typeof e.type&&b(e.type.prototype)?e._data.unmount(e._node):null!=e.content&&a(e.content))}function v(e,n,t,r){for(var o,i=0;i<r.length;i++){o=r[i];var l=t&&t[o],f=n[o];l!==f&&(e[o]=f)}}function d(e,n,t,r){var o=[];for(var i in n)if(i.startsWith("on")||i in C)o.push(i);else{var l=null!=t?t[i]:void 0,f=n[i];l!==f&&p(e,i,f,r)}for(i in t)i in n||e.removeAttribute(i);if(o.length>0)return o}function p(e,n,t,r){if(!0===t)e.setAttribute(n,"");else if(!1===t)e.removeAttribute(n);else{var o=r?M[n]:void 0;void 0!==o?e.setAttributeNS(o,n,t):e.setAttribute(n,t)}}function s(e,n,t){var r=n._node;if(n===e)return r;var o,f;if(null!=(o=n._text)&&null!=(f=e._text))o!==f&&(r.nodeValue=f);else if(n.type===e.type&&n.isSVG===e.isSVG){var u=n.type;if(b(u))u.patch(r,e.props,n.props,e.content,n.content);else if("function"==typeof u)if(b(u.prototype)){var p=n._data;p.patch(r,e.props,n.props,e.content,n.content),e._data=p}else if((u.shouldUpdate||i)(e.props,n.props,e.content,n.content)){var h=u(e.props,e.content);r=s(h,n._data,t),e._data=h}else e._data=n._data;else{if("string"!=typeof u)throw new Error("Unkown node type! "+u);var y=d(r,e.props,n.props,e.isSVG);c(r,e.content,n.content),null!=y&&v(r,e.props,n.props,y)}}else r=l(e),t&&t.replaceChild(r,n._node),a(n);return e._node=r,r}function c(e,n,t){S(n)||S(t)?S(n)&&S(t)?y(e,n,t):(u(e,t,0,t.length-1),f(e,n)):n!==t&&s(n,t,e)}function h(e,n){return e.key===n.key}function y(e,n,r){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:0,i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:n.length-1,v=arguments.length>5&&void 0!==arguments[5]?arguments[5]:0,d=arguments.length>6&&void 0!==arguments[6]?arguments[6]:r.length-1;if(n!==r){var p,c=g(n,r,o,i,v,d,h,e);if(o+=c,v+=c,c=_(n,r,o,i,v,d,h,e),i-=c,d-=c,!(o>i&&v>d)){if(o<=i&&v>d)return p=r[v],void f(e,n,o,i,p&&p._node);if(v<=d&&o>i)u(e,r,v,d);else{var y=d-v+1,k=i-o+1;if(c=-1,y<k){if((c=t(n,r,o,i,v,d,h))>=0){f(e,n,o,c-1,(p=r[v])._node);var x=c+y;for(o=c;o<x;)s(n[o++],r[v++]);return p=r[d],void f(e,n,o,i,p&&p._node.nextSibling)}}else if(y>k&&(c=t(r,n,v,d,o,i,h))>=0){for(u(e,r,v,c-1),x=c+k,v=c;v<x;)s(n[o++],r[v++]);return void u(e,r,v,d)}if(v===d){var A=r[v]._node;return f(e,n,o,i,A),e.removeChild(A),void a(A)}if(o===i)return e.insertBefore(l(n[o]),r[v]._node),void u(e,r,v,d);m(e,n,r,o,i,v,d)&&w(e,n,r,o,i,v,d)}}}}function g(e,n,t,r,o,i,l,f){for(var u,a,v=0;t<=r&&o<=i&&l(u=e[t],a=n[o]);)f&&s(u,a,f),t++,o++,v++;return v}function _(e,n,t,r,o,i,l,f){for(var u,a,v=0;t<=r&&o<=i&&l(u=e[r],a=n[i]);)f&&s(u,a,f),r--,i--,v++;return v}function m(e,n,t){var r,o,i,l,f,u,a,v=arguments.length>3&&void 0!==arguments[3]?arguments[3]:0,d=arguments.length>4&&void 0!==arguments[4]?arguments[4]:n.length-1,p=arguments.length>5&&void 0!==arguments[5]?arguments[5]:0,s=d-v+1,c=(arguments.length>6&&void 0!==arguments[6]?arguments[6]:t.length-1)-p+1,y=s+c,g=[];e:for(r=0;r<=y;r++){if(r>50)return!0;for(a=r-1,f=r?g[r-1]:[0,0],u=g[r]=[],o=-r;o<=r;o+=2){for(i=(l=o===-r||o!==r&&f[a+o-1]<f[a+o+1]?f[a+o+1]:f[a+o-1]+1)-o;l<c&&i<s&&h(t[p+l],n[v+i]);)l++,i++;if(l===c&&i===s)break e;u[r+o]=l}}var _,m=Array(r/2+y/2),w={},x=m.length-1;for(r=g.length-1;r>=0;r--){for(;l>0&&i>0&&h(t[p+l-1],n[v+i-1]);)m[x--]=N,l--,i--;if(!r)break;a=r-1,f=r?g[r-1]:[0,0],(o=l-i)===-r||o!==r&&f[a+o-1]<f[a+o+1]?(i--,m[x--]=B):(l--,m[x--]=U,null!=(_=t[p+l]).key&&(w[_.key]=p+l))}k(e,m,n,t,v,p,w)}function k(e,n,t,r,o,i,f){for(var u,v,d,p,c={},h=0,y=o,g=i;h<n.length;h++){var _=n[h];_===N?s(t[y++],r[g++],e):_===B?(p=null,null!=(u=t[y++]).key&&(p=f[u.key]),null!=p?(d=s(u,r[p]),c[u.key]=p):d=l(u),e.insertBefore(d,g<r.length?r[g]._node:null)):_===U&&g++}for(h=0,g=i;h<n.length;h++){var m=n[h];m===N?g++:m===U&&(null!=(v=r[g++]).key&&null!=c[v.key]||(e.removeChild(v._node),a(v)))}}function w(e,t,r,o,i,l,f){var u,a,v,d,p={},s=[],c=0,h=i-o+1,y=f-l+1,g=Math.min(h,y),_=Array(g+1);_[0]=-1;for(var m=1;m<_.length;m++)_[m]=f+1;var w=Array(g);for(m=l;m<=f;m++)null!=(d=r[m].key)?p[d]=m:s.push(m);for(m=o;m<=i;m++)null!=(v=null==(u=t[m]).key?s[c++]:p[u.key])&&(a=n(_,v))>=0&&(_[a]=v,w[a]={newi:m,oldi:v,prev:w[a-1]});for(a=_.length-1;_[a]>f;)a--;for(var x=w[a],A=Array(y+h-a),S=i,V=f,b=A.length-1;x;){for(var G=x,C=G.newi,E=G.oldi;S>C;)A[b--]=B,S--;for(;V>E;)A[b--]=U,V--;A[b--]=N,S--,V--,x=x.prev}for(;S>=o;)A[b--]=B,S--;for(;V>=l;)A[b--]=U,V--;k(e,A,t,r,o,l,p)}var x={},A=[],S=Array.isArray,V=function(e){return e&&(null!=e._vnode||null!=e._text)},b=function(e){return e&&e.mount&&e.patch&&e.unmount},G="http://www.w3.org/2000/svg",C={selected:!0,value:!0,checked:!0,innerHTML:!0},E="http://www.w3.org/1999/xlink",M={show:E,actuate:E,href:E},N=2,B=4,U=8;e.h=function(e,n,t){var o,i,l,f=!1,u=arguments.length-2;if("string"!=typeof e){if(1===u)o=t;else if(u>1){for(i=Array(u),l=0;l<u;l++)i[l]=arguments[l+2];o=i}}else if(f="svg"===e,1===u)S(t)?o=r(t,f):V(t)?(t.isSVG=f,o=[t]):o=[{_text:null==t?"":t}];else if(u>1){for(i=Array(u),l=0;l<u;l++)i[l]=arguments[l+2];o=r(i,f)}else o=A;return{_vnode:!0,isSVG:f,type:e,key:n&&n.key||null,props:n||x,content:o}},e.mount=l,e.patch=s,e.unmount=a,e.diffChildren=y,Object.defineProperty(e,"__esModule",{value:!0})});
+
 
 },{}],2:[function(require,module,exports){
-var preact = require('preact');
+var vdom = require('petit-dom/dist/petit-dom.min');
 
 var _ = require('./helpers');
 
 
 module.exports = function(template) {
     var element;
+    var tree;
     var state;
     var events = [];
     var self = {};
@@ -451,14 +47,15 @@ module.exports = function(template) {
 
     var update = function(newState) {
         var newTree = template(newState);
-        preact.render(newTree, element.parentNode, element);
+        vdom.patch(newTree, tree);
         attachEventListeners();
+        tree = newTree;
         state = newState;
     };
 
     var eventWrapper = function(fn) {
         return function(event) {
-            var val = fn(event, _.assign({}, state), self);
+            var val = fn(event, Object.assign({}, state), self);
             Promise.resolve(val).then(function(newState) {
                 if (newState != null) {
                     update(newState);
@@ -474,8 +71,9 @@ module.exports = function(template) {
 
     self.init = function(newState, wrapper) {
         wrapper.innerHTML = '';
-        var tree = template(newState);
-        element = preact.render(tree, wrapper);
+        tree = template(newState);
+        element = vdom.mount(tree);
+        wrapper.append(element);
         attachEventListeners();
         state = newState;
     };
@@ -492,25 +90,13 @@ module.exports = function(template) {
     return self;
 };
 
-},{"./helpers":3,"preact":1}],3:[function(require,module,exports){
+},{"./helpers":3,"petit-dom/dist/petit-dom.min":1}],3:[function(require,module,exports){
 module.exports.indexOfKey = function(list, key, kkey) {
     return list.map(function(x) {return x[kkey];}).indexOf(key);
 };
 
 module.exports.findByKey = function(list, key, kkey) {
     return list[module.exports.indexOfKey(list, key, kkey || 'key')];
-};
-
-module.exports.assign = function(target) {
-    for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i];
-        for (var key in source) {
-            if (source.hasOwnProperty(key)) {
-                target[key] = source[key];
-            }
-        }
-    }
-    return target;
 };
 
 },{}],4:[function(require,module,exports){
@@ -526,7 +112,9 @@ var extractJSON = function(response) {
 // helpers
 /** Get `entries` and `categories` from the server. */
 var updateModel = function() {
-    return fetch('api.php').then(extractJSON).then(function(entries) {
+    return fetch('api.php', {
+        credentials: 'same-origin',
+    }).then(extractJSON).then(function(entries) {
         var model = {
             entries: entries,
             categories: [],
@@ -620,7 +208,7 @@ var onFilterChange = function(event, state) {
 };
 
 var onPopState = function(event, state) {
-    var newState = _.assign({}, state, getPath());
+    var newState = Object.assign({}, state, getPath());
     if (state.view !== newState.view) {
         if (newState.view === 'list') {
             newState.$scrollTop = state._listScrollTop;
@@ -644,6 +232,8 @@ var onSubmit = function(event, state, app) {
 
     var data = {};
 
+    // HACK: These inputs are not synced with the vdom.
+    // They are overwritten as long as the vdom does not change.
     var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
@@ -659,14 +249,15 @@ var onSubmit = function(event, state, app) {
 
     return fetch('api.php', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        credentials: 'same-origin',
     }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
-            return onPopState(null, _.assign({}, state, model));
+            return onPopState(null, Object.assign({}, state, model));
         });
     }).catch(function(err) {
-        // FIXME handle error
+        console.error(err);
     });
 };
 
@@ -675,17 +266,18 @@ var onDelete = function(event, state) {
     if (confirm("Wirklich löschen?")) {
         return fetch('api.php', {
             method: 'POST',
-            data: JSON.stringify({
+            body: JSON.stringify({
                 id: state.id,
-            })
+            }),
+            credentials: 'same-origin',
         })
         .then(extractJSON)
         .then(updateModel)
         .then(function(model) {
             history.pushState(null, null, '#!list');
-            return onPopState(null, _.assign({}, state, model));
+            return onPopState(null, Object.assign({}, state, model));
         }).catch(function(err) {
-            // FIXME handle error
+            console.error(err);
         });
     }
 };
@@ -737,11 +329,11 @@ app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
-    app.init(_.assign({}, model, getPath()), document.body);
+    app.init(Object.assign({}, model, getPath()), document.body);
 });
 
 },{"./app":2,"./helpers":3,"./template":5}],5:[function(require,module,exports){
-var h = require('preact').h;
+var h = require('petit-dom/dist/petit-dom.min').h;
 
 var _ = require('./helpers');
 
@@ -803,26 +395,26 @@ var categoryClass = function(state, entry) {
 
 // templates
 var error = function(msg) {
-    return h('h2', {className: 'error'}, 'Fehler: ' + msg);
+    return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
-        className: 'list-item ' + (entry.category || '').replace(/ /g, '-'),
+        'class': 'list-item ' + (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
+        h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
         ' ',
-        h('span', {className: 'subcategory'}, entry.subcategory),
-        h('h2', {className: 'list-item__title'}, entry.name),
-        h('span', {className: 'lang'}, entry.lang),
+        h('span', {'class': 'subcategory'}, entry.subcategory),
+        h('h2', {'class': 'list-item__title'}, entry.name),
+        h('span', {'class': 'lang'}, entry.lang),
     ]);
 };
 
 var list = function(state) {
     return [
         h('input', {
-            className: 'filter',
+            'class': 'filter',
             type: 'search',
             placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
             value: state.q,
@@ -835,27 +427,27 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {}, [listItem(state, entry)]);
         })),
-        h('a', {className: 'button', href: '#!create'}, 'Hinzufügen'),
+        h('a', {'class': 'button', href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul', {className: 'category-filters'}, [
+    return h('ul', {'class': 'category-filters'}, [
         h('li', {}, [
-            h('button', {className: 'js-all button--secondary button--small'}, 'alle'),
+            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button', {className: 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
         ]),
     ].concat(state.categories.map(function(category, i) {
         return h('li', {
-            className: 'c' + i,
+            'class': 'c' + i,
             'data-name': category.key,
         }, [
             category.key,
             ' ',
-            h('button', {className: 'js-all button--secondary button--small'}, 'alle'),
+            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
             ' ',
-            h('button', {className: 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [h('label', {}, [
                     h('input', {
@@ -878,22 +470,22 @@ var detail = function(state, entry) {
 
     var clientToggle;
     if (state.view === 'client') {
-        clientToggle = h('a', {className: 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
+        clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
     } else {
-        clientToggle = h('a', {className: 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
     }
 
     var children = [
-        h('header', {className: 'detail__header'}, [
-            h('span', {className: 'category ' + categoryClass(state, entry)}, entry.category),
+        h('header', {'class': 'detail__header'}, [
+            h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
             ' ',
-            h('span', {className: 'subcategory'}, entry.subcategory),
+            h('span', {'class': 'subcategory'}, entry.subcategory),
             h('h2', {}, entry.name),
-            h('span', {className: 'lang'}, entry.lang),
+            h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
         ]),
         h('h3', {}, LABELS.address),
-        h('p', {className: 'address'}, autourl(entry.address)),
+        h('p', {'class': 'address'}, autourl(entry.address)),
     ];
 
     ['openinghours'].forEach(function(key) {
@@ -906,7 +498,7 @@ var detail = function(state, entry) {
     if (state.view === 'client') {
         if (entry.map) {
             children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {className: 'map', 'data-value': entry.map}));
+            children.push(h('div', {'class': 'map', 'data-value': entry.map}));
         }
     } else {
         ['contact', 'note'].forEach(function(key) {
@@ -918,19 +510,19 @@ var detail = function(state, entry) {
 
         children.push(h('h3', {}, LABELS.rev));
         children.push(h('time', {
-            className: 'rev',
+            'class': 'rev',
             datetime: entry.rev,
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a', {className: 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {className: 'delete'}, 'Löschen'),
-            h('a', {className: 'back button button--secondary', href: '#!list'}, 'Zurück'),
+            h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('button', {'class': 'delete'}, 'Löschen'),
+            h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
         ]));
     }
 
     return h('div', {
-        className: (entry.category || '').replace(/ /g, '-'),
+        'class': (entry.category || '').replace(/ /g, '-'),
     }, children);
 };
 
@@ -1004,7 +596,7 @@ var form = function(state, entry) {
         h('nav', {}, [
             h('input', {type: 'submit', value: 'Speichern'}),
             h('a', {
-                className: 'back button button--secondary',
+                'class': 'back button button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list'
             }, 'Abbrechen'),
         ]),
@@ -1030,10 +622,10 @@ var template = function(state) {
 
     return h('div', {}, [
         h('aside', {}, aside),
-        h('main', {className: state.view}, main),
+        h('main', {'class': state.view}, main),
     ]);
 };
 
 module.exports = template;
 
-},{"./helpers":3,"preact":1}]},{},[4]);
+},{"./helpers":3,"petit-dom/dist/petit-dom.min":1}]},{},[4]);
