@@ -1,4 +1,4 @@
-var h = require('preact').h;
+var h = require('petit-dom/dist/petit-dom.min').h;
 
 var _ = require('./helpers');
 

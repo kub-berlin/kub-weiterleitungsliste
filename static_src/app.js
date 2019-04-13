@@ -1,10 +1,11 @@
-var preact = require('preact');
+var vdom = require('petit-dom/dist/petit-dom.min');
 
 var _ = require('./helpers');
 
 
 module.exports = function(template) {
     var element;
+    var tree;
     var state;
     var events = [];
     var self = {};
@@ -41,8 +42,9 @@ module.exports = function(template) {
 
     var update = function(newState) {
         var newTree = template(newState);
-        preact.render(newTree, element.parentNode, element);
+        vdom.patch(newTree, tree);
         attachEventListeners();
+        tree = newTree;
         state = newState;
     };
 
@@ -64,8 +66,9 @@ module.exports = function(template) {
 
     self.init = function(newState, wrapper) {
         wrapper.innerHTML = '';
-        var tree = template(newState);
-        element = preact.render(tree, wrapper);
+        tree = template(newState);
+        element = vdom.mount(tree);
+        wrapper.append(element);
         attachEventListeners();
         state = newState;
     };

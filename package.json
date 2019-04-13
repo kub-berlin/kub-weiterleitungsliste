@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "mfbs": "^4.0.0",
-    "preact": "^8.4.2",
+    "petit-dom": "^0.2.2",
     "sass-planifolia": "^0.6.0"
   },
   "author": "Tobias Bengfort <tobias.bengfort@posteo.de>",
