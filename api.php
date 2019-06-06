@@ -4,7 +4,7 @@
 
 function get_database()
 {
-    $db = new PDO('sqlite:db.sqlite');
+    $db = new PDO('sqlite:begleitung.sqlite');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
