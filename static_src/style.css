@@ -1,10 +1,10 @@
 :root {
-    --link-hue: 257;
+    --link-hue: 151;
     --color-border: #666;
-    --color-bg-tint: #f2f5f6;
-    --color-bg-tint2: #dde4ea;
-    --color-link: oklch(45% 0.16 var(--link-hue));
-    --color-link-focus: oklch(50% 0.16 var(--link-hue));
+    --color-bg-tint: #f2f6f5;
+    --color-bg-tint2: #ddeae4;
+    --color-link: oklch(45% 0.12 var(--link-hue));
+    --color-link-focus: oklch(50% 0.12 var(--link-hue));
     font-size: 90%;
     background: var(--color-bg-tint2);
 }
