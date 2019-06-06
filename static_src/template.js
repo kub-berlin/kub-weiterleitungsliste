@@ -6,7 +6,7 @@ var _ = require('./helpers');
 // constants
 var LOCALE = 'de-DE';
 var LABELS = {
-    name: 'Organisation',
+    name: 'Name',
     category: 'Bereich',
     subcategory: 'Rubrik',
     gender: 'Gender',
@@ -17,7 +17,7 @@ var LABELS = {
     note: 'Kommentar',
     rev: 'Stand der Info',
 
-    _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+    _search: 'Suchen in allen Feldern (z.B. "Arabisch", "Donnerstag", "Lisa", …)',
     _filter_toggle: 'Filter anzeigen',
     _add: 'Hinzufügen',
     _edit: 'Bearbeiten',
