@@ -132,13 +132,6 @@ var detail = function(state, entry) {
         return error('404 Not Found');
     }
 
-    var clientToggle;
-    if (state.view === 'client') {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
-    } else {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
-    }
-
     var children = [
         h('header', {'class': 'detail__header'}, [
             h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
@@ -146,7 +139,6 @@ var detail = function(state, entry) {
             h('span', {'class': 'subcategory'}, entry.subcategory),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
-            clientToggle,
         ]),
     ];
 
@@ -258,7 +250,7 @@ var template = function(state) {
     if (state.view === 'list') {
         main = list(state);
         aside = h('aside', {}, categoryFilters(state));
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));
