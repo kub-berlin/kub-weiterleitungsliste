@@ -15,9 +15,10 @@ function get_database()
         mtime INTEGER,
         category TEXT,
         subcategory TEXT,
-        address TEXT,
-        openinghours TEXT,
-        contact TEXT,
+        gender TEXT,
+        email TEXT,
+        phone TEXT,
+        availability TEXT,
         lang TEXT,
         note TEXT,
         rev TEXT
@@ -56,18 +57,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 mtime=:mtime,
                 category=:category,
                 subcategory=:subcategory,
-                address=:address,
-                openinghours=:openinghours,
-                contact=:contact,
+                gender=:gender,
+                email=:email,
+                phone=:phone,
+                availability=:availability,
                 lang=:lang,
                 note=:note,
                 rev=:rev
                 WHERE id=:id';
         } else {
             $sql = 'INSERT INTO entries
-                (name, mtime, category, subcategory, address, openinghours, contact, lang, note, rev)
+                (name, mtime, category, subcategory, gender, email, phone, availability, lang, note, rev)
                 VALUES
-                (:name, :mtime, :category, :subcategory, :address, :openinghours, :contact, :lang, :note, :rev)';
+                (:name, :mtime, :category, :subcategory, :gender, :email, :phone, :availability, :lang, :note, :rev)';
         }
     }
 

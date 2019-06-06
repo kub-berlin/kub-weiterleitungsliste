@@ -133,7 +133,7 @@ var onSubmit = function(event, state, app) {
 
     // HACK: These inputs are not synced with the vdom.
     // They are overwritten as long as the vdom does not change.
-    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
+    var keys = ['name', 'gender', 'email', 'phone', 'availability', 'lang', 'note', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });

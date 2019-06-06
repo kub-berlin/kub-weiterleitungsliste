@@ -8,9 +8,10 @@ var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
-    address: 'Kontaktdaten',
-    openinghours: 'Öffnungszeiten',
-    contact: 'Ansprechpartner_in',
+    gender: 'Gender',
+    email: 'E-Mail',
+    phone: 'Telefon',
+    availability: 'Erreichbarkeit',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
     rev: 'Stand der Info',
@@ -147,37 +148,26 @@ var detail = function(state, entry) {
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
         ]),
-        h('h3', {}, LABELS.address),
-        h('p', {'class': 'address'}, autourl(entry.address)),
     ];
 
-    ['openinghours'].forEach(function(key) {
+    ['gender', 'email', 'phone', 'availability', 'note'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
         }
     });
 
-    if (state.view !== 'client') {
-        ['contact', 'note'].forEach(function(key) {
-            if (entry[key]) {
-                children.push(h('h3', {}, LABELS[key]));
-                children.push(h('p', {'class': key}, autourl(entry[key])));
-            }
-        });
+    children.push(h('h3', {}, LABELS.rev));
+    children.push(h('time', {
+        'class': 'rev',
+        datetime: entry.rev,
+    }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
-        children.push(h('h3', {}, LABELS.rev));
-        children.push(h('time', {
-            'class': 'rev',
-            datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
-
-        children.push(h('nav', {}, [
-            h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {'class': 'delete'}, 'Löschen'),
-            h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
-        ]));
-    }
+    children.push(h('nav', {}, [
+        h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
+        h('button', {'class': 'delete'}, 'Löschen'),
+        h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
+    ]));
 
     return h('div', {
         'class': (entry.category || '').replace(/ /g, '-'),
@@ -236,9 +226,10 @@ var form = function(state, entry) {
     return h('form', {}, [
         field('name', entry.name, true),
         h('div', {}, categoryFields),
-        field('address', entry.address, true, 'textarea'),
-        field('openinghours', entry.openinghours, false, 'textarea'),
-        field('contact', entry.contact, false, 'textarea'),
+        field('gender', entry.gender, false, 'text'),
+        field('email', entry.email, false, 'email'),
+        field('phone', entry.phone, false, 'tel'),
+        field('availability', entry.availability, false, 'textarea'),
         field('lang', entry.lang, false, 'textarea'),
         field('note', entry.note, false, 'textarea'),
         h('label', {}, [LABELS.rev, h('input', {
