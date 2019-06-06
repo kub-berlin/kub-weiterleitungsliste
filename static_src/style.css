@@ -210,12 +210,6 @@ p {
     display: block;
 }
 
-.map {
-    width: 100%;
-    height: 30em;
-    border: 0;
-}
-
 nav {
     margin-block: 2em 1em;
 }
@@ -271,8 +265,7 @@ nav {
 
 @media print {
     .button--block,
-    .client-toggle,
-    .leaflet-control-container {
+    .client-toggle {
         display: none;
     }
 }
