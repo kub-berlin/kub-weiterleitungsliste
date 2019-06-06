@@ -5,7 +5,7 @@ var _ = require('./helpers');
 
 // constants
 var LABELS = {
-    name: 'Organisation',
+    name: 'Name',
     category: 'Bereich',
     subcategory: 'Rubrik',
     gender: 'Gender',
@@ -80,7 +80,7 @@ var list = function(state) {
         h('input', {
             'class': 'filter',
             type: 'search',
-            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+            placeholder: 'Suchen in allen Feldern (z.B. "Arabisch", "Donnerstag", "Lisa", …)',
             value: state.q,
         }),
         h('ul', {}, state.entries.filter(function(entry) {
