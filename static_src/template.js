@@ -162,49 +162,32 @@ var detail = function(state, entry) {
         return error('404 Not Found');
     }
 
-    var clientToggle;
-    if (state.view === 'client') {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
-    } else {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
-    }
-
     var children = [
         h('header', {'class': 'detail__header'}, [
             categoryList(state, entry.categories),
             h('h2', {}, entry.name),
             h('span', {'class': 'subtitle'}, entry.lang),
-            clientToggle,
         ]),
     ];
 
-    ['address', 'openinghours'].forEach(function(key) {
+    ['address', 'openinghours', 'contact', 'note'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
         }
     });
 
-    if (state.view !== 'client') {
-        ['contact', 'note'].forEach(function(key) {
-            if (entry[key]) {
-                children.push(h('h3', {}, LABELS[key]));
-                children.push(h('p', {'class': key}, autourl(entry[key])));
-            }
-        });
+    children.push(h('h3', {}, LABELS.rev));
+    children.push(h('time', {
+        'class': 'rev',
+        datetime: entry.rev,
+    }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
 
-        children.push(h('h3', {}, LABELS.rev));
-        children.push(h('time', {
-            'class': 'rev',
-            datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
-
-        children.push(h('nav', {}, [
-            h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
-            h('button', {'class': 'delete button--block'}, LABELS._delete),
-            h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
-        ]));
-    }
+    children.push(h('nav', {}, [
+        h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
+        h('button', {'class': 'delete button--block'}, LABELS._delete),
+        h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
+    ]));
 
     return h('div', {}, children);
 };
@@ -300,7 +283,7 @@ var template = function(state) {
             h('label', {'for': 'filter-toggle'}, LABELS._filter_toggle),
             categoryFilters(state),
         ]);
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));

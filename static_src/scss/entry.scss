@@ -56,14 +56,3 @@ p {
     font-size: 80%;
     color: $color-border;
 }
-
-.client-toggle {
-    position: absolute;
-    top: $padding;
-    right: $padding;
-    font-size: 90%;
-
-    @media print {
-        display: none;
-    }
-}
