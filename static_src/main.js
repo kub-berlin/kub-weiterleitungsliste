@@ -133,7 +133,7 @@ var onSubmit = function(event, state, app) {
 
     // HACK: These inputs are not synced with the vdom.
     // They are overwritten as long as the vdom does not change.
-    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
+    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
@@ -181,26 +181,6 @@ var onDelete = function(event, state) {
     }
 };
 
-var onMapInit = function(event) {
-    var geoUri = event.target.dataset.value;
-    var match = geoUri.match(/geo:([0-9.-]+),([0-9.-]+)\?z=([0-9]+)/);
-
-    if (match && window.L) {
-        var lng = parseFloat(match[1]);
-        var lat = parseFloat(match[2]);
-        var zoom = Math.min(parseInt(match[3], 10), 18);
-
-        setTimeout(function() {
-            var map = L.map(event.target, {
-                scrollWheelZoom: false,
-            }).setView([lng, lat], zoom);
-
-            L.tileLayer('https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(map);
-            L.marker([lng, lat]).addTo(map);
-        });
-    }
-};
-
 var onCategoryChange = function(event, state, app) {
     var parts = app.getValue('category').split('--');
     state.subcategory = parts[1];
@@ -222,7 +202,6 @@ app.bindEvent('textarea', 'keydown', resize);
 app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
-app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name=category]', 'change', onCategoryChange);
 app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onPopState);

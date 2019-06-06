@@ -13,7 +13,6 @@ var LABELS = {
     contact: 'Ansprechpartner_in',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
-    map: 'Karte',
     rev: 'Stand der Info',
 };
 
@@ -159,12 +158,7 @@ var detail = function(state, entry) {
         }
     });
 
-    if (state.view === 'client') {
-        if (entry.map) {
-            children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {'class': 'map', 'data-value': entry.map}));
-        }
-    } else {
+    if (state.view !== 'client') {
         ['contact', 'note'].forEach(function(key) {
             if (entry[key]) {
                 children.push(h('h3', {}, LABELS[key]));
@@ -247,7 +241,6 @@ var form = function(state, entry) {
         field('contact', entry.contact, false, 'textarea'),
         field('lang', entry.lang, false, 'textarea'),
         field('note', entry.note, false, 'textarea'),
-        field('map', entry.map, false, 'url'),
         h('label', {}, [LABELS.rev, h('input', {
             name: 'rev',
             value: entry.rev,
