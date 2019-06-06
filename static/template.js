@@ -12,7 +12,6 @@ var LABELS = {
     contact: 'Ansprechpartner_in',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
-    map: 'Karte (Geo-URI)',
     rev: 'Stand der Info',
 
     _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
@@ -180,12 +179,7 @@ var detail = function(state, entry) {
         }
     });
 
-    if (state.view === 'client') {
-        if (entry.map) {
-            children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {'class': 'map', 'data-value': entry.map}));
-        }
-    } else {
+    if (state.view !== 'client') {
         ['contact', 'note'].forEach(function(key) {
             if (entry[key]) {
                 children.push(h('h3', {}, LABELS[key]));
@@ -272,7 +266,6 @@ var form = function(state, entry) {
         field('contact', entry.contact, {}, 'textarea'),
         field('lang', entry.lang, {}, 'textarea'),
         field('note', entry.note, {}, 'textarea'),
-        field('map', entry.map, {}, 'url'),
         field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
