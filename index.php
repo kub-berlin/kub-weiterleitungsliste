@@ -11,7 +11,7 @@ if (!check_session()) {
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
-        <title>Weiterleitungsmöglichkeiten</title>
+        <title>Begleitung und Sprachmittlung</title>
         <meta name="viewport" content="width=device-width" />
         <link rel="stylesheet" type="text/css" href="static/style.css" />
     </head>
