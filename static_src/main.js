@@ -70,7 +70,7 @@ var getTitle = function(state) {
 
     if (state.view === 'list') {
         // do nothing
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         var entry = _.findByKey(state.entries, state.id, 'id');
         stack.push(entry.name || '404');
     } else if (state.view === 'edit') {
