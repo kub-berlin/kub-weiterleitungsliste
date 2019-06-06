@@ -139,13 +139,6 @@ p {
     color: var(--color-border);
 }
 
-.client-toggle {
-    position: absolute;
-    inset-block-start: var(--padding);
-    inset-inline-end: var(--padding);
-    font-size: 90%;
-}
-
 .category,
 .subcategory {
     --category-hue: calc(var(--link-hue) + 360 * var(--category) / 13);
