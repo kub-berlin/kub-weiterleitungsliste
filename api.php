@@ -19,7 +19,6 @@ function get_database()
         contact TEXT,
         lang TEXT,
         note TEXT,
-        map TEXT,
         rev TEXT
     );');
 
@@ -65,14 +64,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 contact=:contact,
                 lang=:lang,
                 note=:note,
-                map=:map,
                 rev=:rev
                 WHERE id=:id';
         } else {
             $sql = 'INSERT INTO entries
-                (name, mtime, categories, address, openinghours, contact, lang, note, map, rev)
+                (name, mtime, categories, address, openinghours, contact, lang, note, rev)
                 VALUES
-                (:name, :mtime, :categories, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
+                (:name, :mtime, :categories, :address, :openinghours, :contact, :lang, :note, :rev)';
         }
     }
 
