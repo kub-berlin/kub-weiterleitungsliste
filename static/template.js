@@ -105,6 +105,11 @@ var listItem = function(state, entry) {
     ]);
 };
 
+var dateRandom = function(entry) {
+    var today = new Date();
+    return _.hash(today.toDateString() + entry.name);
+};
+
 var list = function(state) {
     return [
         h('input', {
@@ -117,7 +122,7 @@ var list = function(state) {
             return checkCategoryMatch(entry, state.categories) &&
                 checkQueryMatch(entry, state.q);
         }).sort(function(a, b) {
-            return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
+            return dateRandom(a) > dateRandom(b) ? 1 : -1;
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
