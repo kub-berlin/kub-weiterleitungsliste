@@ -156,7 +156,7 @@ var detail = function(state, entry) {
     ['openinghours'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
-            children.push(h('p.' + key, {}, autourl(entry[key])));
+            children.push(h('p', {'class': key}, autourl(entry[key])));
         }
     });
 
@@ -169,7 +169,7 @@ var detail = function(state, entry) {
         ['contact', 'note'].forEach(function(key) {
             if (entry[key]) {
                 children.push(h('h3', {}, LABELS[key]));
-                children.push(h('p.' + key, {}, autourl(entry[key])));
+                children.push(h('p', {'class': key}, autourl(entry[key])));
             }
         });
 
