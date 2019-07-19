@@ -17,8 +17,7 @@ var LABELS = {
     rev: 'Stand der Info',
 };
 
-// derived from http://blog.mattheworiordan.com/post/13174566389
-var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-ÄÖÜäöüß]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-ÄÖÜäöüß]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9.\/_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/
 
 // helpers
 var autourl = function(text) {
@@ -29,7 +28,7 @@ var autourl = function(text) {
         var before = text.substr(0, i);
         var after = text.substr(i + url.length);
         var surl = url;
-        if (!match[3]) {
+        if (!surl.startsWith('http')) {
             surl = (url.indexOf('@') !== -1 ? 'mailto:' : 'http://') + surl;
         }
         return [before, h('a', {href: surl}, url)].concat(autourl(after));
