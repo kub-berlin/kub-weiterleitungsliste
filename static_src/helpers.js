@@ -1,5 +1,5 @@
 module.exports.indexOfKey = function(list, key, kkey) {
-    return list.map(function(x) {return x[kkey];}).indexOf(key);
+    return list.map(x => x[kkey]).indexOf(key);
 };
 
 module.exports.findByKey = function(list, key, kkey) {

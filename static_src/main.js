@@ -161,7 +161,7 @@ var onSubmit = function(event, state, app) {
 
 var onDelete = function(event, state) {
     event.preventDefault();
-    if (confirm("Wirklich löschen?")) {
+    if (confirm('Wirklich löschen?')) {
         return fetch('api.php', {
             method: 'POST',
             body: JSON.stringify({
@@ -182,19 +182,19 @@ var onDelete = function(event, state) {
 
 var onMapInit = function(event) {
     var geoUri = event.target.dataset.value;
-    var match = geoUri.match(/geo:([0-9\.-]+),([0-9\.-]+)\?z=([0-9]+)/);
+    var match = geoUri.match(/geo:([0-9.-]+),([0-9.-]+)\?z=([0-9]+)/);
 
     if (match && window.L) {
         var lng = parseFloat(match[1]);
         var lat = parseFloat(match[2]);
-        var zoom = Math.min(parseInt(match[3]), 18);
+        var zoom = Math.min(parseInt(match[3], 10), 18);
 
         setTimeout(function() {
             var map = L.map(event.target, {
-                scrollWheelZoom: false
+                scrollWheelZoom: false,
             }).setView([lng, lat], zoom);
 
-            L.tileLayer("https://b.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18}).addTo(map);
+            L.tileLayer('https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(map);
             L.marker([lng, lat]).addTo(map);
         });
     }

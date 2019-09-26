@@ -17,7 +17,7 @@ var LABELS = {
     rev: 'Stand der Info',
 };
 
-var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9.\/_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/
+var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9./_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/;
 
 // helpers
 var autourl = function(text) {
@@ -261,7 +261,7 @@ var form = function(state, entry) {
             h('input', {type: 'submit', value: 'Speichern'}),
             h('a', {
                 'class': 'back button button--secondary',
-                href: entry.id ? '#!detail/' + entry.id : '#!list'
+                href: entry.id ? '#!detail/' + entry.id : '#!list',
             }, 'Abbrechen'),
         ]),
     ]);

@@ -1,7 +1,5 @@
 var vdom = require('petit-dom/dist/petit-dom.min');
 
-var _ = require('./helpers');
-
 
 module.exports = function(template) {
     var element;
@@ -10,12 +8,12 @@ module.exports = function(template) {
     var events = [];
     var self = {};
 
-    var initEvent = function(element, fn) {
-        if (!element.$init) {
+    var initEvent = function(el, fn) {
+        if (!el.$init) {
             setTimeout(function() {
-                fn({target: element});
+                fn({target: el});
             });
-            element.$init = true;
+            el.$init = true;
         }
     };
 
@@ -57,7 +55,7 @@ module.exports = function(template) {
 
                     if (newState.$scrollTop != null) {
                         scrollTo(0, newState.$scrollTop);
-                        delete newState['$scrollTop'];
+                        delete newState.$scrollTop;
                     }
                 }
             });
