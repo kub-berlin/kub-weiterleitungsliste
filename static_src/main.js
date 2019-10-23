@@ -2,6 +2,7 @@ var _ = require('./helpers');
 var template = require('./template');
 var createApp = require('./app');
 
+var baseTitle = document.title;
 
 var extractJSON = function(response) {
     return response.ok ? response.json() : Promise.reject(response);
@@ -59,7 +60,7 @@ var getPath = function() {
 };
 
 var getTitle = function(state) {
-    var stack = ['Weiterleitungsmöglichkeiten'];
+    var stack = [baseTitle];
 
     if (state.view === 'list') {
         // do nothing
