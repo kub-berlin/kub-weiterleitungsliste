@@ -15,7 +15,7 @@ aside {
         padding: $padding;
     }
 
-    body > div {
+    .l-grid {
         display: grid;
         grid-gap: 1rem;
         grid-auto-flow: dense;

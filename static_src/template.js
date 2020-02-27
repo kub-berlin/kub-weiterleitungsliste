@@ -284,7 +284,7 @@ var template = function(state) {
         main = error('Invalid view');
     }
 
-    return h('div', {}, [
+    return h('div', {'class': 'l-grid'}, [
         aside,
         h('main', {'class': state.view}, main),
     ]);
