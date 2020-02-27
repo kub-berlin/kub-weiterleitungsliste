@@ -273,7 +273,7 @@ var template = function(state) {
 
     if (state.view === 'list') {
         main = list(state);
-        aside = categoryFilters(state);
+        aside = h('aside', {}, categoryFilters(state));
     } else if (state.view === 'detail' || state.view === 'client') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
@@ -285,7 +285,7 @@ var template = function(state) {
     }
 
     return h('div', {}, [
-        h('aside', {}, aside),
+        aside,
         h('main', {'class': state.view}, main),
     ]);
 };

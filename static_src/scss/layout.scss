@@ -1,4 +1,5 @@
-main, aside:not(:empty) {
+main,
+aside {
     background: $color-bg;
     padding: $padding;
 }
