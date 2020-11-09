@@ -32,7 +32,16 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $result = $db->query('SELECT * from entries')->fetchAll();
-    echo json_encode($result);
+    if ($_GET['format'] === 'csv') {
+        header('Content-Type: text/csv');
+        $out = fopen('php://output', 'w');
+        foreach ($result as $row) {
+            fputcsv($out, $row);
+        }
+        fclose($out);
+    } else {
+        echo json_encode($result);
+    }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     # FIXME: do server-side validation
 
