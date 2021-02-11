@@ -9,7 +9,7 @@ function get_database()
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-    $db->query("CREATE TABLE IF NOT EXISTS entries (
+    $db->query('CREATE TABLE IF NOT EXISTS entries (
         id INTEGER PRIMARY KEY,
         name TEXT,
         mtime INTEGER,
@@ -22,7 +22,7 @@ function get_database()
         note TEXT,
         map TEXT,
         rev TEXT
-    );");
+    );');
 
     return $db;
 }
@@ -83,5 +83,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     echo json_encode($data);
 } else {
-    header("HTTP/1.1 405 Method Not Allowed");
+    header('HTTP/1.1 405 Method Not Allowed');
 }
