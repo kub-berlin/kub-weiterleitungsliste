@@ -15,6 +15,7 @@ var LABELS = {
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
     rev: 'Stand der Info',
+    password: 'Passwort',
 };
 
 var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9./_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/;
@@ -220,7 +221,7 @@ var form = function(state, entry) {
         categoryFields.push(field('subcategory', '', true));
     }
 
-    return h('form', {}, [
+    return h('form', {id: 'entry'}, [
         field('name', entry.name, true),
         h('div', {}, categoryFields),
         field('gender', entry.gender, false, 'text'),
@@ -248,11 +249,21 @@ var form = function(state, entry) {
     ]);
 };
 
+var login = function() {
+    return h('form', {id: 'login'}, [
+        field('name', '', true, 'text'),
+        field('password', '', true, 'password'),
+        h('button', {}, 'Anmelden'),
+    ]);
+};
+
 var template = function(state) {
     var main;
     var aside;
 
-    if (state.view === 'list') {
+    if (state.login) {
+        main = login();
+    } else if (state.view === 'list') {
         main = list(state);
         aside = h('aside', {}, categoryFilters(state));
     } else if (state.view === 'detail') {

@@ -160,6 +160,19 @@ var onSubmit = function(event, state, app) {
     });
 };
 
+var onLogin = function(event, state, app) {
+    event.preventDefault();
+
+    return fetch('api.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            name: app.getValue('name'),
+            password: app.getValue('password'),
+        }),
+        credentials: 'same-origin',
+    }).then(init);
+};
+
 var onDelete = function(event, state) {
     event.preventDefault();
     if (confirm('Wirklich löschen?')) {
@@ -194,7 +207,8 @@ var app = createApp(template);
 app.bindEvent('.filter', 'change', onFilter);
 app.bindEvent('.filter', 'search', onFilter);
 app.bindEvent('.filter', 'keyup', onFilter);
-app.bindEvent('form', 'submit', onSubmit);
+app.bindEvent('form#entry', 'submit', onSubmit);
+app.bindEvent('form#login', 'submit', onLogin);
 app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'change', resize);
@@ -206,6 +220,16 @@ app.bindEvent('[name=category]', 'change', onCategoryChange);
 app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onPopState);
 
-updateModel().then(function(model) {
-    app.init(Object.assign({}, model, getPath()), document.body);
-});
+var init = function() {
+    return updateModel().catch(function(response) {
+        if (response.status === 403) {
+            return {login: true};
+        } else {
+            return response;
+        }
+    }).then(function(model) {
+        app.init(Object.assign({}, model, getPath()), document.body);
+    });
+};
+
+init();
