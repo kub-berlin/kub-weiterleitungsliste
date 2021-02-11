@@ -126,7 +126,7 @@ var onSubmit = function(event, state, app) {
     event.preventDefault();
 
     // prevent double-submit
-    var submit = event.target.querySelector('input[type=submit]');
+    var submit = event.target.querySelector('button');
     submit.disabled = true;
 
     var data = {};

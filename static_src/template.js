@@ -258,7 +258,7 @@ var form = function(state, entry) {
         })]),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
-            h('input', {type: 'submit', value: 'Speichern'}),
+            h('button', {}, 'Speichern'),
             h('a', {
                 'class': 'back button button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
