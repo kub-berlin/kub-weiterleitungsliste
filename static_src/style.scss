@@ -42,3 +42,28 @@ nav {
         padding: 0;
     }
 }
+
+.users > ul {
+    margin: 0 0 1em;
+    padding: 0;
+    list-style: none;
+
+    > li {
+        margin: 0 0 1em;
+        padding: 0;
+        grid-template-columns: 1fr min-content;
+    }
+
+    form {
+        display: grid;
+        gap: 0.5em;
+        align-items: center;
+        grid-template-columns: 1fr 1fr min-content min-content min-content;
+    }
+
+    label,
+    button {
+        white-space: nowrap;
+        margin: 0;
+    }
+}

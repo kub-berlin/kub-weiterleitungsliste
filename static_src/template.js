@@ -16,6 +16,8 @@ var LABELS = {
     note: 'Kommentar',
     rev: 'Stand der Info',
     password: 'Passwort',
+    new_password: 'Neues Passwort',
+    is_admin: 'Admin',
 };
 
 var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9./_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/;
@@ -249,6 +251,51 @@ var form = function(state, entry) {
     ]);
 };
 
+var users = function(state) {
+    if (!state.users) {
+        return h('p', {}, 'Access denied');
+    }
+
+    return h('ul', {'class': 'users'}, state.users.map(function(user) {
+        return h('li', {key: user.id}, [
+            h('form', {'class': 'js-user'}, [
+                h('input', {type: 'hidden', name: 'id', value: user.id}),
+                field('name', user.name, true, 'text'),
+                field('new_password', '', false, 'password'),
+                h('label', {}, [
+                    h('input', {
+                        type: 'checkbox',
+                        name: 'is_admin',
+                        checked: user.is_admin,
+                    }),
+                    ' ',
+                    LABELS.is_admin,
+                ]),
+                h('button', {}, 'Speichern'),
+                h('button', {'class': 'js-user-delete', type: 'button'}, 'Löschen'),
+            ]),
+        ]);
+    }).concat([
+        h('li', {key: 'new'}, [
+            h('form', {'class': 'js-user'}, [
+                field('name', '', true, 'text'),
+                field('new_password', '', true, 'password'),
+                h('label', {}, [
+                    h('input', {
+                        type: 'checkbox',
+                        name: 'is_admin',
+                        checked: false,
+                    }),
+                    ' ',
+                    LABELS.is_admin,
+                ]),
+                h('button', {}, 'Speichern'),
+                h('button', {disabled: true, type: 'button'}, 'Löschen'),
+            ]),
+        ]),
+    ]));
+};
+
 var login = function() {
     return h('form', {id: 'login'}, [
         field('name', '', true, 'text'),
@@ -267,6 +314,7 @@ var template = function(state) {
         main = list(state);
         aside = h('aside', {}, [
             categoryFilters(state),
+            state.users && h('a', {'class': 'button', href: '#!users'}, 'Users'),
             h('button', {'id': 'logout', type: 'button'}, 'Abmelden'),
         ]);
     } else if (state.view === 'detail') {
@@ -275,6 +323,8 @@ var template = function(state) {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'create') {
         main = form(state, {});
+    } else if (state.view === 'users') {
+        main = users(state, {});
     } else {
         main = error('Invalid view');
     }

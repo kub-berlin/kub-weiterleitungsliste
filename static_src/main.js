@@ -210,6 +210,33 @@ var onCategoryChange = function(event, state, app) {
     return state;
 };
 
+var onUserSubmit = function(event, state) {
+    event.preventDefault();
+    var form = event.target;
+    return fetch('api.php?users=1', {
+        method: 'POST',
+        body: JSON.stringify({
+            id: form.id.value,
+            name: form.name.value,
+            password: form.new_password.value,
+            is_admin: form.is_admin.checked,
+        }),
+        credentials: 'same-origin',
+    }).then(init);
+};
+
+var onUserDelete = function(event, state) {
+    event.preventDefault();
+    var form = event.target.form;
+    return fetch('api.php?users=1', {
+        method: 'POST',
+        body: JSON.stringify({
+            id: form.id.value,
+        }),
+        credentials: 'same-origin',
+    }).then(init);
+};
+
 
 // main
 var app = createApp(template);
@@ -229,6 +256,8 @@ app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('[name=category]', 'change', onCategoryChange);
 app.bindEvent('[name=category]', 'init', onCategoryChange);
+app.bindEvent('.js-user', 'submit', onUserSubmit);
+app.bindEvent('.js-user-delete', 'click', onUserDelete);
 app.bindEvent(window, 'popstate', onPopState);
 
 var init = function() {
