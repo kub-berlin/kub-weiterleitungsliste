@@ -90,8 +90,8 @@ var onFilterAll = function(event, state) {
     var key = event.target.parentElement.dataset.name;
     var category = _.findByKey(state.categories, key);
     var cats = category ? [category] : state.categories;
-    cats.forEach(function(category) {
-        category.children.forEach(function(subcategory) {
+    cats.forEach(function(cat) {
+        cat.children.forEach(function(subcategory) {
             subcategory.active = event.target.classList.contains('js-all');
         });
     });
