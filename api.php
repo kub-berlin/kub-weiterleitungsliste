@@ -24,13 +24,75 @@ function get_database()
         rev TEXT
     );');
 
+    $db->query('CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        name TEXT UNIQUE,
+        password_hash TEXT,
+        is_admin BOOL
+    );');
+
+    $db->query('CREATE TABLE IF NOT EXISTS sessions (
+        id INTEGER PRIMARY KEY,
+        user INTEGER,
+        expires INTEGER,
+        token TEXT
+    );');
+
     return $db;
 }
 
+function get_user($db)
+{
+    $stmt = $db->query('DELETE FROM sessions WHERE expires < :now');
+    $stmt->execute(array('now' => time()));
+
+    $stmt = $db->prepare('SELECT user FROM sessions WHERE token = :token');
+    $stmt->execute(array('token' => $_COOKIE['begleitung_session']));
+    $session = $stmt->fetch();
+
+    $stmt = $db->prepare('SELECT * FROM users WHERE id = :id');
+    $stmt->execute(array('id' => $session['user']));
+    return $stmt->fetch();
+}
+
+function create_session($db, $user)
+{
+    $token = bin2hex(random_bytes(42));
+    $expires = time() + 60 * 60 * 24;
+    $stmt = $db->prepare('INSERT INTO sessions (token, expires, user) VALUES (:token, :expires, :user)');
+    $stmt->execute(array(
+        'token' => $token,
+        'expires' => $expires,
+        'user' => $user['id'],
+    ));
+    setcookie('begleitung_session', $token, array(
+        'expires' => $expires,
+        'secure' => true,
+        'samesite' => 'Strict',
+    ));
+}
+
+function check_password($db, $name, $password)
+{
+    $stmt = $db->prepare('SELECT * FROM users WHERE name = :name');
+    $stmt->execute(array('name' => $name));
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password_hash'])) {
+        return $user;
+    }
+}
+
 $db = get_database();
+$user = get_user($db);
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    if (empty($user)) {
+        header('HTTP/1.1 403 Forbidden');
+        die();
+    }
+
     $result = $db->query('SELECT * from entries')->fetchAll();
     if ($_GET['format'] === 'csv') {
         header('Content-Type: text/csv');
@@ -46,6 +108,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     # FIXME: do server-side validation
 
     $data = json_decode(file_get_contents('php://input'), true);
+
+    if (empty($user)) {
+        $user = check_password($db, $data['name'], $data['password']);
+        if (empty($user)) {
+            header('HTTP/1.1 403 Forbidden');
+        } else {
+            create_session($db, $user);
+            header('HTTP/1.1 204 No Content');
+        }
+        die();
+    }
 
     if (!array_key_exists('name', $data)) {
         $sql = 'DELETE from entries WHERE id=:id';
