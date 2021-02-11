@@ -8,6 +8,12 @@ input, textarea, select {
     border-radius: 0.2em;
 }
 
+input[type="checkbox"] {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
 
 .button,
 button,
