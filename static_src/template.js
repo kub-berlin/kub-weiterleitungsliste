@@ -89,7 +89,7 @@ var list = function(state) {
         }).sort(function(a, b) {
             return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
         }).map(function(entry) {
-            return h('li', {}, [listItem(state, entry)]);
+            return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
         h('a', {'class': 'button', href: '#!create'}, 'Hinzufügen'),
     ];
