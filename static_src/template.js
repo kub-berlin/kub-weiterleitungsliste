@@ -265,7 +265,10 @@ var template = function(state) {
         main = login();
     } else if (state.view === 'list') {
         main = list(state);
-        aside = h('aside', {}, categoryFilters(state));
+        aside = h('aside', {}, [
+            categoryFilters(state),
+            h('button', {'id': 'logout', type: 'button'}, 'Abmelden'),
+        ]);
     } else if (state.view === 'detail') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {

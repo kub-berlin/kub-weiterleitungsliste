@@ -173,6 +173,15 @@ var onLogin = function(event, state, app) {
     }).then(init);
 };
 
+var onLogout = function(event, state, app) {
+    event.preventDefault();
+
+    return fetch('api.php?logout=1', {
+        method: 'POST',
+        credentials: 'same-origin',
+    }).then(init);
+};
+
 var onDelete = function(event, state) {
     event.preventDefault();
     if (confirm('Wirklich löschen?')) {
@@ -209,6 +218,7 @@ app.bindEvent('.filter', 'search', onFilter);
 app.bindEvent('.filter', 'keyup', onFilter);
 app.bindEvent('form#entry', 'submit', onSubmit);
 app.bindEvent('form#login', 'submit', onLogin);
+app.bindEvent('button#logout', 'click', onLogout);
 app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'change', resize);
