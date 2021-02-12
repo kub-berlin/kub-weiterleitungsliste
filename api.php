@@ -120,41 +120,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         die();
     }
 
-    if (!array_key_exists('name', $data)) {
-        $sql = 'DELETE from entries WHERE id=:id';
+    if ($_GET['logout']) {
+        $stmt = $db->prepare('DELETE FROM sessions WHERE token = :token');
+        $stmt->execute(array('token' => $_COOKIE['begleitung_session']));
+        header('HTTP/1.1 204 No Content');
     } else {
-        $data['mtime'] = time();
-        if (array_key_exists('id', $data)) {
-            $sql = 'UPDATE entries SET
-                name=:name,
-                mtime=:mtime,
-                category=:category,
-                subcategory=:subcategory,
-                gender=:gender,
-                email=:email,
-                phone=:phone,
-                availability=:availability,
-                lang=:lang,
-                note=:note,
-                rev=:rev
-                WHERE id=:id';
+        if (!array_key_exists('name', $data)) {
+            $sql = 'DELETE from entries WHERE id=:id';
         } else {
-            $sql = 'INSERT INTO entries
-                (name, mtime, category, subcategory, gender, email, phone, availability, lang, note, rev)
-                VALUES
-                (:name, :mtime, :category, :subcategory, :gender, :email, :phone, :availability, :lang, :note, :rev)';
+            $data['mtime'] = time();
+            if (array_key_exists('id', $data)) {
+                $sql = 'UPDATE entries SET
+                    name=:name,
+                    mtime=:mtime,
+                    category=:category,
+                    subcategory=:subcategory,
+                    gender=:gender,
+                    email=:email,
+                    phone=:phone,
+                    availability=:availability,
+                    lang=:lang,
+                    note=:note,
+                    rev=:rev
+                    WHERE id=:id';
+            } else {
+                $sql = 'INSERT INTO entries
+                    (name, mtime, category, subcategory, gender, email, phone, availability, lang, note, rev)
+                    VALUES
+                    (:name, :mtime, :category, :subcategory, :gender, :email, :phone, :availability, :lang, :note, :rev)';
+            }
         }
+
+        $stmt = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+        $stmt->execute($data);
+
+        if (!array_key_exists('id', $data)) {
+            $result = $db->query('SELECT last_insert_rowid()')->fetch();
+            $data['id'] = $result['last_insert_rowid()'];
+        }
+
+        echo json_encode($data);
     }
-
-    $stmt = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-    $stmt->execute($data);
-
-    if (!array_key_exists('id', $data)) {
-        $result = $db->query('SELECT last_insert_rowid()')->fetch();
-        $data['id'] = $result['last_insert_rowid()'];
-    }
-
-    echo json_encode($data);
 } else {
     header('HTTP/1.1 405 Method Not Allowed');
 }
