@@ -13,13 +13,14 @@ var extractJSON = function(response) {
 var updateModel = function() {
     return fetch('api.php', {
         credentials: 'same-origin',
-    }).then(extractJSON).then(function(entries) {
+    }).then(extractJSON).then(function(data) {
         var model = {
-            entries: entries,
+            entries: data.entries,
+            users: data.users,
             categories: [],
         };
 
-        entries.forEach(function(entry) {
+        model.entries.forEach(function(entry) {
             var category = _.findByKey(model.categories, entry.category);
             if (!category) {
                 category = {

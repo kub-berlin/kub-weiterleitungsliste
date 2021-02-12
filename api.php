@@ -102,7 +102,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
         fclose($out);
     } else {
-        echo json_encode($result);
+        $data = array('entries' => $result);
+        if (!empty($user['is_admin'])) {
+            $data['users'] = $db->query('SELECT id, name, is_admin from users')->fetchAll();
+        }
+        echo json_encode($data);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     # FIXME: do server-side validation
@@ -124,6 +128,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $stmt = $db->prepare('DELETE FROM sessions WHERE token = :token');
         $stmt->execute(array('token' => $_COOKIE['begleitung_session']));
         header('HTTP/1.1 204 No Content');
+    } elseif ($_GET['users']) {
+        if (empty($user['is_admin'])) {
+            header('HTTP/1.1 403 Forbidden');
+            die();
+        }
+
+        if (!array_key_exists('id', $data)) {
+            $sql = 'INSERT INTO users (name, password_hash, is_admin) VALUES (:name, :password, :is_admin)';
+        } elseif (!empty($data['password'])) {
+            $sql = 'UPDATE users SET name=:name, password_hash=:password, is_admin=:is_admin WHERE id=:id';
+        } elseif (array_key_exists('name', $data)) {
+            $sql = 'UPDATE users SET name=:name, is_admin=:is_admin WHERE id=:id';
+        } else {
+            $sql = 'DELETE from users WHERE id=:id';
+        }
+
+        $stmt = $db->prepare($sql);
+
+        if (array_key_exists('id', $data)) {
+            $stmt->bindValue(':id', $data['id']);
+        }
+        if (array_key_exists('name', $data)) {
+            $stmt->bindValue(':name', $data['name']);
+            $stmt->bindValue(':is_admin', $data['is_admin']);
+        }
+        if (!empty($data['password'])) {
+            $hash = password_hash($data['password'], PASSWORD_DEFAULT);
+            $stmt->bindValue(':password', $hash);
+        }
+
+        $stmt->execute();
     } else {
         if (!array_key_exists('name', $data)) {
             $sql = 'DELETE from entries WHERE id=:id';
