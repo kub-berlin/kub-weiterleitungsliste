@@ -77,8 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $stmt->execute($data);
 
     if (!array_key_exists('id', $data)) {
-        $result = $db->query('SELECT last_insert_rowid()')->fetch();
-        $data['id'] = $result['last_insert_rowid()'];
+        $data['id'] = $db->lastInsertId();
     }
 
     echo json_encode($data);
