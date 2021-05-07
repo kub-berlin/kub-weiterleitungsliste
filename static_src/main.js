@@ -42,13 +42,10 @@ var updateModel = function() {
 };
 
 /** Autoresize text areas. */
-// https://stackoverflow.com/questions/454202
+// https://projects.verou.me/stretchy/
 var resize = function(event) {
-    /* 0-timeout to get the already changed text */
-    setTimeout(function() {
-        event.target.style.height = 'auto';
-        event.target.style.height = event.target.scrollHeight + 5 + 'px';
-    }, 0);
+    event.target.style.height = '0';
+    event.target.style.height = event.target.scrollHeight + event.target.offsetHeight + 'px';
 };
 
 var getPath = function() {
@@ -217,8 +214,7 @@ app.bindEvent('.filter', 'keyup', onFilter);
 app.bindEvent('form', 'submit', onSubmit);
 app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
-app.bindEvent('textarea', 'change', resize);
-app.bindEvent('textarea', 'keydown', resize);
+app.bindEvent('textarea', 'input', resize);
 app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
