@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "main.js",
   "dependencies": {
-    "mfbs": "^4.0.0",
+    "mfbs": "^5.0.0",
     "petit-dom": "^0.2.2",
     "sass-planifolia": "^0.6.0"
   },
