@@ -13,7 +13,7 @@ var LABELS = {
     contact: 'Ansprechpartner_in',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
-    map: 'Karte',
+    map: 'Karte (Geo-URI)',
     rev: 'Stand der Info',
 };
 
