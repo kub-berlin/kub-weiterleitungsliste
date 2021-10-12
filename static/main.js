@@ -121,21 +121,25 @@ var updateModel = function() {
         };
 
         entries.forEach(function(entry) {
-            var category = _.findByKey(model.categories, entry.category);
-            if (!category) {
-                category = {
-                    key: entry.category,
-                    children: [],
-                };
-                model.categories.push(category);
-            }
+            for (var i = 1; i <= MAX_CATEGORIES; i++) {
+				if (entry['category' + i]) {
+					var category = _.findByKey(model.categories, entry['category' + i]);
+					if (!category) {
+						category = {
+							key: entry['category' + i],
+							children: [],
+						};
+						model.categories.push(category);
+					}
 
-            if (!_.findByKey(category.children, entry.subcategory)) {
-                category.children.push({
-                    key: entry.subcategory,
-                    active: true,
-                });
-            }
+					if (!_.findByKey(category.children, entry['subcategory' + i])) {
+						category.children.push({
+							key: entry['subcategory' + i],
+							active: true,
+						});
+					}
+				}
+			}
         });
 
         return model;
@@ -311,6 +315,8 @@ var onCategoryChange = function(event, state, app) {
 
 // main
 var app = createApp(template);
+
+var MAX_CATEGORIES = 5;
 
 app.bindEvent('.filter', 'change', onFilter);
 app.bindEvent('.filter', 'search', onFilter);
