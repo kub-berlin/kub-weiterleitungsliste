@@ -59,8 +59,12 @@ var checkQueryMatch = function(entry, q) {
     }));
 };
 
-var categoryClass = function(state, entry) {
-    return 'c' + _.indexOfKey(state.categories, entry.category, 'key');
+var categoryClass = function(state, category) {
+    if (category) {
+		return 'c' + _.indexOfKey(state.categories, category, 'key');
+	} else {
+		return '';
+	}
 };
 
 
@@ -69,14 +73,28 @@ var error = function(msg) {
     return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
+var categoryList = function (state, entry) {
+	var catList = [h('span', {'class': 'category ' + categoryClass(state, entry.category1)}, entry.category1),
+        ' ',
+        h('span', {'class': 'subcategory'}, entry.subcategory1)];
+        
+    for (var i = 2; i <= MAX_CATEGORIES; i++) {
+		if (entry['category' + i]) {
+			catList.push(h('br'), h('span', {'class': 'category ' + categoryClass(state, entry['category' + i])}, entry['category' + i]),
+			' ',
+			h('span', {'class': 'subcategory'}, entry['subcategory' + i]));
+		}
+	}
+	
+	return catList;
+};
+
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
         'class': 'list-item ' + (entry.category || '').replace(/ /g, '-'),
     }, [
-        h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
-        ' ',
-        h('span', {'class': 'subcategory'}, entry.subcategory),
+        categoryList(state, entry),
         h('h2', {'class': 'list-item__title'}, entry.name),
         h('span', {'class': 'lang'}, entry.lang),
     ]);
@@ -148,9 +166,7 @@ var detail = function(state, entry) {
 
     var children = [
         h('header', {'class': 'detail__header'}, [
-            h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
-            ' ',
-            h('span', {'class': 'subcategory'}, entry.subcategory),
+            categoryList(state, entry),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
