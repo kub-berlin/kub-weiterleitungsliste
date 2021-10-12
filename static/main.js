@@ -349,6 +349,11 @@ var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
+    subcategory1: 'Rubrik',
+    subcategory2: 'Rubrik',
+    subcategory3: 'Rubrik',
+    subcategory4: 'Rubrik',
+    subcategory5: 'Rubrik',
     address: 'Kontaktdaten',
     openinghours: 'Öffnungszeiten',
     contact: 'Ansprechpartner_in',
@@ -360,6 +365,8 @@ var LABELS = {
 
 // derived from http://blog.mattheworiordan.com/post/13174566389
 var RE_URL = /(((https?:\/\/|mailto:)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-ÄÖÜäöüß]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-ÄÖÜäöüß]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/;
+
+var MAX_CATEGORIES = 5;
 
 // helpers
 var autourl = function(text) {
@@ -553,20 +560,23 @@ var field = function(name, value, required, type) {
     return h('label', {}, [LABELS[name], f]);
 };
 
-var form = function(state, entry) {
-    var categoryFields = [
+var categoryField = function(state, entry, num) {
+	var f;
+	var required = (num === 1)? true: false;
+	
+	f = [
         h('label', {}, [
-            LABELS.category + '/' + LABELS.subcategory,
+            num + '. ' + LABELS.category + '/' + LABELS.subcategory,
             h('select', {
-                name: 'category',
-                required: true,
+                name: 'category' + num,
+                required: required,
             }, [h('option')].concat(state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
                     return h('option', {
                         value: category.key + '--' + subcategory.key,
-                        selected: entry.subcategory === subcategory.key,
+                        selected: entry['subcategory' + num] === subcategory.key,
                     }, subcategory.key);
                 }).concat([
                     h('option', {
@@ -576,14 +586,48 @@ var form = function(state, entry) {
             }))),
         ]),
     ];
+    
+    return f;
+};
 
-    if (state.subcategory === '') {
-        categoryFields.push(field('subcategory', '', true));
-    }
+var categoryFields = function(state, entry) {
+	if (!('categoryCount' in state)) {
+		state.categoryCount = 1;
+	}
+	
+	var catCount = 1;
+	for (var i = 2; i <= MAX_CATEGORIES; i++) {
+		if (entry['category' + i]) {
+			catCount = i;
+		}
+	}
+	
+	if (catCount > state.categoryCount) {
+		state.categoryCount = catCount;
+	}
+	
+	var categoryFields = [];
+	
+	for (var i = 1; i <= state.categoryCount; i++) {
+		categoryFields.push(h('div', {}, categoryField(state, entry, i)));
+		if (state['subcategory' + i] === '') {
+			categoryFields.push(field('subcategory' + i, '', true));
+		}
+	}
+	
+	if (state.categoryCount < MAX_CATEGORIES) {
+		categoryFields.push(h('button', {'type': 'button', 'class': 'add-category'}, '+'));
+		categoryFields.push(' Weiteren Bereich/Rubrik hinzufügen');
+	}
+	
+	return categoryFields;
+};
 
+var form = function(state, entry) {
+    
     return h('form', {}, [
         field('name', entry.name, true),
-        h('div', {}, categoryFields),
+        categoryFields(state, entry),
         field('address', entry.address, true, 'textarea'),
         field('openinghours', entry.openinghours, false, 'textarea'),
         field('contact', entry.contact, false, 'textarea'),
