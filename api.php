@@ -13,8 +13,16 @@ function get_database()
         id INTEGER PRIMARY KEY,
         name TEXT,
         mtime INTEGER,
-        category TEXT,
-        subcategory TEXT,
+        category1 TEXT,
+        subcategory1 TEXT,
+        category2 TEXT,
+        subcategory2 TEXT,
+        category3 TEXT,
+        subcategory3 TEXT,
+        category4 TEXT,
+        subcategory4 TEXT,
+        category5 TEXT,
+        subcategory5 TEXT,
         address TEXT,
         openinghours TEXT,
         contact TEXT,
@@ -55,8 +63,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $sql = 'UPDATE entries SET
                 name=:name,
                 mtime=:mtime,
-                category=:category,
-                subcategory=:subcategory,
+                category1=:category1,
+                subcategory1=:subcategory1,
+                category2=:category2,
+                subcategory2=:subcategory2,
+                category3=:category3,
+                subcategory3=:subcategory3,
+                category4=:category4,
+                subcategory4=:subcategory4,
+                category5=:category5,
+                subcategory5=:subcategory5,
                 address=:address,
                 openinghours=:openinghours,
                 contact=:contact,
@@ -67,9 +83,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 WHERE id=:id';
         } else {
             $sql = 'INSERT INTO entries
-                (name, mtime, category, subcategory, address, openinghours, contact, lang, note, map, rev)
+                (name, mtime, category1, subcategory1, category2, subcategory2, 
+                category3, subcategory3, category4, subcategory4, category5, 
+                subcategory5, address, openinghours, contact, lang, note, map, rev)
                 VALUES
-                (:name, :mtime, :category, :subcategory, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
+                (:name, :mtime, :category1, :subcategory1, :category2, :subcategory2, 
+                :category3, :subcategory3, :category4, :subcategory4, :category5, 
+                :subcategory5, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
         }
     }
 
