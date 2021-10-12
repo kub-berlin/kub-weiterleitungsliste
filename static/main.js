@@ -307,9 +307,18 @@ var onMapInit = function(event) {
 };
 
 var onCategoryChange = function(event, state, app) {
-    var parts = app.getValue('category').split('--');
-    state.subcategory = parts[1];
+    var category = event.target.name;
+	var subcategory = 'subcategory' + category.slice(-1);
+	var parts = app.getValue(category).split('--');
+	if (parts[0] !== '') {
+		state[subcategory] = parts[1];
+	}
     return state;
+};
+
+var onAddCategory = function(event, state) {
+	state.categoryCount = state.categoryCount + 1;
+	return state;
 };
 
 
@@ -330,8 +339,12 @@ app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
-app.bindEvent('[name=category]', 'change', onCategoryChange);
-app.bindEvent('[name=category]', 'init', onCategoryChange);
+for (var i = 1; i <= MAX_CATEGORIES; i++) {
+	var category = 'category' + i;
+	app.bindEvent('[name=' + category + ']', 'change', onCategoryChange);
+	app.bindEvent('[name=' + category + ']', 'init', onCategoryChange);
+}
+app.bindEvent('.add-category', 'click', onAddCategory);
 app.bindEvent(window, 'popstate', onPopState);
 
 updateModel().then(function(model) {
