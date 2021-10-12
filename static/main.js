@@ -223,6 +223,12 @@ var onPopState = function(event, state) {
             newState._listScrollTop = scrollY;
         }
     }
+    for (var i = 1; i <= MAX_CATEGORIES; i++) {
+		if (newState['subcategory' + i] === '') {
+			delete newState['subcategory' + i];
+		}
+	}
+	newState.categoryCount = 1;
     document.title = getTitle(newState);
     return newState;
 };
@@ -243,9 +249,11 @@ var onSubmit = function(event, state, app) {
         data[key] = app.getValue(key);
     });
 
-    var categoryParts = app.getValue('category').split('--');
-    data.category = categoryParts[0];
-    data.subcategory = categoryParts[1] || app.getValue('subcategory');
+    for (var i = 1; i <= state.categoryCount; i++) {
+		var categoryParts = app.getValue('category' + i).split('--');
+		data['category' + i] = categoryParts[0];
+		data['subcategory' + i] = categoryParts[1] || app.getValue('subcategory' + i);
+	}
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
