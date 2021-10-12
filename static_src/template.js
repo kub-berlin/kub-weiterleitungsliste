@@ -45,9 +45,16 @@ var autourl = function(text) {
 };
 
 var checkCategoryMatch = function(entry, categories) {
-    var category = _.findByKey(categories, entry.category);
-    var subcategory = _.findByKey(category.children, entry.subcategory);
-    return subcategory.active;
+    for (var i = 1; i <= MAX_CATEGORIES; i++) {
+		var category = _.findByKey(categories, entry['category' + i]);
+		if (category) {
+			var subcategory = _.findByKey(category.children, entry['subcategory' + i]);
+			if (subcategory.active) {
+				return true;
+			}
+		}
+	}
+	return false;
 };
 
 var checkQueryMatch = function(entry, q) {
