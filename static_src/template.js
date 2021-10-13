@@ -297,8 +297,9 @@ var categoryFields = function(state, entry) {
 	}
 	
 	if (state.categoryCount < MAX_CATEGORIES) {
-		categoryFields.push(h('button', {'type': 'button', 'class': 'add-category'}, '+'));
-		categoryFields.push(' Weiteren Bereich/Rubrik hinzufügen');
+		categoryFields.push(h('label', {}, [h('button', 
+		{'type': 'button', 'class': 'add-category'}, '+'), 
+		' Weiteren Bereich/Rubrik hinzufügen']));
 	}
 	
 	return categoryFields;
