@@ -67,11 +67,7 @@ var checkQueryMatch = function(entry, q) {
 };
 
 var categoryClass = function(state, category) {
-    if (category) {
-		return 'c' + _.indexOfKey(state.categories, category, 'key');
-	} else {
-		return '';
-	}
+	return 'c' + _.indexOfKey(state.categories, category, 'key');
 };
 
 
