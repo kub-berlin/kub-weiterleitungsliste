@@ -82,14 +82,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 rev=:rev
                 WHERE id=:id';
         } else {
-            $sql = 'INSERT INTO entries
-                (name, mtime, category1, subcategory1, category2, subcategory2, 
-                category3, subcategory3, category4, subcategory4, category5, 
-                subcategory5, address, openinghours, contact, lang, note, map, rev)
-                VALUES
-                (:name, :mtime, :category1, :subcategory1, :category2, :subcategory2, 
-                :category3, :subcategory3, :category4, :subcategory4, :category5, 
-                :subcategory5, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
+            $sql = 'INSERT INTO entries (
+				name, 
+                mtime, 
+                category1, 
+                subcategory1, 
+                category2, 
+                subcategory2, 
+                category3, 
+                subcategory3, 
+                category4, 
+                subcategory4, 
+                category5, 
+                subcategory5, 
+                address, 
+                openinghours, 
+                contact, 
+                lang, 
+                note, 
+                map, 
+                rev
+                ) VALUES (
+                :name, 
+                :mtime, 
+                :category1, 
+                :subcategory1, 
+                :category2, 
+                :subcategory2, 
+                :category3, 
+                :subcategory3, 
+                :category4, 
+                :subcategory4, 
+                :category5, 
+                :subcategory5, 
+                :address, 
+                :openinghours, 
+                :contact, 
+                :lang, 
+                :note, 
+                :map, 
+                :rev
+                )';
         }
     }
 
