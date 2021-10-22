@@ -20,10 +20,6 @@ var updateModel = function() {
         };
 
         entries.forEach(function(entry) {
-            // FIXME: temporary compat code
-            entry.category = entry.categories[0][0];
-            entry.subcategory = entry.categories[0][1];
-
             entry.categories.forEach(function(c) {
                 var category = _.findByKey(model.categories, c[0]);
                 if (!category) {
