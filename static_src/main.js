@@ -54,12 +54,19 @@ var resize = function(event) {
     event.target.style.height = event.target.scrollHeight + event.target.offsetHeight + 'px';
 };
 
-var getPath = function() {
+var applyPath = function(state) {
     var path = location.hash.substr(2).split('/');
-    return {
+    var newState = Object.assign({}, state, {
         view: path[0] || 'list',
         id: path[1],
-    };
+    });
+    if (newState.view === 'edit') {
+        var entry = _.findByKey(newState.entries, newState.id, 'id')
+        newState.formCategories = entry.categories.slice();
+    } else {
+        newState.formCategories = [];
+    }
+    return newState;
 };
 
 var getTitle = function(state) {
@@ -110,7 +117,7 @@ var onFilterChange = function(event, state) {
 };
 
 var onNavigate = function(event, state) {
-    var newState = Object.assign({}, state, getPath());
+    var newState = applyPath(state);
     if (state.view !== newState.view) {
         if (newState.view === 'list') {
             newState.$scrollTop = state._listScrollTop;
@@ -132,7 +139,9 @@ var onSubmit = function(event, state, app) {
     var submit = event.target.querySelector('button');
     submit.disabled = true;
 
-    var data = {};
+    var data = {
+        categories: state.formCategories,
+    };
 
     // HACK: These inputs are not synced with the vdom.
     // They are overwritten as long as the vdom does not change.
@@ -140,13 +149,6 @@ var onSubmit = function(event, state, app) {
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
-
-    var categoryParts = app.getValue('category').split('--');
-    // FIXME: temporary compat code
-    data.categories = [[
-        categoryParts[0],
-        categoryParts[1] || app.getValue('subcategory'),
-    ]];
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
@@ -233,5 +235,5 @@ app.bindEvent('[name=category]', 'init', onCategoryChange);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
-    app.init(Object.assign({}, model, getPath()), document.body);
+    app.init(applyPath(model), document.body);
 });
