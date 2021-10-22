@@ -236,7 +236,7 @@ var form = function(state, entry) {
                 }, category.children.map(function(subcategory) {
                     return h('option', {
                         value: category.key + '--' + subcategory.key,
-                        selected: entry.subcategory === subcategory.key,
+                        selected: entry.categories[0][1] === subcategory.key,
                     }, subcategory.key);
                 }).concat([
                     h('option', {
