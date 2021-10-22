@@ -103,7 +103,7 @@ var onFilterChange = function(event, state) {
     return state;
 };
 
-var onPopState = function(event, state) {
+var onNavigate = function(event, state) {
     var newState = Object.assign({}, state, getPath());
     if (state.view !== newState.view) {
         if (newState.view === 'list') {
@@ -150,7 +150,7 @@ var onSubmit = function(event, state, app) {
     }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
-            return onPopState(null, Object.assign({}, state, model));
+            return onNavigate(null, Object.assign({}, state, model));
         });
     }).catch(function(err) {
         console.error(err);
@@ -171,7 +171,7 @@ var onDelete = function(event, state) {
         .then(updateModel)
         .then(function(model) {
             history.pushState(null, null, '#!list');
-            return onPopState(null, Object.assign({}, state, model));
+            return onNavigate(null, Object.assign({}, state, model));
         }).catch(function(err) {
             console.error(err);
         });
@@ -221,7 +221,7 @@ app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name=category]', 'change', onCategoryChange);
 app.bindEvent('[name=category]', 'init', onCategoryChange);
-app.bindEvent(window, 'popstate', onPopState);
+app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
     app.init(Object.assign({}, model, getPath()), document.body);
