@@ -190,22 +190,20 @@ var detail = function(state, entry) {
     }, children);
 };
 
-var field = function(name, value, required, type) {
+var field = function(name, value, params, type) {
     var f;
 
     if (type === 'textarea') {
-        f = h('textarea', {
+        f = h('textarea', Object.assign({
             name: name,
             value: value,
-            required: required,
-        });
+        }, params));
     } else {
-        f = h('input', {
+        f = h('input', Object.assign({
             name: name,
             value: value,
-            required: required,
             type: type || 'text',
-        });
+        }, params));
     }
 
     return h('label', {}, [LABELS[name], f]);
@@ -236,19 +234,19 @@ var form = function(state, entry) {
     ];
 
     if (state.subcategory === '') {
-        categoryFields.push(field('subcategory', '', true));
+        categoryFields.push(field('subcategory', '', {required: true}));
     }
 
     return h('form', {}, [
-        field('name', entry.name, true),
+        field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
-        field('address', entry.address, true, 'textarea'),
-        field('openinghours', entry.openinghours, false, 'textarea'),
-        field('contact', entry.contact, false, 'textarea'),
-        field('lang', entry.lang, false, 'textarea'),
-        field('note', entry.note, false, 'textarea'),
-        field('map', entry.map, false, 'url'),
-        field('rev', entry.rev, true, 'date'),
+        field('address', entry.address, {required: true}, 'textarea'),
+        field('openinghours', entry.openinghours, {}, 'textarea'),
+        field('contact', entry.contact, {}, 'textarea'),
+        field('lang', entry.lang, {}, 'textarea'),
+        field('note', entry.note, {}, 'textarea'),
+        field('map', entry.map, {}, 'url'),
+        field('rev', entry.rev, {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('button', {}, 'Speichern'),
