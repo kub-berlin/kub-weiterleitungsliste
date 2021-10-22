@@ -1,4 +1,9 @@
+.PHONY: all
 all: static/main.js static/style.css
+
+.PHONY: serve
+serve:
+	php -S localhost:8000
 
 static/main.js: static_src/main.js static_src/*.js node_modules
 	npx browserify $< -o $@
