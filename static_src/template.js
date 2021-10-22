@@ -226,8 +226,8 @@ var field = function(name, value, params, type) {
 var form = function(state, entry) {
     var categoryFields = [
         h('div', {'class': 'category-row'}, [
-            field('category', '', {list: 'list-categories', form: 'category-add-form'}),
-            field('subcategory', '', {list: 'list-subcategories', form: 'category-add-form'}),
+            field('category', '', {list: 'list-categories', autocomplete: 'off', form: 'category-add-form'}),
+            field('subcategory', '', {list: 'list-subcategories', autocomplete: 'off', form: 'category-add-form'}),
             h('button', {form: 'category-add-form'}, 'Hinzufügen'),
         ]),
         h('datalist', {id: 'list-categories'}, state.categories.map(function(category) {
