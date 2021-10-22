@@ -220,6 +220,14 @@ var onCategoryRemove = function(event, state, app) {
     return state;
 };
 
+var onCategoryChange = function(event, state, app) {
+    var category = app.getValue('category');
+    var el = document.querySelector('#list-subcategories');
+    Array.prototype.forEach.call(el.children, option => {
+        option.disabled = category && category !== option.dataset.category;
+    });
+};
+
 // main
 var app = createApp(template);
 
@@ -236,6 +244,7 @@ app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('#category-add-form', 'submit', onCategoryAdd);
 app.bindEvent('.category-remove', 'click', onCategoryRemove);
+app.bindEvent('[name="category"]', 'change', onCategoryChange);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
