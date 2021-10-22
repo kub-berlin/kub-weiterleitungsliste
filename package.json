@@ -8,5 +8,10 @@
     "sass-planifolia": "^0.6.0"
   },
   "author": "Tobias Bengfort <tobias.bengfort@posteo.de>",
-  "license": "GPL-2.0+"
+  "license": "GPL-2.0+",
+  "eslintConfig": {
+    "globals": {
+      "L": "readonly"
+    }
+  }
 }
