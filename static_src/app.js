@@ -76,7 +76,7 @@ module.exports = function(template) {
     };
 
     self.getValue = function(name) {
-        var el = element.querySelector('[name=' + name + ']');
+        var el = element.querySelector('[name="' + name + '"]');
         return el ? el.value : null;
     };
 
