@@ -248,14 +248,7 @@ var form = function(state, entry) {
         field('lang', entry.lang, false, 'textarea'),
         field('note', entry.note, false, 'textarea'),
         field('map', entry.map, false, 'url'),
-        h('label', {}, [LABELS.rev, h('input', {
-            name: 'rev',
-            value: entry.rev,
-            required: true,
-            type: 'date',
-            pattern: '\\d{4}-\\d{2}-\\d{2}',
-            placeholder: 'yyyy-mm-dd',
-        })]),
+        field('rev', entry.rev, true, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('button', {}, 'Speichern'),
