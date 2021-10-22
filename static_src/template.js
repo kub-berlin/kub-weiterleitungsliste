@@ -241,7 +241,7 @@ var form = function(state, entry) {
 
     return h('form', {}, [
         field('name', entry.name, true),
-        h('div', {}, categoryFields),
+        h('fieldset', {}, categoryFields),
         field('address', entry.address, true, 'textarea'),
         field('openinghours', entry.openinghours, false, 'textarea'),
         field('contact', entry.contact, false, 'textarea'),
