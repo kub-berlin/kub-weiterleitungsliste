@@ -236,7 +236,7 @@ var form = function(state, entry) {
         h('datalist', {id: 'list-subcategories'}, state.categories.map(function(category) {
             var options = [];
             category.children.forEach(function(subcategory) {
-                options.push(h('option', {}, subcategory.key));
+                options.push(h('option', {'data-category': category.key}, subcategory.key));
             });
             return options;
         })),
