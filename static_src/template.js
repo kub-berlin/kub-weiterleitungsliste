@@ -65,7 +65,7 @@ var error = function(msg) {
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
-        'class': 'list-item ' + (entry.category || '').replace(/ /g, '-'),
+        'class': 'list-item',
     }, [
         h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
         ' ',
@@ -185,9 +185,7 @@ var detail = function(state, entry) {
         ]));
     }
 
-    return h('div', {
-        'class': (entry.category || '').replace(/ /g, '-'),
-    }, children);
+    return h('div', {}, children);
 };
 
 var field = function(name, value, params, type) {
