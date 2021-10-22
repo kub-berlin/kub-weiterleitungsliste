@@ -8,3 +8,4 @@ static/style.css: static_src/style.scss static_src/scss/*.scss node_modules
 
 node_modules: package.json
 	npm install
+	touch node_modules
