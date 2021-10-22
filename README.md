@@ -8,8 +8,9 @@ If you want to use a different database, just edit the relevant parts in
 
 # development
 
-This repository contains pre-build static files. If you want to edit them, you
-will need node.js. Then run `make` to set up the development environment.
+This repository contains pre-build static files in `static/`. If you want to
+edit the code, you should edit the files in `static_src/`. Then run `make` to
+set up the development environment and build the files.
 
 Here are some things that might be interesting:
 
