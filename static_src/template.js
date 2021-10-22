@@ -226,9 +226,9 @@ var field = function(name, value, params, type) {
 var form = function(state, entry) {
     var categoryFields = [
         h('div', {'class': 'category-row'}, [
-            field('category', '', {list: 'list-categories'}),
-            field('subcategory', '', {list: 'list-subcategories'}),
-            h('button', {'class': 'category-add', type: 'button'}, 'Hinzufügen'),
+            field('category', '', {list: 'list-categories', form: 'category-add-form'}),
+            field('subcategory', '', {list: 'list-subcategories', form: 'category-add-form'}),
+            h('button', {form: 'category-add-form'}, 'Hinzufügen'),
         ]),
         h('datalist', {id: 'list-categories'}, state.categories.map(function(category) {
             return h('option', {}, category.key);
@@ -243,7 +243,7 @@ var form = function(state, entry) {
         categoryList(state, state.formCategories, true),
     ];
 
-    return h('form', {}, [
+    var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
         field('address', entry.address, {required: true}, 'textarea'),
@@ -261,6 +261,11 @@ var form = function(state, entry) {
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
             }, 'Abbrechen'),
         ]),
+    ]);
+
+    return h('div', {}, [
+        form,
+        h('form', {id: 'category-add-form'}),
     ]);
 };
 
