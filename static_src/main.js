@@ -20,6 +20,10 @@ var updateModel = function() {
         };
 
         entries.forEach(function(entry) {
+            // FIXME: temporary compat code
+            entry.category = entry.categories[0][0];
+            entry.subcategory = entry.categories[0][1];
+
             var category = _.findByKey(model.categories, entry.category);
             if (!category) {
                 category = {
@@ -136,8 +140,11 @@ var onSubmit = function(event, state, app) {
     });
 
     var categoryParts = app.getValue('category').split('--');
-    data.category = categoryParts[0];
-    data.subcategory = categoryParts[1] || app.getValue('subcategory');
+    // FIXME: temporary compat code
+    data.categories = [[
+        categoryParts[0],
+        categoryParts[1] || app.getValue('subcategory'),
+    ]];
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
