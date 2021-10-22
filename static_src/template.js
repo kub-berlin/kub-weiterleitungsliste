@@ -244,18 +244,18 @@ var form = function(state, entry) {
         h('div', {'class': 'category-row'}, [
             h('label', {}, [
                 LABELS.category + '/' + LABELS.subcategory,
-                h('select', {name: 'category-select'}, categoryOptions(state)),
+                h('select', {name: 'category-select', form: 'category-add-form'}, categoryOptions(state)),
             ]),
-            h('button', {'class': 'category-add', type: 'button'}, 'Hinzufügen'),
+            h('button', {'class': 'category-add', form: 'category-add-form'}, 'Hinzufügen'),
         ]),
         h('div', {'class': 'category-row', hidden: !state.categoryTextFieldsShown}, [
-            field('category', '', {}),
-            field('subcategory', '', {}),
+            field('category', '', {required: true, form: 'category-add-form'}),
+            field('subcategory', '', {required: true, form: 'category-add-form'}),
         ]),
         categoryList(state, state.formCategories, true),
     ];
 
-    return h('form', {}, [
+    var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
         field('address', entry.address, {required: true}, 'textarea'),
@@ -273,6 +273,11 @@ var form = function(state, entry) {
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
             }, 'Abbrechen'),
         ]),
+    ]);
+
+    return h('div', {}, [
+        form,
+        h('form', {id: 'category-add-form'}),
     ]);
 };
 

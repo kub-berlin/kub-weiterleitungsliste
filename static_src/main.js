@@ -219,14 +219,13 @@ var onCategoryChange = function(event, state, app) {
 };
 
 var onCategoryAdd = function(event, state, app) {
+    event.preventDefault();
     state.formCategories.push([
         app.getValue('category'),
         app.getValue('subcategory'),
     ]);
     state.categoryTextFieldsShown = false;
-    app.setValue('category-select', '');
-    app.setValue('category', '');
-    app.setValue('subcategory', '');
+    event.target.reset();
     return state;
 };
 
@@ -243,7 +242,7 @@ var app = createApp(template);
 app.bindEvent('.filter', 'change', onFilter);
 app.bindEvent('.filter', 'search', onFilter);
 app.bindEvent('.filter', 'keyup', onFilter);
-app.bindEvent('form', 'submit', onSubmit);
+app.bindEvent('#form', 'submit', onSubmit);
 app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'input', resize);
@@ -253,7 +252,7 @@ app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name="category-select"]', 'change', onCategoryChange);
 app.bindEvent('[name="category-select"]', 'init', onCategoryChange);
-app.bindEvent('.category-add', 'click', onCategoryAdd);
+app.bindEvent('#category-add-form', 'submit', onCategoryAdd);
 app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 
