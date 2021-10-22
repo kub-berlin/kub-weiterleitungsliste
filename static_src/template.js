@@ -38,22 +38,30 @@ var autourl = function(text) {
 };
 
 var checkCategoryMatch = function(entry, categories) {
-    var category = _.findByKey(categories, entry.category);
-    var subcategory = _.findByKey(category.children, entry.subcategory);
-    return subcategory.active;
+    return entry.categories.some(function(c) {
+        var category = _.findByKey(categories, c[0]);
+        var subcategory = _.findByKey(category.children, c[1]);
+        return subcategory.active;
+    });
 };
 
 var checkQueryMatch = function(entry, q) {
-    return !q || (!q.split(/\s/g).some(function(qq) {
-        return !Object.keys(entry).some(function(key) {
-            var s = entry[key];
-            return s && s.toLowerCase().indexOf(qq.toLowerCase()) !== -1;
+    return !q || (q.toLowerCase().split(/\s/g).every(function(qq) {
+        return Object.keys(entry).some(function(key) {
+            if (key === 'categories') {
+                return entry.categories.some(function(c) {
+                    return c[0].toLowerCase().includes(qq) || c[1].toLowerCase().includes(qq);
+                });
+            } else {
+                var s = entry[key];
+                return s && s.toLowerCase().includes(qq);
+            }
         });
     }));
 };
 
-var categoryClass = function(state, entry) {
-    return 'c' + _.indexOfKey(state.categories, entry.category, 'key');
+var categoryClass = function(state, c) {
+    return 'c' + _.indexOfKey(state.categories, c[0], 'key');
 };
 
 
@@ -62,14 +70,22 @@ var error = function(msg) {
     return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
+var categoryList = function(state, entry) {
+    return h('ul', {'class': 'category-list'}, entry.categories.map(function(c) {
+        return h('li', {}, [
+            h('span', {'class': 'category ' + categoryClass(state, c)}, c[0]),
+            ' ',
+            h('span', {'class': 'subcategory'}, c[1]),
+        ]);
+    }));
+};
+
 var listItem = function(state, entry) {
     return h('a', {
         href: '#!detail/' + entry.id,
         'class': 'list-item',
     }, [
-        h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
-        ' ',
-        h('span', {'class': 'subcategory'}, entry.subcategory),
+        categoryList(state, entry),
         h('h2', {'class': 'list-item__title'}, entry.name),
         h('span', {'class': 'lang'}, entry.lang),
     ]);
@@ -141,9 +157,7 @@ var detail = function(state, entry) {
 
     var children = [
         h('header', {'class': 'detail__header'}, [
-            h('span', {'class': 'category ' + categoryClass(state, entry)}, entry.category),
-            ' ',
-            h('span', {'class': 'subcategory'}, entry.subcategory),
+            categoryList(state, entry),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,

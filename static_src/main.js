@@ -24,21 +24,23 @@ var updateModel = function() {
             entry.category = entry.categories[0][0];
             entry.subcategory = entry.categories[0][1];
 
-            var category = _.findByKey(model.categories, entry.category);
-            if (!category) {
-                category = {
-                    key: entry.category,
-                    children: [],
-                };
-                model.categories.push(category);
-            }
+            entry.categories.forEach(function(c) {
+                var category = _.findByKey(model.categories, c[0]);
+                if (!category) {
+                    category = {
+                        key: c[0],
+                        children: [],
+                    };
+                    model.categories.push(category);
+                }
 
-            if (!_.findByKey(category.children, entry.subcategory)) {
-                category.children.push({
-                    key: entry.subcategory,
-                    active: true,
-                });
-            }
+                if (!_.findByKey(category.children, c[1])) {
+                    category.children.push({
+                        key: c[1],
+                        active: true,
+                    });
+                }
+            });
         });
 
         return model;
