@@ -13,8 +13,7 @@ function get_database()
         id INTEGER PRIMARY KEY,
         name TEXT,
         mtime INTEGER,
-        category TEXT,
-        subcategory TEXT,
+        categories TEXT,
         address TEXT,
         openinghours TEXT,
         contact TEXT,
@@ -32,6 +31,10 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $result = $db->query('SELECT * from entries')->fetchAll();
+    foreach ($result as $i => $row) {
+        $result[$i]['categories'] = json_decode($row['categories'], true);
+    }
+
     if ($_GET['format'] === 'csv') {
         header('Content-Type: text/csv');
         $out = fopen('php://output', 'w');
@@ -46,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     # FIXME: do server-side validation
 
     $data = json_decode(file_get_contents('php://input'), true);
+    $data['categories'] = json_encode($data['categories']);
 
     if (!array_key_exists('name', $data)) {
         $sql = 'DELETE from entries WHERE id=:id';
@@ -55,8 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $sql = 'UPDATE entries SET
                 name=:name,
                 mtime=:mtime,
-                category=:category,
-                subcategory=:subcategory,
+                categories=:categories,
                 address=:address,
                 openinghours=:openinghours,
                 contact=:contact,
@@ -67,9 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 WHERE id=:id';
         } else {
             $sql = 'INSERT INTO entries
-                (name, mtime, category, subcategory, address, openinghours, contact, lang, note, map, rev)
+                (name, mtime, categories, address, openinghours, contact, lang, note, map, rev)
                 VALUES
-                (:name, :mtime, :category, :subcategory, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
+                (:name, :mtime, :categories, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
         }
     }
 

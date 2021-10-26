@@ -20,21 +20,27 @@ var updateModel = function() {
         };
 
         entries.forEach(function(entry) {
-            var category = _.findByKey(model.categories, entry.category);
-            if (!category) {
-                category = {
-                    key: entry.category,
-                    children: [],
-                };
-                model.categories.push(category);
-            }
+            // FIXME: temporary compat code
+            entry.category = entry.categories[0][0];
+            entry.subcategory = entry.categories[0][1];
 
-            if (!_.findByKey(category.children, entry.subcategory)) {
-                category.children.push({
-                    key: entry.subcategory,
-                    active: true,
-                });
-            }
+            entry.categories.forEach(function(c) {
+                var category = _.findByKey(model.categories, c[0]);
+                if (!category) {
+                    category = {
+                        key: c[0],
+                        children: [],
+                    };
+                    model.categories.push(category);
+                }
+
+                if (!_.findByKey(category.children, c[1])) {
+                    category.children.push({
+                        key: c[1],
+                        active: true,
+                    });
+                }
+            });
         });
 
         return model;
@@ -136,8 +142,11 @@ var onSubmit = function(event, state, app) {
     });
 
     var categoryParts = app.getValue('category').split('--');
-    data.category = categoryParts[0];
-    data.subcategory = categoryParts[1] || app.getValue('subcategory');
+    // FIXME: temporary compat code
+    data.categories = [[
+        categoryParts[0],
+        categoryParts[1] || app.getValue('subcategory'),
+    ]];
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
