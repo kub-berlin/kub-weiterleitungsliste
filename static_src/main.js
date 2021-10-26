@@ -140,7 +140,7 @@ var onSubmit = function(event, state, app) {
     submit.disabled = true;
 
     var data = {
-        state.formCategories,
+        categories: state.formCategories,
     };
 
     // HACK: These inputs are not synced with the vdom.
@@ -211,7 +211,23 @@ var onMapInit = function(event) {
 
 var onCategoryChange = function(event, state, app) {
     var parts = app.getValue('category').split('--');
+    state.category = parts[0];
     state.subcategory = parts[1];
+    state.subcategory && state.formCategories.push([parts[0], parts[1]]);
+    app.setValue('category', '');
+    return state;
+};
+
+var onCategoryAdd = function(event, state, app) {
+    state.subcategory = app.getValue('subcategory');
+    state.formCategories.push([state.category, state.subcategory]);
+    return state;
+};
+
+var onCategoryRemove = function(event, state, app) {
+    var el = event.target.closest('li');
+    var i = Array.prototype.indexOf.call(el.parentElement.children, el);
+    state.formCategories.splice(i, 1);
     return state;
 };
 
@@ -231,7 +247,8 @@ app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name=category]', 'change', onCategoryChange);
-app.bindEvent('[name=category]', 'init', onCategoryChange);
+app.bindEvent('.category-remove', 'click', onCategoryRemove);
+app.bindEvent('.category-add', 'click', onCategoryAdd);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {

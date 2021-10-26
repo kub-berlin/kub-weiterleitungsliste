@@ -80,5 +80,11 @@ module.exports = function(template) {
         return el ? el.value : null;
     };
 
+    self.setValue = function(name, value) {
+        var el = element.querySelector('[name="' + name + '"]');
+        el.value = value;
+    };
+
+
     return self;
 };

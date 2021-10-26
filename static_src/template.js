@@ -70,12 +70,14 @@ var error = function(msg) {
     return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
-var categoryList = function(state, entry) {
-    return h('ul', {'class': 'category-list'}, entry.categories.map(function(c) {
+var categoryList = function(state, categories, button) {
+    return h('ul', {'class': 'category-list'}, categories.map(function(c) {
         return h('li', {}, [
             h('span', {'class': 'category ' + categoryClass(state, c)}, c[0]),
             ' ',
             h('span', {'class': 'subcategory'}, c[1]),
+            ' ',
+            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, 'Löschen'),
         ]);
     }));
 };
@@ -85,7 +87,7 @@ var listItem = function(state, entry) {
         href: '#!detail/' + entry.id,
         'class': 'list-item',
     }, [
-        categoryList(state, entry),
+        categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
         h('span', {'class': 'lang'}, entry.lang),
     ]);
@@ -157,7 +159,7 @@ var detail = function(state, entry) {
 
     var children = [
         h('header', {'class': 'detail__header'}, [
-            categoryList(state, entry),
+            categoryList(state, entry.categories),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
@@ -226,15 +228,13 @@ var form = function(state, entry) {
         h('label', {}, [
             LABELS.category + '/' + LABELS.subcategory,
             h('select', {
-                name: 'category',
-                required: true,
+                name: 'category'
             }, [h('option')].concat(state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
                 }, category.children.map(function(subcategory) {
                     return h('option', {
                         value: category.key + '--' + subcategory.key,
-                        selected: entry.subcategory === subcategory.key,
                     }, subcategory.key);
                 }).concat([
                     h('option', {
@@ -246,11 +246,13 @@ var form = function(state, entry) {
     ];
 
     if (state.subcategory === '') {
-        categoryFields.push(field('subcategory', '', {required: true}));
+        categoryFields.push(h('label', {}, [LABELS.category + ': ' + state.category + ' | Neue ' + LABELS.subcategory + ':',
+        h('input', {name: 'subcategory'})]), h('button', {'class': 'category-add', type: 'button'}, 'Hinzufügen'));
     }
 
     return h('form', {}, [
         field('name', entry.name, {required: true}),
+        categoryList(state, state.formCategories, true),
         h('fieldset', {}, categoryFields),
         field('address', entry.address, {required: true}, 'textarea'),
         field('openinghours', entry.openinghours, {}, 'textarea'),
