@@ -241,7 +241,12 @@ var form = function(state, entry) {
                         value: category.key + '--',
                     }, 'neu ...'),
                 ]));
-            }))),
+            })).concat([
+                    h('option', {
+                        value: '--',
+                    }, 'neu ...'),
+                ])
+            ),
         ]),
     ];
 
