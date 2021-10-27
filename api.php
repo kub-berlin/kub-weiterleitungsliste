@@ -49,11 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     # FIXME: do server-side validation
 
     $data = json_decode(file_get_contents('php://input'), true);
-    $data['categories'] = json_encode($data['categories']);
 
     if (!array_key_exists('name', $data)) {
         $sql = 'DELETE from entries WHERE id=:id';
     } else {
+        $data['categories'] = json_encode($data['categories']);
         $data['mtime'] = time();
         if (array_key_exists('id', $data)) {
             $sql = 'UPDATE entries SET
