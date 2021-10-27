@@ -46,3 +46,14 @@ button,
     line-height: inherit;
     padding: 0 0.2em;
 }
+
+.category-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr;
+    grid-gap: $padding;
+    align-items: end;
+}
+.category-row button {
+    font-size: 100%;
+    line-height: 1.8;
+}

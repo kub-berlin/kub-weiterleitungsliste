@@ -228,7 +228,7 @@ var form = function(state, entry) {
         h('label', {}, [
             LABELS.category + '/' + LABELS.subcategory,
             h('select', {
-                name: 'category'
+                name: 'categories'
             }, [h('option')].concat(state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
@@ -245,10 +245,13 @@ var form = function(state, entry) {
         ]),
     ];
 
-    if (state.subcategory === '') {
-        categoryFields.push(h('label', {}, [LABELS.category + ': ' + state.category + ' | Neue ' + LABELS.subcategory + ':',
-        h('input', {name: 'subcategory'})]), h('button', {'class': 'category-add', type: 'button'}, 'Hinzufügen'));
-    }
+    if (state.subcategory === '' || state.category === '') {
+        categoryFields.push(h('div', {'class': 'category-row'}, [
+            field('category', '', {value: state.category}),
+            field('subcategory', '', {}),
+            h('button', {'class': 'category-add', type: 'button'}, 'Hinzufügen'),
+        ]));
+    };
 
     return h('form', {}, [
         field('name', entry.name, {required: true}),
