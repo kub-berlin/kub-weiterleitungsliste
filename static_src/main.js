@@ -128,6 +128,8 @@ var onNavigate = function(event, state) {
             newState._listScrollTop = scrollY;
         }
     }
+    delete newState.category;
+    delete newState.subcategory;
     document.title = getTitle(newState);
     return newState;
 };
