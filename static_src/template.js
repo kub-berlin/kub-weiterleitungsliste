@@ -228,7 +228,8 @@ var form = function(state, entry) {
         h('label', {}, [
             LABELS.category + '/' + LABELS.subcategory,
             h('select', {
-                name: 'categories'
+                name: 'categories',
+                required: !state.formCategories.length
             }, [h('option')].concat(state.categories.map(function(category) {
                 return h('optgroup', {
                     label: category.key,
