@@ -223,7 +223,20 @@ var onCategoryChange = function(event, state, app) {
 var onCategoryAdd = function(event, state, app) {
     state.category = app.getValue('category');
     state.subcategory = app.getValue('subcategory');
-    state.category && state.subcategory && state.formCategories.push([state.category, state.subcategory]);
+    var categoryEl = document.querySelector('[name=category]');
+    var subcategoryEl = document.querySelector('[name=subcategory]');
+    if (state.category && state.subcategory) {
+        state.formCategories.push([state.category, state.subcategory]);
+    } else if (!state.category && state.subcategory) {
+            categoryEl.classList.add('invalid');
+            subcategoryEl.classList.remove('invalid');
+    } else if (state.category && !state.subcategory) {
+            subcategoryEl.classList.add('invalid');
+            categoryEl.classList.remove('invalid');
+    } else {
+        subcategoryEl.classList.add('invalid');
+        categoryEl.classList.add('invalid');
+    }
     return state;
 };
 
