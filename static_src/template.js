@@ -258,7 +258,7 @@ var form = function(state, entry) {
         field('lang', entry.lang, {}, 'textarea'),
         field('note', entry.note, {}, 'textarea'),
         field('map', entry.map, {}, 'url'),
-        field('rev', entry.rev, {required: true}, 'date'),
+        field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('button', {}, 'Speichern'),
