@@ -70,12 +70,14 @@ var error = function(msg) {
     return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
-var categoryList = function(state, categories) {
+var categoryList = function(state, categories, button) {
     return h('ul', {'class': 'category-list'}, categories.map(function(c) {
         return h('li', {}, [
             h('span', {'class': 'category ' + categoryClass(state, c)}, c[0]),
             ' ',
             h('span', {'class': 'subcategory'}, c[1]),
+            ' ',
+            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, 'Löschen'),
         ]);
     }));
 };
@@ -243,7 +245,7 @@ var form = function(state, entry) {
                 ]));
             }))),
         ]),
-        categoryList(state, state.formCategories),
+        categoryList(state, state.formCategories, true),
     ];
 
     if (state.subcategory === '') {

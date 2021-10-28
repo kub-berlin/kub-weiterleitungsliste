@@ -215,6 +215,12 @@ var onCategoryChange = function(event, state, app) {
     return state;
 };
 
+var onCategoryRemove = function(event, state, app) {
+    var el = event.target.closest('li');
+    var i = Array.prototype.indexOf.call(el.parentElement.children, el);
+    state.formCategories.splice(i, 1);
+    return state;
+};
 
 // main
 var app = createApp(template);
@@ -232,6 +238,7 @@ app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange
 app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name=category]', 'change', onCategoryChange);
 app.bindEvent('[name=category]', 'init', onCategoryChange);
+app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
