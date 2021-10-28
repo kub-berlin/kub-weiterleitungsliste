@@ -205,9 +205,10 @@ var onMapInit = function(event) {
     }
 };
 
-var onCategoryChange = function(event, state, app) {
-    var parts = app.getValue('category').split('--');
-    state.subcategory = parts[1];
+var onCategoryAdd = function(event, state, app) {
+    state.formCategories.push([app.getValue('category'), app.getValue('subcategory')]);
+    app.setValue('category', '');
+    app.setValue('subcategory', '');
     return state;
 };
 
@@ -232,8 +233,7 @@ app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
-app.bindEvent('[name=category]', 'change', onCategoryChange);
-app.bindEvent('[name=category]', 'init', onCategoryChange);
+app.bindEvent('.category-add', 'click', onCategoryAdd);
 app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 
