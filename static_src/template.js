@@ -70,8 +70,8 @@ var error = function(msg) {
     return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
-var categoryList = function(state, entry) {
-    return h('ul', {'class': 'category-list'}, entry.categories.map(function(c) {
+var categoryList = function(state, categories) {
+    return h('ul', {'class': 'category-list'}, categories.map(function(c) {
         return h('li', {}, [
             h('span', {'class': 'category ' + categoryClass(state, c)}, c[0]),
             ' ',
@@ -85,7 +85,7 @@ var listItem = function(state, entry) {
         href: '#!detail/' + entry.id,
         'class': 'list-item',
     }, [
-        categoryList(state, entry),
+        categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
         h('span', {'class': 'lang'}, entry.lang),
     ]);
@@ -157,7 +157,7 @@ var detail = function(state, entry) {
 
     var children = [
         h('header', {'class': 'detail__header'}, [
-            categoryList(state, entry),
+            categoryList(state, entry.categories),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
@@ -243,6 +243,7 @@ var form = function(state, entry) {
                 ]));
             }))),
         ]),
+        categoryList(state, state.formCategories),
     ];
 
     if (state.subcategory === '') {
