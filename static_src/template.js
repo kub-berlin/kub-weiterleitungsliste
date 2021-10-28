@@ -253,8 +253,8 @@ var form = function(state, entry) {
 
     if (state.subcategory === '' || state.category === '') {
         categoryFields.push(h('div', {'class': 'category-row'}, [
-            field('category', '', {value: state.category}),
-            field('subcategory', '', {}),
+            field('category', '', {value: state.category, required: !state.formCategories.length}),
+            field('subcategory', '', {required: !state.formCategories.length}),
             h('button', {'class': 'category-add', type: 'button'}, 'Hinzufügen'),
         ]));
     };

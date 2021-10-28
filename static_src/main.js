@@ -215,8 +215,10 @@ var onCategoryChange = function(event, state, app) {
     var parts = app.getValue('categories').split('--');
     state.category = parts[0];
     state.subcategory = parts[1];
-    state.subcategory && state.formCategories.push([parts[0], parts[1]]);
-    app.setValue('categories', '');
+    if (state.subcategory) {
+        state.formCategories.push([parts[0], parts[1]]);
+        app.setValue('categories', '');
+    } 
     return state;
 };
 
@@ -227,6 +229,7 @@ var onCategoryAdd = function(event, state, app) {
     var subcategoryEl = document.querySelector('[name=subcategory]');
     if (state.category && state.subcategory) {
         state.formCategories.push([state.category, state.subcategory]);
+        app.setValue('categories', '');
     } else if (!state.category && state.subcategory) {
             categoryEl.classList.add('invalid');
             subcategoryEl.classList.remove('invalid');
