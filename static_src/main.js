@@ -137,7 +137,7 @@ var onSubmit = function(event, state, app) {
     }
 
     // prevent double-submit
-    var submit = event.target.querySelector('button');
+    var submit = event.target.querySelector('nav button');
     submit.disabled = true;
 
     var data = {
@@ -211,8 +211,22 @@ var onMapInit = function(event) {
 };
 
 var onCategoryChange = function(event, state, app) {
-    var parts = app.getValue('category').split('--');
-    state.subcategory = parts[1];
+    var parts = app.getValue('category-select').split('--');
+    app.setValue('category', parts[0]);
+    app.setValue('subcategory', parts[1] || '');
+    state.categoryTextFieldsShown = parts[1] === '';
+    return state;
+};
+
+var onCategoryAdd = function(event, state, app) {
+    state.formCategories.push([
+        app.getValue('category'),
+        app.getValue('subcategory'),
+    ]);
+    state.categoryTextFieldsShown = false;
+    app.setValue('category-select', '');
+    app.setValue('category', '');
+    app.setValue('subcategory', '');
     return state;
 };
 
@@ -237,8 +251,9 @@ app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
-app.bindEvent('[name=category]', 'change', onCategoryChange);
-app.bindEvent('[name=category]', 'init', onCategoryChange);
+app.bindEvent('[name="category-select"]', 'change', onCategoryChange);
+app.bindEvent('[name="category-select"]', 'init', onCategoryChange);
+app.bindEvent('.category-add', 'click', onCategoryAdd);
 app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 

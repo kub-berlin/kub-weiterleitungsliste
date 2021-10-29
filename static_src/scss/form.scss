@@ -44,3 +44,17 @@ button {
     line-height: inherit;
     padding: 0 0.2em;
 }
+
+.category-row {
+    display: flex;
+    gap: $padding;
+    align-items: flex-end;
+}
+.category-row label {
+    flex-grow: 1;
+}
+.category-row button {
+    width: auto;
+    font-size: 100%;
+    line-height: 1.8;
+}
