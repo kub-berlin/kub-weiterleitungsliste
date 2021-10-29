@@ -131,6 +131,11 @@ var onNavigate = function(event, state) {
 var onSubmit = function(event, state, app) {
     event.preventDefault();
 
+    if (state.formCategories.length === 0) {
+        alert('Bitte füge eine Rubrik hinzu!');
+        return;
+    }
+
     // prevent double-submit
     var submit = event.target.querySelector('button');
     submit.disabled = true;
