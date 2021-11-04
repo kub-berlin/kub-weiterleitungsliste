@@ -21,9 +21,7 @@ input[type="checkbox"] {
 }
 
 .button,
-button,
-[type=button],
-[type=submit] {
+button {
     display: block;
     width: 100%;
     line-height: 2;
