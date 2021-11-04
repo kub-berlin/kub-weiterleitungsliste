@@ -20,6 +20,10 @@ input[type="checkbox"] {
     width: auto;
 }
 
+select {
+    height: calc(2.4em + 2px);
+}
+
 .button,
 button {
     display: block;
@@ -43,4 +47,18 @@ button {
     width: auto;
     line-height: inherit;
     padding: 0 0.2em;
+}
+
+.category-row {
+    display: flex;
+    gap: $padding;
+    align-items: flex-end;
+}
+.category-row label {
+    flex-grow: 1;
+}
+.category-row button {
+    width: auto;
+    font-size: 100%;
+    line-height: 1.8;
 }
