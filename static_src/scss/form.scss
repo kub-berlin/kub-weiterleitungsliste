@@ -20,6 +20,10 @@ input[type="checkbox"] {
     width: auto;
 }
 
+select {
+    height: calc(2.4em + 2px);
+}
+
 .button,
 button {
     display: block;
