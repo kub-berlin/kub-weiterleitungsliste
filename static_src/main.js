@@ -140,8 +140,9 @@ var onSubmit = function(event, state, app) {
     var submit = event.target.querySelector('nav button');
     submit.disabled = true;
 
+    var collator = new Intl.Collator('de');
     var data = {
-        categories: state.formCategories,
+        categories: state.formCategories.slice().sort(collator.compare),
     };
 
     // HACK: These inputs are not synced with the vdom.
