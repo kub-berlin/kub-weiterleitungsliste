@@ -241,10 +241,11 @@ input[type="checkbox"] {
   padding: 0;
   width: auto; }
 
+select {
+  height: calc(2.4em + 2px); }
+
 .button,
-button,
-[type=button],
-[type=submit] {
+button {
   display: block;
   width: 100%;
   line-height: 2;
@@ -252,9 +253,7 @@ button,
   margin-bottom: 1em; }
   @media print {
     .button,
-    button,
-    [type=button],
-    [type=submit] {
+    button {
       display: none; } }
 .button--secondary {
   border-color: #666;
@@ -284,6 +283,19 @@ button,
   width: auto;
   line-height: inherit;
   padding: 0 0.2em; }
+
+.category-row {
+  display: flex;
+  gap: 0.5em;
+  align-items: flex-end; }
+
+.category-row label {
+  flex-grow: 1; }
+
+.category-row button {
+  width: auto;
+  font-size: 100%;
+  line-height: 1.8; }
 
 h2 {
   font-size: 150%;

@@ -85,6 +85,11 @@ module.exports = function(template) {
         return el ? el.value : null;
     };
 
+    self.setValue = function(name, value) {
+        var el = element.querySelector('[name="' + name + '"]');
+        el.value = value;
+    };
+
     return self;
 };
 
@@ -120,10 +125,6 @@ var updateModel = function() {
         };
 
         entries.forEach(function(entry) {
-            // FIXME: temporary compat code
-            entry.category = entry.categories[0][0];
-            entry.subcategory = entry.categories[0][1];
-
             entry.categories.forEach(function(c) {
                 var category = _.findByKey(model.categories, c[0]);
                 if (!category) {
@@ -154,12 +155,19 @@ var resize = function(event) {
     event.target.style.height = event.target.scrollHeight + event.target.offsetHeight + 'px';
 };
 
-var getPath = function() {
+var applyPath = function(state) {
     var path = location.hash.substr(2).split('/');
-    return {
+    var newState = Object.assign({}, state, {
         view: path[0] || 'list',
         id: path[1],
-    };
+    });
+    if (newState.view === 'edit') {
+        var entry = _.findByKey(newState.entries, newState.id, 'id')
+        newState.formCategories = entry.categories.slice();
+    } else {
+        newState.formCategories = [];
+    }
+    return newState;
 };
 
 var getTitle = function(state) {
@@ -210,7 +218,7 @@ var onFilterChange = function(event, state) {
 };
 
 var onNavigate = function(event, state) {
-    var newState = Object.assign({}, state, getPath());
+    var newState = applyPath(state);
     if (state.view !== newState.view) {
         if (newState.view === 'list') {
             newState.$scrollTop = state._listScrollTop;
@@ -228,11 +236,19 @@ var onNavigate = function(event, state) {
 var onSubmit = function(event, state, app) {
     event.preventDefault();
 
+    if (state.formCategories.length === 0) {
+        alert('Bitte füge eine Rubrik hinzu!');
+        return;
+    }
+
     // prevent double-submit
-    var submit = event.target.querySelector('button');
+    var submit = event.target.querySelector('nav button');
     submit.disabled = true;
 
-    var data = {};
+    var collator = new Intl.Collator('de');
+    var data = {
+        categories: state.formCategories.slice().sort(collator.compare),
+    };
 
     // HACK: These inputs are not synced with the vdom.
     // They are overwritten as long as the vdom does not change.
@@ -240,13 +256,6 @@ var onSubmit = function(event, state, app) {
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
-
-    var categoryParts = app.getValue('category').split('--');
-    // FIXME: temporary compat code
-    data.categories = [[
-        categoryParts[0],
-        categoryParts[1] || app.getValue('subcategory'),
-    ]];
 
     if (app.getValue('id')) {
         data.id = app.getValue('id');
@@ -308,11 +317,30 @@ var onMapInit = function(event) {
 };
 
 var onCategoryChange = function(event, state, app) {
-    var parts = app.getValue('category').split('--');
-    state.subcategory = parts[1];
+    var parts = app.getValue('category-select').split('--');
+    app.setValue('category', parts[0]);
+    app.setValue('subcategory', parts[1] || '');
+    state.categoryTextFieldsShown = parts[1] === '';
     return state;
 };
 
+var onCategoryAdd = function(event, state, app) {
+    event.preventDefault();
+    state.formCategories.push([
+        app.getValue('category'),
+        app.getValue('subcategory'),
+    ]);
+    state.categoryTextFieldsShown = false;
+    event.target.reset();
+    return state;
+};
+
+var onCategoryRemove = function(event, state, app) {
+    var el = event.target.closest('li');
+    var i = Array.prototype.indexOf.call(el.parentElement.children, el);
+    state.formCategories.splice(i, 1);
+    return state;
+};
 
 // main
 var app = createApp(template);
@@ -320,7 +348,7 @@ var app = createApp(template);
 app.bindEvent('.filter', 'change', onFilter);
 app.bindEvent('.filter', 'search', onFilter);
 app.bindEvent('.filter', 'keyup', onFilter);
-app.bindEvent('form', 'submit', onSubmit);
+app.bindEvent('#form', 'submit', onSubmit);
 app.bindEvent('.delete', 'click', onDelete);
 app.bindEvent('textarea', 'init', resize);
 app.bindEvent('textarea', 'input', resize);
@@ -328,12 +356,14 @@ app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
 app.bindEvent('.map', 'init', onMapInit);
-app.bindEvent('[name=category]', 'change', onCategoryChange);
-app.bindEvent('[name=category]', 'init', onCategoryChange);
+app.bindEvent('[name="category-select"]', 'change', onCategoryChange);
+app.bindEvent('[name="category-select"]', 'init', onCategoryChange);
+app.bindEvent('#category-add-form', 'submit', onCategoryAdd);
+app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
-    app.init(Object.assign({}, model, getPath()), document.body);
+    app.init(applyPath(model), document.body);
 });
 
 },{"./app":2,"./helpers":3,"./template":5}],5:[function(require,module,exports){
@@ -409,12 +439,14 @@ var error = function(msg) {
     return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
 };
 
-var categoryList = function(state, entry) {
-    return h('ul', {'class': 'category-list'}, entry.categories.map(function(c) {
+var categoryList = function(state, categories, button) {
+    return h('ul', {'class': 'category-list'}, categories.map(function(c) {
         return h('li', {}, [
             h('span', {'class': 'category ' + categoryClass(state, c)}, c[0]),
             ' ',
             h('span', {'class': 'subcategory'}, c[1]),
+            ' ',
+            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, 'Löschen'),
         ]);
     }));
 };
@@ -424,7 +456,7 @@ var listItem = function(state, entry) {
         href: '#!detail/' + entry.id,
         'class': 'list-item',
     }, [
-        categoryList(state, entry),
+        categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
         h('span', {'class': 'lang'}, entry.lang),
     ]);
@@ -496,7 +528,7 @@ var detail = function(state, entry) {
 
     var children = [
         h('header', {'class': 'detail__header'}, [
-            categoryList(state, entry),
+            categoryList(state, entry.categories),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
@@ -560,35 +592,43 @@ var field = function(name, value, params, type) {
     return h('label', {}, [LABELS[name], f]);
 };
 
+var categoryOptions = function(state) {
+    return [
+        h('option'),
+        state.categories.map(function(category) {
+            return h('optgroup', {
+                label: category.key,
+            }, category.children.map(function(subcategory) {
+                return h('option', {
+                    value: category.key + '--' + subcategory.key,
+                }, subcategory.key);
+            }).concat([
+                h('option', {
+                    value: category.key + '--',
+                }, 'neu ...'),
+            ]));
+        }),
+        h('option', {value: '--'}, 'neu ...'),
+    ];
+};
+
 var form = function(state, entry) {
     var categoryFields = [
-        h('label', {}, [
-            LABELS.category + '/' + LABELS.subcategory,
-            h('select', {
-                name: 'category',
-                required: true,
-            }, [h('option')].concat(state.categories.map(function(category) {
-                return h('optgroup', {
-                    label: category.key,
-                }, category.children.map(function(subcategory) {
-                    return h('option', {
-                        value: category.key + '--' + subcategory.key,
-                        selected: entry.subcategory === subcategory.key,
-                    }, subcategory.key);
-                }).concat([
-                    h('option', {
-                        value: category.key + '--',
-                    }, 'neu ...'),
-                ]));
-            }))),
+        h('div', {'class': 'category-row'}, [
+            h('label', {}, [
+                LABELS.category + '/' + LABELS.subcategory,
+                h('select', {name: 'category-select', form: 'category-add-form'}, categoryOptions(state)),
+            ]),
+            h('button', {'class': 'category-add', form: 'category-add-form'}, 'Hinzufügen'),
         ]),
+        h('div', {'class': 'category-row', hidden: !state.categoryTextFieldsShown}, [
+            field('category', '', {required: true, form: 'category-add-form'}),
+            field('subcategory', '', {required: true, form: 'category-add-form'}),
+        ]),
+        categoryList(state, state.formCategories, true),
     ];
 
-    if (state.subcategory === '') {
-        categoryFields.push(field('subcategory', '', {required: true}));
-    }
-
-    return h('form', {}, [
+    var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
         field('address', entry.address, {required: true}, 'textarea'),
@@ -606,6 +646,11 @@ var form = function(state, entry) {
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
             }, 'Abbrechen'),
         ]),
+    ]);
+
+    return h('div', {}, [
+        form,
+        h('form', {id: 'category-add-form'}),
     ]);
 };
 
