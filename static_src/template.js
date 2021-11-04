@@ -109,7 +109,7 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
-        h('a', {'class': 'button', href: '#!create'}, 'Hinzufügen'),
+        h('a', {'class': 'button button--block', href: '#!create'}, 'Hinzufügen'),
     ];
 };
 
@@ -195,9 +195,9 @@ var detail = function(state, entry) {
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {'class': 'delete'}, 'Löschen'),
-            h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
+            h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, 'Bearbeiten'),
+            h('button', {'class': 'delete button--block'}, 'Löschen'),
+            h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, 'Zurück'),
         ]));
     }
 
@@ -271,9 +271,9 @@ var form = function(state, entry) {
         field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
-            h('button', {}, 'Speichern'),
+            h('button', {'class': 'button--block'}, 'Speichern'),
             h('a', {
-                'class': 'back button button--secondary',
+                'class': 'back button button--block button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
             }, 'Abbrechen'),
         ]),

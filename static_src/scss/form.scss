@@ -24,8 +24,7 @@ select {
     height: calc(2.4em + 2px);
 }
 
-.button,
-button {
+.button--block {
     display: block;
     width: 100%;
     line-height: 2;
@@ -53,12 +52,9 @@ button {
     display: flex;
     gap: $padding;
     align-items: flex-end;
+    margin: 0 0 $spacer;
 }
 .category-row label {
     flex-grow: 1;
-}
-.category-row button {
-    width: auto;
-    font-size: 100%;
-    line-height: 1.8;
+    margin: 0;
 }
