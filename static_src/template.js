@@ -224,19 +224,23 @@ var field = function(name, value, params, type) {
 };
 
 var categoryOptions = function(state) {
-    return [h('option')].concat(state.categories.map(function(category) {
-        return h('optgroup', {
-            label: category.key,
-        }, category.children.map(function(subcategory) {
-            return h('option', {
-                value: category.key + '--' + subcategory.key,
-            }, subcategory.key);
-        }).concat([
-            h('option', {
-                value: category.key + '--',
-            }, 'neu ...'),
-        ]));
-    }));
+    return [
+        h('option'),
+        state.categories.map(function(category) {
+            return h('optgroup', {
+                label: category.key,
+            }, category.children.map(function(subcategory) {
+                return h('option', {
+                    value: category.key + '--' + subcategory.key,
+                }, subcategory.key);
+            }).concat([
+                h('option', {
+                    value: category.key + '--',
+                }, 'neu ...'),
+            ]));
+        }),
+        h('option', {value: '--'}, 'neu ...'),
+    ];
 };
 
 var form = function(state, entry) {
