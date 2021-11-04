@@ -223,27 +223,28 @@ var field = function(name, value, params, type) {
     return h('label', {}, [LABELS[name], f]);
 };
 
+var categoryOptions = function(state, entry) {
+    return [h('option')].concat(state.categories.map(function(category) {
+        return h('optgroup', {
+            label: category.key,
+        }, category.children.map(function(subcategory) {
+            return h('option', {
+                value: category.key + '--' + subcategory.key,
+                selected: entry.categories[0][1] === subcategory.key,
+            }, subcategory.key);
+        }).concat([
+            h('option', {
+                value: category.key + '--',
+            }, 'neu ...'),
+        ]));
+    }));
+};
+
 var form = function(state, entry) {
     var categoryFields = [
         h('label', {}, [
             LABELS.category + '/' + LABELS.subcategory,
-            h('select', {
-                name: 'category',
-                required: true,
-            }, [h('option')].concat(state.categories.map(function(category) {
-                return h('optgroup', {
-                    label: category.key,
-                }, category.children.map(function(subcategory) {
-                    return h('option', {
-                        value: category.key + '--' + subcategory.key,
-                        selected: entry.categories[0][1] === subcategory.key,
-                    }, subcategory.key);
-                }).concat([
-                    h('option', {
-                        value: category.key + '--',
-                    }, 'neu ...'),
-                ]));
-            }))),
+            h('select', {name: 'category', required: true}, categoryOptions(state, entry)),
         ]),
         categoryList(state, state.formCategories, true),
     ];
