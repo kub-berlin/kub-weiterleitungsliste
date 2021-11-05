@@ -127,14 +127,14 @@ var categoryFilters = function(state) {
         }, [
             category.key,
             ' ',
-            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
+            h('button', {'class': 'js-all button--secondary button--small', 'data-category': category.key}, 'alle'),
             ' ',
-            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small', 'data-category': category.key}, 'keins'),
             h('ul', {}, category.children.map(function(subcategory) {
                 return h('li', {}, [h('label', {}, [
                     h('input', {
                         type: 'checkbox',
-                        name: subcategory.key,
+                        name: category.key + '--' + subcategory.key,
                         checked: subcategory.active,
                     }),
                     ' ',

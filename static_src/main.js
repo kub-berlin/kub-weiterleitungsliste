@@ -93,9 +93,8 @@ var onFilter = function(event, state) {
 
 var onFilterAll = function(event, state) {
     event.preventDefault();
-    var key = event.target.parentElement.dataset.name;
-    var category = _.findByKey(state.categories, key);
-    var cats = category ? [category] : state.categories;
+    var key = event.target.dataset.category;
+    var cats = key ? [_.findByKey(state.categories, key)] : state.categories;
     cats.forEach(function(cat) {
         cat.children.forEach(function(subcategory) {
             subcategory.active = event.target.classList.contains('js-all');
@@ -105,9 +104,8 @@ var onFilterAll = function(event, state) {
 };
 
 var onFilterChange = function(event, state) {
-    var subkey = event.target.name;
-    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = _.findByKey(_.findByKey(state.categories, key).children, subkey);
+    var parts = event.target.name.split('--');
+    var subcategory = _.findByKey(_.findByKey(state.categories, parts[0]).children, parts[1]);
     subcategory.active = event.target.checked;
     return state;
 };
