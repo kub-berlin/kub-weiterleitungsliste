@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-$db = new PDO('sqlite:db.sqlite');
+$db = new PDO('sqlite:begleitung.sqlite');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -13,9 +13,10 @@ try {
         name TEXT,
         mtime INTEGER,
         categories TEXT,
-        address TEXT,
-        openinghours TEXT,
-        contact TEXT,
+        gender TEXT,
+        email TEXT,
+        phone TEXT,
+        availability TEXT,
         lang TEXT,
         note TEXT,
         map TEXT,
@@ -30,9 +31,9 @@ try {
         unset($row['subcategory']);
 
         $sql = 'INSERT INTO tmp
-            (id, name, mtime, categories, address, openinghours, contact, lang, note, map, rev)
+            (id, name, mtime, categories, gender, email, phone, availability, lang, note, map, rev)
             VALUES
-            (:id, :name, :mtime, :categories, :address, :openinghours, :contact, :lang, :note, :map, :rev)';
+            (:id, :name, :mtime, :categories, :gender, :email, :phone, :availability, :lang, :note, :map, :rev)';
         $stmt = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
         $stmt->execute($row);
     }
