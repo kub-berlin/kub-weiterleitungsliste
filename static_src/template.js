@@ -114,24 +114,23 @@ var list = function(state) {
 };
 
 var categoryFilters = function(state) {
-    return h('ul', {'class': 'category-filters'}, [
-        h('li', {}, [
-            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
+    return h('div', {'class': 'category-filters'}, [
+        h('fieldset', {}, [
+            h('button', {'class': 'js-all button--secondary button--small', type: 'button'}, 'alle'),
             ' ',
-            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small', type: 'button'}, 'keins'),
         ]),
     ].concat(state.categories.map(function(category, i) {
-        return h('li', {
-            'class': 'c' + i,
-            'data-name': category.key,
-        }, [
-            category.key,
-            ' ',
-            h('button', {'class': 'js-all button--secondary button--small', 'data-category': category.key}, 'alle'),
-            ' ',
-            h('button', {'class': 'js-none button--secondary button--small', 'data-category': category.key}, 'keins'),
-            h('ul', {}, category.children.map(function(subcategory) {
-                return h('li', {}, [h('label', {}, [
+        return h('fieldset', {}, [
+            h('legend', {}, [
+                category.key,
+                ' ',
+                h('button', {'class': 'js-all button--secondary button--small', type: 'button', 'data-category': category.key}, 'alle'),
+                ' ',
+                h('button', {'class': 'js-none button--secondary button--small', type: 'button', 'data-category': category.key}, 'keins'),
+            ]),
+            category.children.map(function(subcategory) {
+                return h('label', {}, [
                     h('input', {
                         type: 'checkbox',
                         name: category.key + '--' + subcategory.key,
@@ -139,8 +138,8 @@ var categoryFilters = function(state) {
                     }),
                     ' ',
                     subcategory.key,
-                ])]);
-            })),
+                ]);
+            }),
         ]);
     })));
 };
