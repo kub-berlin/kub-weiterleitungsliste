@@ -3,6 +3,9 @@
         font-weight: bold;
     }
     label {
+        display: flex;
+        gap: 0.2em;
+        align-items: baseline;
         margin: 0;
     }
 }
