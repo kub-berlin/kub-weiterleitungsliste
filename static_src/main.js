@@ -57,7 +57,7 @@ var applyPath = function(state) {
         id: path[1],
     });
     if (newState.view === 'edit') {
-        var entry = _.findByKey(newState.entries, newState.id, 'id')
+        var entry = _.findByKey(newState.entries, newState.id, 'id');
         newState.formCategories = entry.categories.slice();
     } else {
         newState.formCategories = [];
