@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $result[$i]['categories'] = json_decode($row['categories'], true);
     }
 
-    if ($_GET['format'] === 'csv') {
+    if (isset($_GET['format']) && $_GET['format'] === 'csv') {
         header('Content-Type: text/csv');
         $out = fopen('php://output', 'w');
         foreach ($result as $row) {
