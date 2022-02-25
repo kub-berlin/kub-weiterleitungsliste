@@ -176,11 +176,9 @@ var detail = function(state, entry) {
             h('span', {'class': 'lang'}, entry.lang),
             clientToggle,
         ]),
-        h('h3', {}, LABELS.address),
-        h('p', {'class': 'address'}, autourl(entry.address)),
     ];
 
-    ['openinghours'].forEach(function(key) {
+    ['address', 'openinghours'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
