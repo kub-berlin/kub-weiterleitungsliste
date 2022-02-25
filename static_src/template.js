@@ -15,6 +15,18 @@ var LABELS = {
     note: 'Kommentar',
     map: 'Karte (Geo-URI)',
     rev: 'Stand der Info',
+
+    _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+    _add: 'Hinzufügen',
+    _edit: 'Bearbeiten',
+    _delete: 'Löschen',
+    _save: 'Speichern',
+    _back: 'Zurück',
+    _cancel: 'Abbrechen',
+    _error: 'Fehler',
+    _all: 'alle',
+    _none: 'keins',
+    _new: 'neu…',
 };
 
 var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9./_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/;
@@ -67,7 +79,7 @@ var categoryClass = function(state, c) {
 
 // templates
 var error = function(msg) {
-    return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
+    return h('h2', {'class': 'error'}, LABELS._error + ': ' + msg);
 };
 
 var categoryList = function(state, categories, button) {
@@ -77,7 +89,7 @@ var categoryList = function(state, categories, button) {
             ' ',
             h('span', {'class': 'subcategory'}, c[1]),
             ' ',
-            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, 'Löschen'),
+            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, LABELS._delete),
         ]);
     }));
 };
@@ -98,7 +110,7 @@ var list = function(state) {
         h('input', {
             'class': 'filter',
             type: 'search',
-            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+            placeholder: LABELS._search,
             value: state.q,
         }),
         h('ul', {}, state.entries.filter(function(entry) {
@@ -109,25 +121,25 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
-        h('a', {'class': 'button button--block', href: '#!create'}, 'Hinzufügen'),
+        h('a', {'class': 'button button--block', href: '#!create'}, LABELS._add),
     ];
 };
 
 var categoryFilters = function(state) {
     return h('div', {'class': 'category-filters'}, [
         h('fieldset', {}, [
-            h('button', {'class': 'js-all button--secondary button--small', type: 'button'}, 'alle'),
+            h('button', {'class': 'js-all button--secondary button--small', type: 'button'}, LABELS._all),
             ' ',
-            h('button', {'class': 'js-none button--secondary button--small', type: 'button'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small', type: 'button'}, LABELS._none),
         ]),
     ].concat(state.categories.map(function(category, i) {
         return h('fieldset', {}, [
             h('legend', {}, [
                 category.key,
                 ' ',
-                h('button', {'class': 'js-all button--secondary button--small', type: 'button', 'data-category': category.key}, 'alle'),
+                h('button', {'class': 'js-all button--secondary button--small', type: 'button', 'data-category': category.key}, LABELS._all),
                 ' ',
-                h('button', {'class': 'js-none button--secondary button--small', type: 'button', 'data-category': category.key}, 'keins'),
+                h('button', {'class': 'js-none button--secondary button--small', type: 'button', 'data-category': category.key}, LABELS._none),
             ]),
             category.children.map(function(subcategory) {
                 return h('label', {}, [
@@ -194,9 +206,9 @@ var detail = function(state, entry) {
         }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
 
         children.push(h('nav', {}, [
-            h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {'class': 'delete button--block'}, 'Löschen'),
-            h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, 'Zurück'),
+            h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
+            h('button', {'class': 'delete button--block'}, LABELS._delete),
+            h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
         ]));
     }
 
@@ -238,7 +250,7 @@ var categoryOptions = function(state) {
                 }, 'neu ...'),
             ]));
         }),
-        h('option', {value: '--'}, 'neu ...'),
+        h('option', {value: '--'}, LABELS._new),
     ];
 };
 
@@ -249,7 +261,7 @@ var form = function(state, entry) {
                 LABELS.category + '/' + LABELS.subcategory,
                 h('select', {name: 'category-select', form: 'category-add-form'}, categoryOptions(state)),
             ]),
-            h('button', {'class': 'category-add', form: 'category-add-form'}, 'Hinzufügen'),
+            h('button', {'class': 'category-add', form: 'category-add-form'}, LABELS._add),
         ]),
         h('div', {'class': 'category-row', hidden: !state.categoryTextFieldsShown}, [
             field('category', '', {required: true, form: 'category-add-form'}),
@@ -270,11 +282,11 @@ var form = function(state, entry) {
         field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
-            h('button', {'class': 'button--block'}, 'Speichern'),
+            h('button', {'class': 'button--block'}, LABELS._save),
             h('a', {
                 'class': 'back button button--block button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
-            }, 'Abbrechen'),
+            }, LABELS._cancel),
         ]),
     ]);
 
