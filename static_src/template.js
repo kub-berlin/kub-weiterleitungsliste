@@ -17,7 +17,7 @@ var LABELS = {
     note: 'Kommentar',
     contact: 'Kontakt',
 
-    _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+    _search: 'Suchen in allen Feldern',
     _add: 'Hinzufügen',
     _edit: 'Bearbeiten',
     _delete: 'Löschen',
