@@ -6,15 +6,16 @@ var _ = require('./helpers');
 // constants
 var LOCALE = 'de-DE';
 var LABELS = {
-    name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
-    address: 'Kontaktdaten',
-    openinghours: 'Öffnungszeiten',
-    contact: 'Ansprechpartner_in',
-    lang: 'Sprachkenntnisse',
+    name: 'Beschreibung',
+    city: 'Stadt',
+    rooms: 'Zimmer',
+    people: 'Wie viele Personen',
+    duration: 'max. Dauer',
+    lang: 'Sprachen',
     note: 'Kommentar',
-    rev: 'Stand der Info',
+    contact: 'Kontakt',
 
     _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
     _add: 'Hinzufügen',
@@ -101,7 +102,7 @@ var listItem = function(state, entry) {
     }, [
         categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
-        h('span', {'class': 'lang'}, entry.lang),
+        h('span', {'class': 'lang'}, entry.city),
     ]);
 };
 
@@ -169,18 +170,12 @@ var detail = function(state, entry) {
         ]),
     ];
 
-    ['address', 'openinghours', 'contact', 'note'].forEach(function(key) {
+    ['city', 'rooms', 'people', 'duration', 'lang', 'note', 'contact'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
         }
     });
-
-    children.push(h('h3', {}, LABELS.rev));
-    children.push(h('time', {
-        'class': 'rev',
-        datetime: entry.rev,
-    }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
 
     children.push(h('nav', {}, [
         h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
@@ -249,12 +244,13 @@ var form = function(state, entry) {
     var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
-        field('address', entry.address, {required: true}, 'textarea'),
-        field('openinghours', entry.openinghours, {}, 'textarea'),
-        field('contact', entry.contact, {}, 'textarea'),
-        field('lang', entry.lang, {}, 'textarea'),
+        field('city', entry.city, {required: true}),
+        field('rooms', entry.rooms, {}),
+        field('people', entry.people, {}),
+        field('duration', entry.duration, {}),
+        field('lang', entry.lang, {}),
         field('note', entry.note, {}, 'textarea'),
-        field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
+        field('contact', entry.contact, {required: true}, 'textarea'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('button', {'class': 'button--block'}, LABELS._save),
