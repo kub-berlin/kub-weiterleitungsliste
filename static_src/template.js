@@ -102,7 +102,7 @@ var listItem = function(state, entry) {
     }, [
         categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
-        h('span', {'class': 'lang'}, entry.lang),
+        h('span', {'class': 'subtitle'}, entry.lang),
     ]);
 };
 
@@ -173,7 +173,7 @@ var detail = function(state, entry) {
         h('header', {'class': 'detail__header'}, [
             categoryList(state, entry.categories),
             h('h2', {}, entry.name),
-            h('span', {'class': 'lang'}, entry.lang),
+            h('span', {'class': 'subtitle'}, entry.lang),
             clientToggle,
         ]),
     ];
