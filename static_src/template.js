@@ -4,6 +4,7 @@ var _ = require('./helpers');
 
 
 // constants
+var LOCALE = 'de-DE';
 var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
@@ -203,7 +204,7 @@ var detail = function(state, entry) {
         children.push(h('time', {
             'class': 'rev',
             datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
+        }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
 
         children.push(h('nav', {}, [
             h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
