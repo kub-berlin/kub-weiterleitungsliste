@@ -9,9 +9,10 @@ var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
-    address: 'Kontaktdaten',
-    openinghours: 'Öffnungszeiten',
-    contact: 'Ansprechpartner_in',
+    gender: 'Gender',
+    email: 'E-Mail',
+    phone: 'Telefon',
+    availability: 'Erreichbarkeit',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
     rev: 'Stand der Info',
@@ -170,7 +171,7 @@ var detail = function(state, entry) {
         ]),
     ];
 
-    ['address', 'openinghours', 'contact', 'note'].forEach(function(key) {
+    ['gender', 'email', 'phone', 'availability', 'note'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
@@ -250,9 +251,10 @@ var form = function(state, entry) {
     var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
-        field('address', entry.address, {required: true}, 'textarea'),
-        field('openinghours', entry.openinghours, {}, 'textarea'),
-        field('contact', entry.contact, {}, 'textarea'),
+        field('gender', entry.gender, {}),
+        field('email', entry.email, {}, 'email'),
+        field('phone', entry.phone, {}, 'tel'),
+        field('availability', entry.availability, {}, 'textarea'),
         field('lang', entry.lang, {}, 'textarea'),
         field('note', entry.note, {}, 'textarea'),
         field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
