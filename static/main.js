@@ -162,7 +162,7 @@ var applyPath = function(state) {
         id: path[1],
     });
     if (newState.view === 'edit') {
-        var entry = _.findByKey(newState.entries, newState.id, 'id')
+        var entry = _.findByKey(newState.entries, newState.id, 'id');
         newState.formCategories = entry.categories.slice();
     } else {
         newState.formCategories = [];
@@ -175,7 +175,7 @@ var getTitle = function(state) {
 
     if (state.view === 'list') {
         // do nothing
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         var entry = _.findByKey(state.entries, state.id, 'id');
         stack.push(entry.name || '404');
     } else if (state.view === 'edit') {
@@ -198,9 +198,8 @@ var onFilter = function(event, state) {
 
 var onFilterAll = function(event, state) {
     event.preventDefault();
-    var key = event.target.parentElement.dataset.name;
-    var category = _.findByKey(state.categories, key);
-    var cats = category ? [category] : state.categories;
+    var key = event.target.dataset.category;
+    var cats = key ? [_.findByKey(state.categories, key)] : state.categories;
     cats.forEach(function(cat) {
         cat.children.forEach(function(subcategory) {
             subcategory.active = event.target.classList.contains('js-all');
@@ -210,9 +209,8 @@ var onFilterAll = function(event, state) {
 };
 
 var onFilterChange = function(event, state) {
-    var subkey = event.target.name;
-    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = _.findByKey(_.findByKey(state.categories, key).children, subkey);
+    var parts = event.target.name.split('--');
+    var subcategory = _.findByKey(_.findByKey(state.categories, parts[0]).children, parts[1]);
     subcategory.active = event.target.checked;
     return state;
 };
@@ -252,7 +250,7 @@ var onSubmit = function(event, state, app) {
 
     // HACK: These inputs are not synced with the vdom.
     // They are overwritten as long as the vdom does not change.
-    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
+    var keys = ['name', 'city', 'rooms', 'people', 'duration', 'lang', 'note', 'contact'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
@@ -296,26 +294,6 @@ var onDelete = function(event, state) {
     }
 };
 
-var onMapInit = function(event) {
-    var geoUri = event.target.dataset.value;
-    var match = geoUri.match(/geo:([0-9.-]+),([0-9.-]+)\?z=([0-9]+)/);
-
-    if (match && window.L) {
-        var lng = parseFloat(match[1]);
-        var lat = parseFloat(match[2]);
-        var zoom = Math.min(parseInt(match[3], 10), 18);
-
-        setTimeout(function() {
-            var map = L.map(event.target, {
-                scrollWheelZoom: false,
-            }).setView([lng, lat], zoom);
-
-            L.tileLayer('https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(map);
-            L.marker([lng, lat]).addTo(map);
-        });
-    }
-};
-
 var onCategoryChange = function(event, state, app) {
     var parts = app.getValue('category-select').split('--');
     app.setValue('category', parts[0]);
@@ -355,7 +333,6 @@ app.bindEvent('textarea', 'input', resize);
 app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
-app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name="category-select"]', 'change', onCategoryChange);
 app.bindEvent('[name="category-select"]', 'init', onCategoryChange);
 app.bindEvent('#category-add-form', 'submit', onCategoryAdd);
@@ -373,17 +350,30 @@ var _ = require('./helpers');
 
 
 // constants
+var LOCALE = 'de-DE';
 var LABELS = {
-    name: 'Organisation',
     category: 'Bereich',
     subcategory: 'Rubrik',
-    address: 'Kontaktdaten',
-    openinghours: 'Öffnungszeiten',
-    contact: 'Ansprechpartner_in',
-    lang: 'Sprachkenntnisse',
+    name: 'Beschreibung',
+    city: 'Stadt',
+    rooms: 'Zimmer',
+    people: 'Wie viele Personen',
+    duration: 'max. Dauer',
+    lang: 'Sprachen',
     note: 'Kommentar',
-    map: 'Karte (Geo-URI)',
-    rev: 'Stand der Info',
+    contact: 'Kontakt',
+
+    _search: 'Suchen in allen Feldern',
+    _add: 'Hinzufügen',
+    _edit: 'Bearbeiten',
+    _delete: 'Löschen',
+    _save: 'Speichern',
+    _back: 'Zurück',
+    _cancel: 'Abbrechen',
+    _error: 'Fehler',
+    _all: 'alle',
+    _none: 'keins',
+    _new: 'neu…',
 };
 
 var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9./_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/;
@@ -436,7 +426,7 @@ var categoryClass = function(state, c) {
 
 // templates
 var error = function(msg) {
-    return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
+    return h('h2', {'class': 'error'}, LABELS._error + ': ' + msg);
 };
 
 var categoryList = function(state, categories, button) {
@@ -446,7 +436,7 @@ var categoryList = function(state, categories, button) {
             ' ',
             h('span', {'class': 'subcategory'}, c[1]),
             ' ',
-            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, 'Löschen'),
+            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, LABELS._delete),
         ]);
     }));
 };
@@ -458,7 +448,7 @@ var listItem = function(state, entry) {
     }, [
         categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
-        h('span', {'class': 'lang'}, entry.lang),
+        h('span', {'class': 'lang'}, entry.city),
     ]);
 };
 
@@ -467,7 +457,7 @@ var list = function(state) {
         h('input', {
             'class': 'filter',
             type: 'search',
-            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+            placeholder: LABELS._search,
             value: state.q,
         }),
         h('ul', {}, state.entries.filter(function(entry) {
@@ -478,38 +468,37 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
-        h('a', {'class': 'button', href: '#!create'}, 'Hinzufügen'),
+        h('a', {'class': 'button button--block', href: '#!create'}, LABELS._add),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul', {'class': 'category-filters'}, [
-        h('li', {}, [
-            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
+    return h('div', {'class': 'category-filters'}, [
+        h('fieldset', {}, [
+            h('button', {'class': 'js-all button--secondary button--small', type: 'button'}, LABELS._all),
             ' ',
-            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small', type: 'button'}, LABELS._none),
         ]),
     ].concat(state.categories.map(function(category, i) {
-        return h('li', {
-            'class': 'c' + i,
-            'data-name': category.key,
-        }, [
-            category.key,
-            ' ',
-            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
-            ' ',
-            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
-            h('ul', {}, category.children.map(function(subcategory) {
-                return h('li', {}, [h('label', {}, [
+        return h('fieldset', {}, [
+            h('legend', {}, [
+                category.key,
+                ' ',
+                h('button', {'class': 'js-all button--secondary button--small', type: 'button', 'data-category': category.key}, LABELS._all),
+                ' ',
+                h('button', {'class': 'js-none button--secondary button--small', type: 'button', 'data-category': category.key}, LABELS._none),
+            ]),
+            category.children.map(function(subcategory) {
+                return h('label', {}, [
                     h('input', {
                         type: 'checkbox',
-                        name: subcategory.key,
+                        name: category.key + '--' + subcategory.key,
                         checked: subcategory.active,
                     }),
                     ' ',
                     subcategory.key,
-                ])]);
-            })),
+                ]);
+            }),
         ]);
     })));
 };
@@ -519,56 +508,26 @@ var detail = function(state, entry) {
         return error('404 Not Found');
     }
 
-    var clientToggle;
-    if (state.view === 'client') {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
-    } else {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
-    }
-
     var children = [
         h('header', {'class': 'detail__header'}, [
             categoryList(state, entry.categories),
             h('h2', {}, entry.name),
             h('span', {'class': 'lang'}, entry.lang),
-            clientToggle,
         ]),
-        h('h3', {}, LABELS.address),
-        h('p', {'class': 'address'}, autourl(entry.address)),
     ];
 
-    ['openinghours'].forEach(function(key) {
+    ['city', 'rooms', 'people', 'duration', 'lang', 'note', 'contact'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
         }
     });
 
-    if (state.view === 'client') {
-        if (entry.map) {
-            children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {'class': 'map', 'data-value': entry.map}));
-        }
-    } else {
-        ['contact', 'note'].forEach(function(key) {
-            if (entry[key]) {
-                children.push(h('h3', {}, LABELS[key]));
-                children.push(h('p', {'class': key}, autourl(entry[key])));
-            }
-        });
-
-        children.push(h('h3', {}, LABELS.rev));
-        children.push(h('time', {
-            'class': 'rev',
-            datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
-
-        children.push(h('nav', {}, [
-            h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {'class': 'delete'}, 'Löschen'),
-            h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
-        ]));
-    }
+    children.push(h('nav', {}, [
+        h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
+        h('button', {'class': 'delete button--block'}, LABELS._delete),
+        h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
+    ]));
 
     return h('div', {}, children);
 };
@@ -608,7 +567,7 @@ var categoryOptions = function(state) {
                 }, 'neu ...'),
             ]));
         }),
-        h('option', {value: '--'}, 'neu ...'),
+        h('option', {value: '--'}, LABELS._new),
     ];
 };
 
@@ -619,7 +578,7 @@ var form = function(state, entry) {
                 LABELS.category + '/' + LABELS.subcategory,
                 h('select', {name: 'category-select', form: 'category-add-form'}, categoryOptions(state)),
             ]),
-            h('button', {'class': 'category-add', form: 'category-add-form'}, 'Hinzufügen'),
+            h('button', {'class': 'category-add', form: 'category-add-form'}, LABELS._add),
         ]),
         h('div', {'class': 'category-row', hidden: !state.categoryTextFieldsShown}, [
             field('category', '', {required: true, form: 'category-add-form'}),
@@ -631,20 +590,20 @@ var form = function(state, entry) {
     var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
-        field('address', entry.address, {required: true}, 'textarea'),
-        field('openinghours', entry.openinghours, {}, 'textarea'),
-        field('contact', entry.contact, {}, 'textarea'),
-        field('lang', entry.lang, {}, 'textarea'),
+        field('city', entry.city, {required: true}),
+        field('rooms', entry.rooms, {}),
+        field('people', entry.people, {}),
+        field('duration', entry.duration, {}),
+        field('lang', entry.lang, {}),
         field('note', entry.note, {}, 'textarea'),
-        field('map', entry.map, {}, 'url'),
-        field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
+        field('contact', entry.contact, {required: true}, 'textarea'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
-            h('button', {}, 'Speichern'),
+            h('button', {'class': 'button--block'}, LABELS._save),
             h('a', {
-                'class': 'back button button--secondary',
+                'class': 'back button button--block button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
-            }, 'Abbrechen'),
+            }, LABELS._cancel),
         ]),
     ]);
 
@@ -661,7 +620,7 @@ var template = function(state) {
     if (state.view === 'list') {
         main = list(state);
         aside = h('aside', {}, categoryFilters(state));
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));
