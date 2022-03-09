@@ -43,6 +43,18 @@ var updateModel = function() {
     });
 };
 
+var activateCategories = function(model, state) {
+    var mod = model;
+    mod.categories.forEach(function(c) {
+        c.children.forEach(function(ch) {
+            if (_.findByKey(_.findByKey(state.categories, c.key).children, ch.key)) {
+                ch.active = _.findByKey(_.findByKey(state.categories, c.key).children, ch.key).active;
+            }
+        });
+    });
+    return mod;
+};
+
 /** Autoresize text areas. */
 // https://projects.verou.me/stretchy/
 var resize = function(event) {
@@ -160,8 +172,9 @@ var onSubmit = function(event, state, app) {
         credentials: 'same-origin',
     }).then(extractJSON).then(function(result) {
         return updateModel().then(function(model) {
+            modifiedModel = activateCategories(model, state);
             history.pushState(null, null, '#!detail/' + result.id);
-            return onNavigate(null, Object.assign({}, state, model));
+            return onNavigate(null, Object.assign({}, state, modifiedModel));
         });
     }).catch(function(err) {
         console.error(err);
@@ -181,8 +194,9 @@ var onDelete = function(event, state) {
         .then(extractJSON)
         .then(updateModel)
         .then(function(model) {
+            modifiedModel = activateCategories(model, state);
             history.pushState(null, null, '#!list');
-            return onNavigate(null, Object.assign({}, state, model));
+            return onNavigate(null, Object.assign({}, state, modifiedModel));
         }).catch(function(err) {
             console.error(err);
         });
