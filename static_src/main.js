@@ -10,7 +10,7 @@ var extractJSON = function(response) {
 
 // helpers
 /** Get `entries` and `categories` from the server. */
-var updateModel = function() {
+var updateModel = function(state) {
     return fetch('api.php', {
         credentials: 'same-origin',
     }).then(extractJSON).then(function(entries) {
@@ -31,9 +31,20 @@ var updateModel = function() {
                 }
 
                 if (!_.findByKey(category.children, c[1])) {
+                    var active = true;
+                    if (state) {
+                        var oldCategory = _.findByKey(state.categories, c[0]);
+                        if (oldCategory) {
+                            var oldSubcategory = _.findByKey(oldCategory.children, c[1]);
+                            if (oldSubcategory) {
+                                active = oldSubcategory.active;
+                            }
+                        }
+                    }
+
                     category.children.push({
                         key: c[1],
-                        active: true,
+                        active: active,
                     });
                 }
             });
@@ -159,7 +170,7 @@ var onSubmit = function(event, state, app) {
         body: JSON.stringify(data),
         credentials: 'same-origin',
     }).then(extractJSON).then(function(result) {
-        return updateModel().then(function(model) {
+        return updateModel(state).then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
             return onNavigate(null, Object.assign({}, state, model));
         });
@@ -179,8 +190,9 @@ var onDelete = function(event, state) {
             credentials: 'same-origin',
         })
         .then(extractJSON)
-        .then(updateModel)
-        .then(function(model) {
+        .then(function() {
+            return updateModel(state);
+        }).then(function(model) {
             history.pushState(null, null, '#!list');
             return onNavigate(null, Object.assign({}, state, model));
         }).catch(function(err) {
