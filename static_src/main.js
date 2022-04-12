@@ -10,7 +10,7 @@ var extractJSON = function(response) {
 
 // helpers
 /** Get `entries` and `categories` from the server. */
-var updateModel = function() {
+var updateModel = function(state) {
     return fetch('api.php', {
         credentials: 'same-origin',
     }).then(extractJSON).then(function(entries) {
@@ -18,6 +18,15 @@ var updateModel = function() {
             entries: entries,
             categories: [],
         };
+
+        var allActive = true;
+        if (state) {
+            allActive = state.categories.every(function(c) {
+                return c.children.every(function(child) {
+                    return child.active === true;
+                });
+            });
+        }
 
         entries.forEach(function(entry) {
             entry.categories.forEach(function(c) {
@@ -31,10 +40,21 @@ var updateModel = function() {
                 }
 
                 if (!_.findByKey(category.children, c[1])) {
-                    category.children.push({
-                        key: c[1],
-                        active: true,
-                    });
+                    if (allActive) {
+                        category.children.push({
+                            key: c[1],
+                            active: true,
+                        });
+                    } else {
+                        var stateSubcategory = null;
+                        if (_.findByKey(state.categories, c[0])) {
+                            stateSubcategory = _.findByKey(_.findByKey(state.categories, c[0]).children, c[1]);
+                        }
+                        category.children.push({
+                            key: c[1],
+                            active: stateSubcategory ? stateSubcategory.active : false,
+                        });
+                    }
                 }
             });
         });
@@ -159,7 +179,7 @@ var onSubmit = function(event, state, app) {
         body: JSON.stringify(data),
         credentials: 'same-origin',
     }).then(extractJSON).then(function(result) {
-        return updateModel().then(function(model) {
+        return updateModel(state).then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
             return onNavigate(null, Object.assign({}, state, model));
         });
@@ -179,11 +199,14 @@ var onDelete = function(event, state) {
             credentials: 'same-origin',
         })
         .then(extractJSON)
-        .then(updateModel)
+        .then(function () {
+            return (updateModel(state));
+        })
         .then(function(model) {
             history.pushState(null, null, '#!list');
             return onNavigate(null, Object.assign({}, state, model));
-        }).catch(function(err) {
+        })
+        .catch(function(err) {
             console.error(err);
         });
     }
