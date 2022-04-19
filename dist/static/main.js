@@ -9,6 +9,11 @@ var extractJSON = function(response) {
 };
 
 // helpers
+var getCategoryDefault = function(c) {
+    // TODO: convert this to settings
+    return c[0] === 'Begleitung & Sprachmittlung';
+};
+
 /** Get `entries` and `categories` from the server. */
 var updateModel = function(state) {
     return fetch('api.php', {
@@ -31,7 +36,7 @@ var updateModel = function(state) {
                 }
 
                 if (!_.findByKey(category.children, c[1])) {
-                    var active = true;
+                    var active = getCategoryDefault(c);
                     if (state) {
                         var oldCategory = _.findByKey(state.categories, c[0]);
                         if (oldCategory) {
