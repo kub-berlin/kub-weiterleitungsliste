@@ -4,10 +4,6 @@ aside {
     padding: $padding;
 }
 
-aside {
-    display: none;
-}
-
 @media screen and (min-width: 40em) {
     body {
         max-width: 70em;
@@ -27,6 +23,5 @@ aside {
     }
     aside {
         grid-column: 3;
-        display: block;
     }
 }

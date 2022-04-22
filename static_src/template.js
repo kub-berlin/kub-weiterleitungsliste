@@ -18,6 +18,7 @@ var LABELS = {
     rev: 'Stand der Info',
 
     _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+    _filter_toggle: 'Filter anzeigen',
     _add: 'Hinzufügen',
     _edit: 'Bearbeiten',
     _delete: 'Löschen',
@@ -301,7 +302,11 @@ var template = function(state) {
 
     if (state.view === 'list') {
         main = list(state);
-        aside = h('aside', {}, categoryFilters(state));
+        aside = h('aside', {}, [
+            h('input', {type: 'checkbox', id: 'filter-toggle'}),
+            h('label', {'for': 'filter-toggle'}, LABELS._filter_toggle),
+            categoryFilters(state),
+        ]);
     } else if (state.view === 'detail' || state.view === 'client') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {

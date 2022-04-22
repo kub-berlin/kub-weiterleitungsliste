@@ -9,3 +9,41 @@
         margin: 0;
     }
 }
+
+#filter-toggle {
+    position: absolute;
+    width: 0;
+    height: 0;
+    clip: rect(0,0,0,0);
+
+    ~ label {
+        margin: 0;
+
+        &::before {
+            content: "▶ ";
+        }
+    }
+    &:focus-visible ~ label {
+        outline: 1px auto $color-link;
+    }
+    &:checked ~ label::before {
+        content: "▼ ";
+    }
+
+    ~ div {
+        display: none;
+    }
+    &:checked ~ div {
+        display: block;
+    }
+}
+
+@media screen and (min-width: 40em) {
+    #filter-toggle,
+    #filter-toggle ~ label {
+        display: none;
+    }
+    #filter-toggle ~ div {
+        display: block;
+    }
+}
