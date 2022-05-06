@@ -115,7 +115,7 @@ var extractJSON = function(response) {
 
 // helpers
 /** Get `entries` and `categories` from the server. */
-var updateModel = function() {
+var updateModel = function(state) {
     return fetch('api.php', {
         credentials: 'same-origin',
     }).then(extractJSON).then(function(entries) {
@@ -136,9 +136,20 @@ var updateModel = function() {
                 }
 
                 if (!_.findByKey(category.children, c[1])) {
+                    var active = true;
+                    if (state) {
+                        var oldCategory = _.findByKey(state.categories, c[0]);
+                        if (oldCategory) {
+                            var oldSubcategory = _.findByKey(oldCategory.children, c[1]);
+                            if (oldSubcategory) {
+                                active = oldSubcategory.active;
+                            }
+                        }
+                    }
+
                     category.children.push({
                         key: c[1],
-                        active: true,
+                        active: active,
                     });
                 }
             });
@@ -162,7 +173,7 @@ var applyPath = function(state) {
         id: path[1],
     });
     if (newState.view === 'edit') {
-        var entry = _.findByKey(newState.entries, newState.id, 'id')
+        var entry = _.findByKey(newState.entries, newState.id, 'id');
         newState.formCategories = entry.categories.slice();
     } else {
         newState.formCategories = [];
@@ -198,9 +209,8 @@ var onFilter = function(event, state) {
 
 var onFilterAll = function(event, state) {
     event.preventDefault();
-    var key = event.target.parentElement.dataset.name;
-    var category = _.findByKey(state.categories, key);
-    var cats = category ? [category] : state.categories;
+    var key = event.target.dataset.category;
+    var cats = key ? [_.findByKey(state.categories, key)] : state.categories;
     cats.forEach(function(cat) {
         cat.children.forEach(function(subcategory) {
             subcategory.active = event.target.classList.contains('js-all');
@@ -210,9 +220,8 @@ var onFilterAll = function(event, state) {
 };
 
 var onFilterChange = function(event, state) {
-    var subkey = event.target.name;
-    var key = event.target.parentElement.parentElement.parentElement.parentElement.dataset.name;
-    var subcategory = _.findByKey(_.findByKey(state.categories, key).children, subkey);
+    var parts = event.target.name.split('--');
+    var subcategory = _.findByKey(_.findByKey(state.categories, parts[0]).children, parts[1]);
     subcategory.active = event.target.checked;
     return state;
 };
@@ -266,7 +275,7 @@ var onSubmit = function(event, state, app) {
         body: JSON.stringify(data),
         credentials: 'same-origin',
     }).then(extractJSON).then(function(result) {
-        return updateModel().then(function(model) {
+        return updateModel(state).then(function(model) {
             history.pushState(null, null, '#!detail/' + result.id);
             return onNavigate(null, Object.assign({}, state, model));
         });
@@ -286,8 +295,9 @@ var onDelete = function(event, state) {
             credentials: 'same-origin',
         })
         .then(extractJSON)
-        .then(updateModel)
-        .then(function(model) {
+        .then(function() {
+            return updateModel(state);
+        }).then(function(model) {
             history.pushState(null, null, '#!list');
             return onNavigate(null, Object.assign({}, state, model));
         }).catch(function(err) {
@@ -373,6 +383,7 @@ var _ = require('./helpers');
 
 
 // constants
+var LOCALE = 'de-DE';
 var LABELS = {
     name: 'Organisation',
     category: 'Bereich',
@@ -384,6 +395,19 @@ var LABELS = {
     note: 'Kommentar',
     map: 'Karte (Geo-URI)',
     rev: 'Stand der Info',
+
+    _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+    _filter_toggle: 'Filter anzeigen',
+    _add: 'Hinzufügen',
+    _edit: 'Bearbeiten',
+    _delete: 'Löschen',
+    _save: 'Speichern',
+    _back: 'Zurück',
+    _cancel: 'Abbrechen',
+    _error: 'Fehler',
+    _all: 'alle',
+    _none: 'keins',
+    _new: 'neu…',
 };
 
 var RE_URL = /\b((https?:\/\/|www.)[a-zA-Z0-9./_-]+|[a-z0-9_.-]+@[a-z0-9.-]+)\b/;
@@ -436,7 +460,7 @@ var categoryClass = function(state, c) {
 
 // templates
 var error = function(msg) {
-    return h('h2', {'class': 'error'}, 'Fehler: ' + msg);
+    return h('h2', {'class': 'error'}, LABELS._error + ': ' + msg);
 };
 
 var categoryList = function(state, categories, button) {
@@ -446,7 +470,7 @@ var categoryList = function(state, categories, button) {
             ' ',
             h('span', {'class': 'subcategory'}, c[1]),
             ' ',
-            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, 'Löschen'),
+            button && h('button', {'class': 'category-remove button--secondary button--small', type: 'button'}, LABELS._delete),
         ]);
     }));
 };
@@ -458,7 +482,7 @@ var listItem = function(state, entry) {
     }, [
         categoryList(state, entry.categories),
         h('h2', {'class': 'list-item__title'}, entry.name),
-        h('span', {'class': 'lang'}, entry.lang),
+        h('span', {'class': 'subtitle'}, entry.lang),
     ]);
 };
 
@@ -467,7 +491,7 @@ var list = function(state) {
         h('input', {
             'class': 'filter',
             type: 'search',
-            placeholder: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+            placeholder: LABELS._search,
             value: state.q,
         }),
         h('ul', {}, state.entries.filter(function(entry) {
@@ -478,38 +502,37 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
-        h('a', {'class': 'button', href: '#!create'}, 'Hinzufügen'),
+        h('a', {'class': 'button button--block', href: '#!create'}, LABELS._add),
     ];
 };
 
 var categoryFilters = function(state) {
-    return h('ul', {'class': 'category-filters'}, [
-        h('li', {}, [
-            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
+    return h('div', {'class': 'category-filters'}, [
+        h('fieldset', {}, [
+            h('button', {'class': 'js-all button--secondary button--small', type: 'button'}, LABELS._all),
             ' ',
-            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
+            h('button', {'class': 'js-none button--secondary button--small', type: 'button'}, LABELS._none),
         ]),
     ].concat(state.categories.map(function(category, i) {
-        return h('li', {
-            'class': 'c' + i,
-            'data-name': category.key,
-        }, [
-            category.key,
-            ' ',
-            h('button', {'class': 'js-all button--secondary button--small'}, 'alle'),
-            ' ',
-            h('button', {'class': 'js-none button--secondary button--small'}, 'keins'),
-            h('ul', {}, category.children.map(function(subcategory) {
-                return h('li', {}, [h('label', {}, [
+        return h('fieldset', {}, [
+            h('legend', {}, [
+                category.key,
+                ' ',
+                h('button', {'class': 'js-all button--secondary button--small', type: 'button', 'data-category': category.key}, LABELS._all),
+                ' ',
+                h('button', {'class': 'js-none button--secondary button--small', type: 'button', 'data-category': category.key}, LABELS._none),
+            ]),
+            category.children.map(function(subcategory) {
+                return h('label', {}, [
                     h('input', {
                         type: 'checkbox',
-                        name: subcategory.key,
+                        name: category.key + '--' + subcategory.key,
                         checked: subcategory.active,
                     }),
                     ' ',
                     subcategory.key,
-                ])]);
-            })),
+                ]);
+            }),
         ]);
     })));
 };
@@ -530,14 +553,12 @@ var detail = function(state, entry) {
         h('header', {'class': 'detail__header'}, [
             categoryList(state, entry.categories),
             h('h2', {}, entry.name),
-            h('span', {'class': 'lang'}, entry.lang),
+            h('span', {'class': 'subtitle'}, entry.lang),
             clientToggle,
         ]),
-        h('h3', {}, LABELS.address),
-        h('p', {'class': 'address'}, autourl(entry.address)),
     ];
 
-    ['openinghours'].forEach(function(key) {
+    ['address', 'openinghours'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
@@ -561,12 +582,12 @@ var detail = function(state, entry) {
         children.push(h('time', {
             'class': 'rev',
             datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString('de-DE')));
+        }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
 
         children.push(h('nav', {}, [
-            h('a', {'class': 'button', href: '#!edit/' + entry.id}, 'Bearbeiten'),
-            h('button', {'class': 'delete'}, 'Löschen'),
-            h('a', {'class': 'back button button--secondary', href: '#!list'}, 'Zurück'),
+            h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
+            h('button', {'class': 'delete button--block'}, LABELS._delete),
+            h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
         ]));
     }
 
@@ -608,7 +629,7 @@ var categoryOptions = function(state) {
                 }, 'neu ...'),
             ]));
         }),
-        h('option', {value: '--'}, 'neu ...'),
+        h('option', {value: '--'}, LABELS._new),
     ];
 };
 
@@ -619,7 +640,7 @@ var form = function(state, entry) {
                 LABELS.category + '/' + LABELS.subcategory,
                 h('select', {name: 'category-select', form: 'category-add-form'}, categoryOptions(state)),
             ]),
-            h('button', {'class': 'category-add', form: 'category-add-form'}, 'Hinzufügen'),
+            h('button', {'class': 'category-add', form: 'category-add-form'}, LABELS._add),
         ]),
         h('div', {'class': 'category-row', hidden: !state.categoryTextFieldsShown}, [
             field('category', '', {required: true, form: 'category-add-form'}),
@@ -640,11 +661,11 @@ var form = function(state, entry) {
         field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
-            h('button', {}, 'Speichern'),
+            h('button', {'class': 'button--block'}, LABELS._save),
             h('a', {
-                'class': 'back button button--secondary',
+                'class': 'back button button--block button--secondary',
                 href: entry.id ? '#!detail/' + entry.id : '#!list',
-            }, 'Abbrechen'),
+            }, LABELS._cancel),
         ]),
     ]);
 
@@ -660,7 +681,11 @@ var template = function(state) {
 
     if (state.view === 'list') {
         main = list(state);
-        aside = h('aside', {}, categoryFilters(state));
+        aside = h('aside', {}, [
+            h('input', {type: 'checkbox', id: 'filter-toggle'}),
+            h('label', {'for': 'filter-toggle'}, LABELS._filter_toggle),
+            categoryFilters(state),
+        ]);
     } else if (state.view === 'detail' || state.view === 'client') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
