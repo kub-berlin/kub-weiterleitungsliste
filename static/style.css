@@ -38,14 +38,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :link {
-  color: #0052af;
+  color: #00632d;
   text-decoration: underline;
 }
 :link:hover, :link:focus, :link:active {
-  color: #396acb;
+  color: #297c44;
 }
 :link:focus:not(:focus-visible) {
-  color: #0052af;
+  color: #00632d;
 }
 
 :visited {
@@ -67,7 +67,7 @@ hr {
 pre, code {
   font-size: 90%;
   font-family: monospace;
-  background-color: #f2f5f6;
+  background-color: #f2f6f5;
 }
 
 code {
@@ -163,7 +163,7 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: #396acb;
+  border-color: #297c44;
 }
 input:focus:not(:focus-visible),
 textarea:focus:not(:focus-visible),
@@ -174,7 +174,7 @@ input:disabled,
 textarea:disabled,
 select:disabled {
   border-color: #666;
-  background: #f2f5f6;
+  background: #f2f6f5;
   color: #666;
   cursor: not-allowed;
 }
@@ -192,8 +192,8 @@ button,
   cursor: pointer;
   text-align: center;
   border-radius: 0.3em;
-  border-color: #0052af;
-  background: #0052af;
+  border-color: #00632d;
+  background: #00632d;
   color: #fff;
 }
 .button:hover, .button:focus,
@@ -203,38 +203,38 @@ button:focus,
 [type=button]:focus,
 [type=submit]:hover,
 [type=submit]:focus {
-  border-color: #1d5ebd;
-  background: #1d5ebd;
+  border-color: #157039;
+  background: #157039;
   color: #fff;
 }
 .button:focus:not(:focus-visible),
 button:focus:not(:focus-visible),
 [type=button]:focus:not(:focus-visible),
 [type=submit]:focus:not(:focus-visible) {
-  border-color: #0052af;
-  background: #0052af;
+  border-color: #00632d;
+  background: #00632d;
   color: #fff;
 }
 .button:active,
 button:active,
 [type=button]:active,
 [type=submit]:active {
-  border-color: #396acb;
-  background: #396acb;
+  border-color: #297c44;
+  background: #297c44;
   color: #fff;
 }
 .button:disabled,
 button:disabled,
 [type=button]:disabled,
 [type=submit]:disabled {
-  border-color: #80a9d7;
-  background: #80a9d7;
-  color: #e6eef7;
+  border-color: #80b196;
+  background: #80b196;
+  color: #e6efea;
   cursor: not-allowed;
 }
 
 html {
-  background: #dde4ea;
+  background: #ddeae4;
 }
 
 body {
@@ -369,7 +369,7 @@ h3 {
   font-weight: normal;
   font-size: 120%;
   margin: 2.5em 0 0.5em;
-  border-bottom: 1px solid #0052af;
+  border-bottom: 1px solid #00632d;
 }
 
 p {
@@ -384,18 +384,18 @@ p {
   text-decoration: inherit;
   padding: 0.5em;
   margin: 0 0 1em;
-  background: #f2f5f6;
+  background: #f2f6f5;
 }
 
 .detail__header {
-  border-bottom: 2px solid #0052af;
+  border-bottom: 2px solid #00632d;
 }
 
 .list-item {
-  border-left: 2px solid #0052af;
+  border-left: 2px solid #00632d;
 }
 .list-item:hover h2, .list-item:focus h2 {
-  color: #0052af;
+  color: #00632d;
 }
 
 .list-item__title {
@@ -415,18 +415,6 @@ p {
   color: #666;
 }
 
-.client-toggle {
-  position: absolute;
-  top: 0.5em;
-  right: 0.5em;
-  font-size: 90%;
-}
-@media print {
-  .client-toggle {
-    display: none;
-  }
-}
-
 .category:not(:empty),
 .subcategory:not(:empty) {
   background: rgb(226, 226, 226);
@@ -437,81 +425,81 @@ p {
 }
 
 .category.c0:not(:empty) {
-  background: rgb(223, 225, 245);
-  color: rgb(0, 82, 175);
-  border-left: 0.35em solid rgb(0, 82, 175);
-}
-
-.category.c1:not(:empty) {
-  background: rgb(234, 223, 240);
-  color: rgb(114, 61, 152);
-  border-left: 0.35em solid rgb(114, 61, 152);
-}
-
-.category.c2:not(:empty) {
-  background: rgb(242, 221, 232);
-  color: rgb(153, 35, 115);
-  border-left: 0.35em solid rgb(153, 35, 115);
-}
-
-.category.c3:not(:empty) {
-  background: rgb(247, 220, 223);
-  color: rgb(165, 24, 72);
-  border-left: 0.35em solid rgb(165, 24, 72);
-}
-
-.category.c4:not(:empty) {
-  background: rgb(247, 221, 215);
-  color: rgb(157, 45, 31);
-  border-left: 0.35em solid rgb(157, 45, 31);
-}
-
-.category.c5:not(:empty) {
-  background: rgb(242, 223, 209);
-  color: rgb(130, 70, 0);
-  border-left: 0.35em solid rgb(130, 70, 0);
-}
-
-.category.c6:not(:empty) {
-  background: rgb(234, 226, 207);
-  color: rgb(99, 85, 0);
-  border-left: 0.35em solid rgb(99, 85, 0);
-}
-
-.category.c7:not(:empty) {
-  background: rgb(223, 229, 210);
-  color: rgb(63, 94, 0);
-  border-left: 0.35em solid rgb(63, 94, 0);
-}
-
-.category.c8:not(:empty) {
   background: rgb(213, 231, 216);
   color: rgb(0, 99, 45);
   border-left: 0.35em solid rgb(0, 99, 45);
 }
 
-.category.c9:not(:empty) {
+.category.c1:not(:empty) {
   background: rgb(206, 232, 225);
   color: rgb(0, 97, 81);
   border-left: 0.35em solid rgb(0, 97, 81);
 }
 
-.category.c10:not(:empty) {
+.category.c2:not(:empty) {
   background: rgb(203, 232, 234);
   color: rgb(0, 95, 100);
   border-left: 0.35em solid rgb(0, 95, 100);
 }
 
-.category.c11:not(:empty) {
+.category.c3:not(:empty) {
   background: rgb(205, 231, 241);
   color: rgb(0, 93, 115);
   border-left: 0.35em solid rgb(0, 93, 115);
 }
 
-.category.c12:not(:empty) {
+.category.c4:not(:empty) {
   background: rgb(213, 228, 245);
-  color: rgb(0, 91, 134);
-  border-left: 0.35em solid rgb(0, 91, 134);
+  color: rgb(0, 90, 134);
+  border-left: 0.35em solid rgb(0, 90, 134);
+}
+
+.category.c5:not(:empty) {
+  background: rgb(223, 225, 245);
+  color: rgb(50, 82, 155);
+  border-left: 0.35em solid rgb(50, 82, 155);
+}
+
+.category.c6:not(:empty) {
+  background: rgb(234, 223, 240);
+  color: rgb(109, 67, 137);
+  border-left: 0.35em solid rgb(109, 67, 137);
+}
+
+.category.c7:not(:empty) {
+  background: rgb(243, 221, 232);
+  color: rgb(139, 53, 108);
+  border-left: 0.35em solid rgb(139, 53, 108);
+}
+
+.category.c8:not(:empty) {
+  background: rgb(247, 220, 223);
+  color: rgb(150, 48, 75);
+  border-left: 0.35em solid rgb(150, 48, 75);
+}
+
+.category.c9:not(:empty) {
+  background: rgb(247, 221, 215);
+  color: rgb(144, 58, 43);
+  border-left: 0.35em solid rgb(144, 58, 43);
+}
+
+.category.c10:not(:empty) {
+  background: rgb(242, 223, 209);
+  color: rgb(126, 72, 14);
+  border-left: 0.35em solid rgb(126, 72, 14);
+}
+
+.category.c11:not(:empty) {
+  background: rgb(234, 226, 207);
+  color: rgb(99, 85, 0);
+  border-left: 0.35em solid rgb(99, 85, 0);
+}
+
+.category.c12:not(:empty) {
+  background: rgb(223, 229, 210);
+  color: rgb(65, 94, 14);
+  border-left: 0.35em solid rgb(65, 94, 14);
 }
 
 .category-filters legend {
@@ -535,7 +523,7 @@ p {
   content: "▶ ";
 }
 #filter-toggle:focus-visible ~ label {
-  outline: 1px auto #0052af;
+  outline: 1px auto #00632d;
 }
 #filter-toggle:checked ~ label::before {
   content: "▼ ";
@@ -555,17 +543,6 @@ p {
 
   #filter-toggle ~ div {
     display: block;
-  }
-}
-.map {
-  width: 100%;
-  height: 30em;
-  border: 0;
-}
-
-@media print {
-  .leaflet-control-container {
-    display: none;
   }
 }
 nav {

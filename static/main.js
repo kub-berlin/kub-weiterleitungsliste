@@ -102,6 +102,17 @@ module.exports.findByKey = function(list, key, kkey) {
     return list[module.exports.indexOfKey(list, key, kkey || 'key')];
 };
 
+// https://stackoverflow.com/a/7616484
+module.exports.hash = function(s) {
+    var hash = 0;
+    for (var i = 0; i < s.length; i++) {
+        var chr = s.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+};
+
 },{}],4:[function(require,module,exports){
 var _ = require('./helpers');
 var template = require('./template');
@@ -186,7 +197,7 @@ var getTitle = function(state) {
 
     if (state.view === 'list') {
         // do nothing
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         var entry = _.findByKey(state.entries, state.id, 'id');
         stack.push(entry.name || '404');
     } else if (state.view === 'edit') {
@@ -261,7 +272,7 @@ var onSubmit = function(event, state, app) {
 
     // HACK: These inputs are not synced with the vdom.
     // They are overwritten as long as the vdom does not change.
-    var keys = ['name', 'address', 'openinghours', 'contact', 'lang', 'note', 'map', 'rev'];
+    var keys = ['name', 'gender', 'email', 'phone', 'availability', 'lang', 'note', 'rev'];
     keys.forEach(function(key) {
         data[key] = app.getValue(key);
     });
@@ -306,26 +317,6 @@ var onDelete = function(event, state) {
     }
 };
 
-var onMapInit = function(event) {
-    var geoUri = event.target.dataset.value;
-    var match = geoUri.match(/geo:([0-9.-]+),([0-9.-]+)\?z=([0-9]+)/);
-
-    if (match && window.L) {
-        var lng = parseFloat(match[1]);
-        var lat = parseFloat(match[2]);
-        var zoom = Math.min(parseInt(match[3], 10), 18);
-
-        setTimeout(function() {
-            var map = L.map(event.target, {
-                scrollWheelZoom: false,
-            }).setView([lng, lat], zoom);
-
-            L.tileLayer('https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(map);
-            L.marker([lng, lat]).addTo(map);
-        });
-    }
-};
-
 var onCategoryChange = function(event, state, app) {
     var parts = app.getValue('category-select').split('--');
     app.setValue('category', parts[0]);
@@ -365,7 +356,6 @@ app.bindEvent('textarea', 'input', resize);
 app.bindEvent('.category-filters .js-all', 'click', onFilterAll);
 app.bindEvent('.category-filters .js-none', 'click', onFilterAll);
 app.bindEvent('.category-filters input[type=checkbox]', 'change', onFilterChange);
-app.bindEvent('.map', 'init', onMapInit);
 app.bindEvent('[name="category-select"]', 'change', onCategoryChange);
 app.bindEvent('[name="category-select"]', 'init', onCategoryChange);
 app.bindEvent('#category-add-form', 'submit', onCategoryAdd);
@@ -385,18 +375,18 @@ var _ = require('./helpers');
 // constants
 var LOCALE = 'de-DE';
 var LABELS = {
-    name: 'Organisation',
+    name: 'Name',
     category: 'Bereich',
     subcategory: 'Rubrik',
-    address: 'Kontaktdaten',
-    openinghours: 'Öffnungszeiten',
-    contact: 'Ansprechpartner_in',
+    gender: 'Gender',
+    email: 'E-Mail',
+    phone: 'Telefon',
+    availability: 'Erreichbarkeit',
     lang: 'Sprachkenntnisse',
     note: 'Kommentar',
-    map: 'Karte (Geo-URI)',
     rev: 'Stand der Info',
 
-    _search: 'Suchen in allen Feldern (z.B. "Wohnen", "Arabisch", "AWO", "Kreuzberg", ...)',
+    _search: 'Suchen in allen Feldern (z.B. "Arabisch", "Donnerstag", "Lisa", …)',
     _filter_toggle: 'Filter anzeigen',
     _add: 'Hinzufügen',
     _edit: 'Bearbeiten',
@@ -486,6 +476,11 @@ var listItem = function(state, entry) {
     ]);
 };
 
+var dateRandom = function(entry) {
+    var today = new Date();
+    return _.hash(today.toDateString() + entry.name);
+};
+
 var list = function(state) {
     return [
         h('input', {
@@ -498,7 +493,7 @@ var list = function(state) {
             return checkCategoryMatch(entry, state.categories) &&
                 checkQueryMatch(entry, state.q);
         }).sort(function(a, b) {
-            return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
+            return dateRandom(a) > dateRandom(b) ? 1 : -1;
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
@@ -542,54 +537,32 @@ var detail = function(state, entry) {
         return error('404 Not Found');
     }
 
-    var clientToggle;
-    if (state.view === 'client') {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
-    } else {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
-    }
-
     var children = [
         h('header', {'class': 'detail__header'}, [
             categoryList(state, entry.categories),
             h('h2', {}, entry.name),
             h('span', {'class': 'subtitle'}, entry.lang),
-            clientToggle,
         ]),
     ];
 
-    ['address', 'openinghours'].forEach(function(key) {
+    ['gender', 'email', 'phone', 'availability', 'note'].forEach(function(key) {
         if (entry[key]) {
             children.push(h('h3', {}, LABELS[key]));
             children.push(h('p', {'class': key}, autourl(entry[key])));
         }
     });
 
-    if (state.view === 'client') {
-        if (entry.map) {
-            children.push(h('h3', {}, LABELS.map));
-            children.push(h('div', {'class': 'map', 'data-value': entry.map}));
-        }
-    } else {
-        ['contact', 'note'].forEach(function(key) {
-            if (entry[key]) {
-                children.push(h('h3', {}, LABELS[key]));
-                children.push(h('p', {'class': key}, autourl(entry[key])));
-            }
-        });
+    children.push(h('h3', {}, LABELS.rev));
+    children.push(h('time', {
+        'class': 'rev',
+        datetime: entry.rev,
+    }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
 
-        children.push(h('h3', {}, LABELS.rev));
-        children.push(h('time', {
-            'class': 'rev',
-            datetime: entry.rev,
-        }, (new Date(entry.rev)).toLocaleDateString(LOCALE)));
-
-        children.push(h('nav', {}, [
-            h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
-            h('button', {'class': 'delete button--block'}, LABELS._delete),
-            h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
-        ]));
-    }
+    children.push(h('nav', {}, [
+        h('a', {'class': 'button button--block', href: '#!edit/' + entry.id}, LABELS._edit),
+        h('button', {'class': 'delete button--block'}, LABELS._delete),
+        h('a', {'class': 'back button button--block button--secondary', href: '#!list'}, LABELS._back),
+    ]));
 
     return h('div', {}, children);
 };
@@ -652,12 +625,12 @@ var form = function(state, entry) {
     var form = h('form', {id: 'form'}, [
         field('name', entry.name, {required: true}),
         h('fieldset', {}, categoryFields),
-        field('address', entry.address, {required: true}, 'textarea'),
-        field('openinghours', entry.openinghours, {}, 'textarea'),
-        field('contact', entry.contact, {}, 'textarea'),
+        field('gender', entry.gender, {}),
+        field('email', entry.email, {}, 'email'),
+        field('phone', entry.phone, {}, 'tel'),
+        field('availability', entry.availability, {}, 'textarea'),
         field('lang', entry.lang, {}, 'textarea'),
         field('note', entry.note, {}, 'textarea'),
-        field('map', entry.map, {}, 'url'),
         field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
@@ -686,7 +659,7 @@ var template = function(state) {
             h('label', {'for': 'filter-toggle'}, LABELS._filter_toggle),
             categoryFilters(state),
         ]);
-    } else if (state.view === 'detail' || state.view === 'client') {
+    } else if (state.view === 'detail') {
         main = detail(state, _.findByKey(state.entries, state.id, 'id'));
     } else if (state.view === 'edit') {
         main = form(state, _.findByKey(state.entries, state.id, 'id'));
