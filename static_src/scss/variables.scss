@@ -1,17 +1,20 @@
+@use "../../node_modules/sass-planifolia/sass/color";
+@use "../../node_modules/sass-planifolia/sass/contrast";
+
 $color-border: #666;
 $color-bg-tint: #f2f5f6;
 $color-bg-tint2: #dde4ea;
 $color-link: #0052af;
-$color-link-focus: pf-lighten($color-link, 10);
-$color-invalid: pf-change-color($color-link, $hue: 0);
+$color-link-focus: color.lighten($color-link, 10);
+$color-invalid: color.change($color-link, $hue: 0);
 $font-size-max: 90%;
 
-$_: contrast-check($color-fg, $color-bg);
-$_: contrast-check($color-border, $color-bg);
-$_: contrast-check($color-fg, $color-bg-tint);
-$_: contrast-check($color-border, $color-bg-tint);
-$_: contrast-check($color-link, $color-bg);
-$_: contrast-check($color-link, $color-bg-tint);
+$_: contrast.check($color-fg, $color-bg);
+$_: contrast.check($color-border, $color-bg);
+$_: contrast.check($color-fg, $color-bg-tint);
+$_: contrast.check($color-border, $color-bg-tint);
+$_: contrast.check($color-link, $color-bg);
+$_: contrast.check($color-link, $color-bg-tint);
 
-$planifolia-contrast-dark-default: $color-fg;
-$planifolia-contrast-light-default: $color-bg;
+contrast.$planifolia-contrast-dark-default: $color-fg;
+contrast.$planifolia-contrast-light-default: $color-bg;

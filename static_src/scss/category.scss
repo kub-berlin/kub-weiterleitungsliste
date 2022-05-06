@@ -1,11 +1,15 @@
-@mixin category($k, $n, $chroma) {
-    $l: pf-lightness($color-link);
-    $c: pf-chroma($color-link);
-    $h: pf-hue($color-link) + 360deg / $n * $k;
+@use "sass:math";
+@use "../../node_modules/sass-planifolia/sass/color";
+@use "../../node_modules/sass-planifolia/sass/contrast";
 
-    $color1: lch($l, $c * $chroma, $h);
-    $color2: lch(90, 10 * $chroma, $h);
-    $_: contrast-check($color1, $color2);
+@mixin category($k, $n, $chroma) {
+    $l: color.lightness($color-link);
+    $c: color.chroma($color-link);
+    $h: color.hue($color-link) + math.div(360deg, $n) * $k;
+
+    $color1: color.lch($l, $c * $chroma, $h);
+    $color2: color.lch(90, 10 * $chroma, $h);
+    $_: contrast.check($color1, $color2);
 
     background: $color2;
     color: $color1;

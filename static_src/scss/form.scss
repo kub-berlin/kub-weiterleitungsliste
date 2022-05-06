@@ -1,3 +1,5 @@
+@use "../../node_modules/sass-planifolia/sass/contrast";
+
 fieldset {
     border: 0;
     padding: 0;
@@ -37,7 +39,7 @@ select {
 }
 
 .button--secondary {
-    @include button-color($color-border, contrast-color($color-border), $color-fg);
+    @include button-color($color-border, contrast.color($color-border), $color-fg);
 }
 
 .button--small {

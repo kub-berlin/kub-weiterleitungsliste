@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "main": "main.js",
   "dependencies": {
-    "mfbs": "^5.0.0",
+    "mfbs": "^5.1.0",
     "petit-dom": "^0.2.2",
-    "sass-planifolia": "^0.6.0"
+    "sass-planifolia": "^1.0.0"
   },
   "author": "Tobias Bengfort <tobias.bengfort@posteo.de>",
   "license": "GPL-2.0+",
