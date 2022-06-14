@@ -262,7 +262,7 @@ var form = function(state, entry) {
         field('availability', entry.availability, {}, 'textarea'),
         field('lang', entry.lang, {}, 'textarea'),
         field('note', entry.note, {}, 'textarea'),
-        field('rev', entry.rev || new Date().toISOString().slice(0, 10), {required: true}, 'date'),
+        field('rev', new Date().toISOString().slice(0, 10), {readonly: true}, 'date'),
         h('input', {type: 'hidden', name: 'id', value: entry.id}),
         h('nav', {}, [
             h('button', {'class': 'button--block'}, LABELS._save),

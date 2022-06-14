@@ -7,6 +7,7 @@ $color-bg-tint2: #ddeae4;
 $color-link: #00632d;
 $color-link-focus: color.lighten($color-link, 10);
 $color-invalid: color.change($color-link, $hue: 0);
+$color-readonly:#B0B0B0;
 $font-size-max: 90%;
 
 $_: contrast.check($color-fg, $color-bg);

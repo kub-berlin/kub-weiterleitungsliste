@@ -22,6 +22,11 @@ input[type="checkbox"] {
     width: auto;
 }
 
+input:read-only {
+    border-color: $color-readonly;
+    color: $color-readonly;
+}
+
 select {
     height: calc(2.4em + 2px);
 }
