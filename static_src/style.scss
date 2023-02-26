@@ -10,7 +10,7 @@ html {
 body {
     margin: 0;
     padding: 0;
-    max-width: none;
+    max-inline-size: none;
 }
 
 @import "scss/layout";
@@ -21,16 +21,17 @@ body {
 @import "scss/map";
 
 nav {
-    margin: 2em 0 1em;
+    margin-block: 2em 1em;
 }
 
 .filter {
     font-size: 120%;
-    margin-bottom: $spacer;
+    margin-block-end: $spacer;
 }
 
 .list > ul {
-    margin: 0 0 1em;
+    margin: 0;
+    margin-block-end: 1em;
     padding: 0;
     list-style: none;
 

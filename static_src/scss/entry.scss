@@ -8,8 +8,8 @@ h2 {
 h3 {
     font-weight: normal;
     font-size: 120%;
-    margin: 2.5em 0 0.5em;
-    border-bottom: 1px solid $color-link;
+    margin-block: 2.5em 0.5em;
+    border-block-end: 1px solid $color-link;
 }
 
 p {
@@ -23,16 +23,16 @@ p {
     color: inherit;
     text-decoration: inherit;
     padding: $padding;
-    margin: 0 0 $spacer;
+    margin-block-end: $spacer;
     background: $color-bg-tint;
 }
 
 .detail__header {
-    border-bottom: 2px solid $color-link;
+    border-block-end: 2px solid $color-link;
 }
 
 .list-item {
-    border-left: 2px solid $color-link;
+    border-inline-start: 2px solid $color-link;
 
     &:hover h2,
     &:focus h2 {

@@ -13,13 +13,13 @@
 
     background: $color2;
     color: $color1;
-    border-left: 0.35em solid $color1;
+    border-inline-start: 0.35em solid $color1;
 }
 
 .category:not(:empty),
 .subcategory:not(:empty) {
     @include category(0, 1, 0);
-    padding: 0 0.2em;
+    padding-inline: 0.2em;
     border-radius: 0.2em;
 }
 

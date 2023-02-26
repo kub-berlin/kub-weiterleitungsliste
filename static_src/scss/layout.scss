@@ -6,8 +6,9 @@ aside {
 
 @media screen and (min-width: 40em) {
     body {
-        max-width: 70em;
-        margin: 2em auto;
+        max-inline-size: 70em;
+        margin-block: 2em;
+        margin-inline: auto;
         padding: $padding;
     }
 
