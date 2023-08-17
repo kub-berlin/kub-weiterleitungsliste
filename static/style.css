@@ -11,12 +11,11 @@
 
 img,
 video {
-  max-width: 100%;
+  max-inline-size: 100%;
 }
 
 p, address, blockquote, pre, table, dl, ul, ol, figure, fieldset {
-  margin-top: 0;
-  margin-bottom: 1em;
+  margin-block: 0 1em;
 }
 
 html {
@@ -26,42 +25,33 @@ html {
   font-size: 90%;
   font-family: sans-serif;
   line-height: 1.5;
+  accent-color: #0052af;
 }
 
 h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
-  margin-bottom: 0.8rem;
-  margin-top: 0;
+  margin-block: 0 0.8rem;
 }
 * + h1, * + h2, * + h3, * + h4, * + h5, * + h6 {
-  margin-top: 1.5em;
+  margin-block-start: 1.5em;
 }
 
-:link {
+:link,
+:visited {
   color: #0052af;
   text-decoration: underline;
 }
-:link:hover, :link:focus, :link:active {
+:link:hover, :link:focus-visible, :link:active,
+:visited:hover,
+:visited:focus-visible,
+:visited:active {
   color: #396acb;
-}
-:link:focus:not(:focus-visible) {
-  color: #0052af;
-}
-
-:visited {
-  color: #26c;
-}
-:visited:hover, :visited:focus, :visited:active {
-  color: #2b4d80;
-}
-:visited:focus:not(:focus-visible) {
-  color: #26c;
 }
 
 hr {
   border: 0;
-  border-bottom: 1px solid #666;
-  margin: 1em 0;
+  border-block-end: 1px solid #666;
+  margin-block: 1em;
 }
 
 pre, code {
@@ -71,7 +61,7 @@ pre, code {
 }
 
 code {
-  padding: 0 0.25em;
+  padding-inline: 0.25em;
 }
 
 pre {
@@ -86,7 +76,7 @@ pre code {
 }
 
 ol, ul {
-  padding-left: 1.5rem;
+  padding-inline-start: 1.5rem;
 }
 
 dt {
@@ -94,13 +84,12 @@ dt {
 }
 
 dd {
-  margin-left: 1.5rem;
+  margin-inline-start: 1.5rem;
 }
 
 blockquote {
   font-style: italic;
-  margin-left: 1.5rem;
-  margin-right: 0;
+  margin-inline: 1.5rem 0;
 }
 
 table {
@@ -148,7 +137,8 @@ button,
 textarea,
 select {
   border: 1px solid #666;
-  padding: 0.3em 0.75em;
+  padding-block: 0.3em;
+  padding-inline: 0.75em;
   font-family: inherit;
   font-size: inherit;
   line-height: 1.8;
@@ -160,15 +150,10 @@ select {
   background: #fff;
   color: #333;
 }
-input:focus,
-textarea:focus,
-select:focus {
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   border-color: #396acb;
-}
-input:focus:not(:focus-visible),
-textarea:focus:not(:focus-visible),
-select:focus:not(:focus-visible) {
-  border-color: #666;
 }
 input:disabled,
 textarea:disabled,
@@ -196,23 +181,15 @@ button,
   background: #0052af;
   color: #fff;
 }
-.button:hover, .button:focus,
+.button:hover, .button:focus-visible,
 button:hover,
-button:focus,
+button:focus-visible,
 [type=button]:hover,
-[type=button]:focus,
+[type=button]:focus-visible,
 [type=submit]:hover,
-[type=submit]:focus {
+[type=submit]:focus-visible {
   border-color: #1d5ebd;
   background: #1d5ebd;
-  color: #fff;
-}
-.button:focus:not(:focus-visible),
-button:focus:not(:focus-visible),
-[type=button]:focus:not(:focus-visible),
-[type=submit]:focus:not(:focus-visible) {
-  border-color: #0052af;
-  background: #0052af;
   color: #fff;
 }
 .button:active,
@@ -240,7 +217,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  max-width: none;
+  max-inline-size: none;
 }
 
 main,
@@ -251,8 +228,9 @@ aside {
 
 @media screen and (min-width: 40em) {
   body {
-    max-width: 70em;
-    margin: 2em auto;
+    max-inline-size: 70em;
+    margin-block: 2em;
+    margin-inline: auto;
     padding: 0.5em;
   }
 
@@ -278,12 +256,12 @@ fieldset {
 }
 
 label {
-  margin: 0 0 1em;
+  margin-block: 0 1em;
 }
 
 input, textarea, select {
   display: block;
-  width: 100%;
+  inline-size: 100%;
   border-radius: 0.2em;
 }
 
@@ -291,19 +269,19 @@ input[type=checkbox] {
   display: inline;
   margin: 0;
   padding: 0;
-  width: auto;
+  inline-size: auto;
 }
 
 select {
-  height: calc(2.4em + 2px);
+  block-size: calc(2.4em + 2px);
 }
 
 .button--block {
   display: block;
-  width: 100%;
+  inline-size: 100%;
   line-height: 2;
   font-size: 110%;
-  margin-bottom: 1em;
+  margin-block-end: 1em;
 }
 @media print {
   .button--block {
@@ -316,14 +294,9 @@ select {
   background: #666;
   color: #fff;
 }
-.button--secondary:hover, .button--secondary:focus {
+.button--secondary:hover, .button--secondary:focus-visible {
   border-color: #4d4d4d;
   background: #4d4d4d;
-  color: #fff;
-}
-.button--secondary:focus:not(:focus-visible) {
-  border-color: #666;
-  background: #666;
   color: #fff;
 }
 .button--secondary:active {
@@ -341,9 +314,10 @@ select {
 .button--small {
   font-size: 80%;
   display: inline-block;
-  width: auto;
+  inline-size: auto;
   line-height: inherit;
-  padding: 0 0.2em;
+  padding-block: 0;
+  padding-inline: 0.2em;
 }
 
 .category-row {
@@ -368,8 +342,8 @@ h2 {
 h3 {
   font-weight: normal;
   font-size: 120%;
-  margin: 2.5em 0 0.5em;
-  border-bottom: 1px solid #0052af;
+  margin-block: 2.5em 0.5em;
+  border-block-end: 1px solid #0052af;
 }
 
 p {
@@ -383,16 +357,16 @@ p {
   color: inherit;
   text-decoration: inherit;
   padding: 0.5em;
-  margin: 0 0 1em;
+  margin-block-end: 1em;
   background: #f2f5f6;
 }
 
 .detail__header {
-  border-bottom: 2px solid #0052af;
+  border-block-end: 2px solid #0052af;
 }
 
 .list-item {
-  border-left: 2px solid #0052af;
+  border-inline-start: 2px solid #0052af;
 }
 .list-item:hover h2, .list-item:focus h2 {
   color: #0052af;
@@ -431,87 +405,87 @@ p {
 .subcategory:not(:empty) {
   background: rgb(226, 226, 226);
   color: rgb(85, 85, 85);
-  border-left: 0.35em solid rgb(85, 85, 85);
-  padding: 0 0.2em;
+  border-inline-start: 0.35em solid rgb(85, 85, 85);
+  padding-inline: 0.2em;
   border-radius: 0.2em;
 }
 
 .category.c0:not(:empty) {
   background: rgb(223, 225, 245);
   color: rgb(0, 82, 175);
-  border-left: 0.35em solid rgb(0, 82, 175);
+  border-inline-start: 0.35em solid rgb(0, 82, 175);
 }
 
 .category.c1:not(:empty) {
   background: rgb(234, 223, 240);
   color: rgb(114, 61, 152);
-  border-left: 0.35em solid rgb(114, 61, 152);
+  border-inline-start: 0.35em solid rgb(114, 61, 152);
 }
 
 .category.c2:not(:empty) {
   background: rgb(242, 221, 232);
   color: rgb(153, 35, 115);
-  border-left: 0.35em solid rgb(153, 35, 115);
+  border-inline-start: 0.35em solid rgb(153, 35, 115);
 }
 
 .category.c3:not(:empty) {
   background: rgb(247, 220, 223);
   color: rgb(165, 24, 72);
-  border-left: 0.35em solid rgb(165, 24, 72);
+  border-inline-start: 0.35em solid rgb(165, 24, 72);
 }
 
 .category.c4:not(:empty) {
   background: rgb(247, 221, 215);
   color: rgb(157, 45, 31);
-  border-left: 0.35em solid rgb(157, 45, 31);
+  border-inline-start: 0.35em solid rgb(157, 45, 31);
 }
 
 .category.c5:not(:empty) {
   background: rgb(242, 223, 209);
   color: rgb(130, 70, 0);
-  border-left: 0.35em solid rgb(130, 70, 0);
+  border-inline-start: 0.35em solid rgb(130, 70, 0);
 }
 
 .category.c6:not(:empty) {
   background: rgb(234, 226, 207);
   color: rgb(99, 85, 0);
-  border-left: 0.35em solid rgb(99, 85, 0);
+  border-inline-start: 0.35em solid rgb(99, 85, 0);
 }
 
 .category.c7:not(:empty) {
   background: rgb(223, 229, 210);
   color: rgb(63, 94, 0);
-  border-left: 0.35em solid rgb(63, 94, 0);
+  border-inline-start: 0.35em solid rgb(63, 94, 0);
 }
 
 .category.c8:not(:empty) {
   background: rgb(213, 231, 216);
   color: rgb(0, 99, 45);
-  border-left: 0.35em solid rgb(0, 99, 45);
+  border-inline-start: 0.35em solid rgb(0, 99, 45);
 }
 
 .category.c9:not(:empty) {
   background: rgb(206, 232, 225);
   color: rgb(0, 97, 81);
-  border-left: 0.35em solid rgb(0, 97, 81);
+  border-inline-start: 0.35em solid rgb(0, 97, 81);
 }
 
 .category.c10:not(:empty) {
   background: rgb(203, 232, 234);
   color: rgb(0, 95, 100);
-  border-left: 0.35em solid rgb(0, 95, 100);
+  border-inline-start: 0.35em solid rgb(0, 95, 100);
 }
 
 .category.c11:not(:empty) {
   background: rgb(205, 231, 241);
   color: rgb(0, 93, 115);
-  border-left: 0.35em solid rgb(0, 93, 115);
+  border-inline-start: 0.35em solid rgb(0, 93, 115);
 }
 
 .category.c12:not(:empty) {
   background: rgb(213, 228, 245);
   color: rgb(0, 91, 134);
-  border-left: 0.35em solid rgb(0, 91, 134);
+  border-inline-start: 0.35em solid rgb(0, 91, 134);
 }
 
 .category-filters legend {
@@ -569,16 +543,17 @@ p {
   }
 }
 nav {
-  margin: 2em 0 1em;
+  margin-block: 2em 1em;
 }
 
 .filter {
   font-size: 120%;
-  margin-bottom: 1em;
+  margin-block-end: 1em;
 }
 
 .list > ul {
-  margin: 0 0 1em;
+  margin: 0;
+  margin-block-end: 1em;
   padding: 0;
   list-style: none;
 }
@@ -586,5 +561,3 @@ nav {
   margin: 0;
   padding: 0;
 }
-
-/*# sourceMappingURL=style.css.map */

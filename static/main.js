@@ -171,10 +171,10 @@ var applyPath = function(state) {
     var newState = Object.assign({}, state, {
         view: path[0] || 'list',
         id: path[1],
+        entry: path[1] ? _.findByKey(state.entries, path[1], 'id') : null,
     });
-    if (newState.view === 'edit') {
-        var entry = _.findByKey(newState.entries, newState.id, 'id');
-        newState.formCategories = entry.categories.slice();
+    if (newState.view === 'edit' && newState.entry) {
+        newState.formCategories = newState.entry.categories.slice();
     } else {
         newState.formCategories = [];
     }
@@ -186,9 +186,8 @@ var getTitle = function(state) {
 
     if (state.view === 'list') {
         // do nothing
-    } else if (state.view === 'detail' || state.view === 'client') {
-        var entry = _.findByKey(state.entries, state.id, 'id');
-        stack.push(entry.name || '404');
+    } else if (state.entry) {
+        stack.push(state.entry.name);
     } else if (state.view === 'edit') {
         stack.push('edit');
     } else if (state.view === 'create') {
@@ -373,7 +372,7 @@ app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
-    app.init(applyPath(model), document.body);
+    app.init(onNavigate(null, model), document.body);
 });
 
 },{"./app":2,"./helpers":3,"./template":5}],5:[function(require,module,exports){
@@ -538,10 +537,6 @@ var categoryFilters = function(state) {
 };
 
 var detail = function(state, entry) {
-    if (!entry) {
-        return error('404 Not Found');
-    }
-
     var clientToggle;
     if (state.view === 'client') {
         clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
@@ -687,9 +682,9 @@ var template = function(state) {
             categoryFilters(state),
         ]);
     } else if (state.view === 'detail' || state.view === 'client') {
-        main = detail(state, _.findByKey(state.entries, state.id, 'id'));
+        main = state.entry ? detail(state, state.entry) : error('404 Not Found');
     } else if (state.view === 'edit') {
-        main = form(state, _.findByKey(state.entries, state.id, 'id'));
+        main = state.entry ? form(state, state.entry) : error('404 Not Found');
     } else if (state.view === 'create') {
         main = form(state, {});
     } else {
