@@ -159,10 +159,6 @@ var categoryFilters = function(state) {
 };
 
 var detail = function(state, entry) {
-    if (!entry) {
-        return error('404 Not Found');
-    }
-
     var clientToggle;
     if (state.view === 'client') {
         clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
@@ -308,9 +304,9 @@ var template = function(state) {
             categoryFilters(state),
         ]);
     } else if (state.view === 'detail' || state.view === 'client') {
-        main = detail(state, _.findByKey(state.entries, state.id, 'id'));
+        main = state.entry ? detail(state, state.entry) : error('404 Not Found');
     } else if (state.view === 'edit') {
-        main = form(state, _.findByKey(state.entries, state.id, 'id'));
+        main = state.entry ? form(state, state.entry) : error('404 Not Found');
     } else if (state.view === 'create') {
         main = form(state, {});
     } else {
