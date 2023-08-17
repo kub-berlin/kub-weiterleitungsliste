@@ -268,5 +268,5 @@ app.bindEvent('.category-remove', 'click', onCategoryRemove);
 app.bindEvent(window, 'popstate', onNavigate);
 
 updateModel().then(function(model) {
-    app.init(applyPath(model), document.body);
+    app.init(onNavigate(null, model), document.body);
 });
