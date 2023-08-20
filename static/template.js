@@ -1,7 +1,5 @@
-var h = require('petit-dom/dist/petit-dom.min').h;
-
-var _ = require('./helpers');
-
+import { h } from './petit-dom/h.js';
+import * as _ from './helpers.js';
 
 // constants
 var LOCALE = 'de-DE';
@@ -292,7 +290,7 @@ var form = function(state, entry) {
     ]);
 };
 
-var template = function(state) {
+export default function(state) {
     var main;
     var aside;
 
@@ -318,5 +316,3 @@ var template = function(state) {
         h('main', {'class': state.view}, main),
     ]);
 };
-
-module.exports = template;

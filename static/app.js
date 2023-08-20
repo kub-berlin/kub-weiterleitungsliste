@@ -1,7 +1,6 @@
-var vdom = require('petit-dom/dist/petit-dom.min');
+import * as vdom from './petit-dom/vdom.js';
 
-
-module.exports = function(template) {
+export default function(template) {
     var element;
     var tree;
     var state;

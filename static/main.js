@@ -1,6 +1,6 @@
-var _ = require('./helpers');
-var template = require('./template');
-var createApp = require('./app');
+import * as _ from './helpers.js';
+import template from './template.js';
+import createApp from './app.js';
 
 var baseTitle = document.title;
 
