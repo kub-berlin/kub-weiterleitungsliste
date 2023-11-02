@@ -6,7 +6,7 @@ function get_database()
 {
     $db = new PDO('sqlite:db.sqlite');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
     $db->query('CREATE TABLE IF NOT EXISTS entries (
