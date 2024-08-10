@@ -1,9 +1,10 @@
 :root {
+    --link-hue: 257;
     --color-border: #666;
     --color-bg-tint: #f2f5f6;
     --color-bg-tint2: #dde4ea;
-    --color-link: oklch(45% 0.16 257);
-    --color-link-focus: oklch(50% 0.16 257);
+    --color-link: oklch(45% 0.16 var(--link-hue));
+    --color-link-focus: oklch(50% 0.16 var(--link-hue));
     font-size: 90%;
     background: var(--color-bg-tint2);
 }
@@ -147,7 +148,7 @@ p {
 
 .category,
 .subcategory {
-    --category-hue: calc(257 + 360 * var(--category) / 13);
+    --category-hue: calc(var(--link-hue) + 360 * var(--category) / 13);
     --category-fg: oklch(45% 0.16 var(--category-hue));
     --category-bg: oklch(90% 0.03 var(--category-hue));
     background: var(--category-bg);
