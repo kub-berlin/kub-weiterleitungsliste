@@ -161,7 +161,7 @@ var detail = function(state, entry) {
     if (state.view === 'client') {
         clientToggle = h('a', {'class': 'client-toggle', href: '#!detail/' + entry.id}, 'Standardansicht');
     } else {
-        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Klient*innen');
+        clientToggle = h('a', {'class': 'client-toggle', href: '#!client/' + entry.id}, 'Ansicht für Ratsuchende');
     }
 
     var children = [
