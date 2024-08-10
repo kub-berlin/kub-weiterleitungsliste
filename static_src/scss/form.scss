@@ -1,12 +1,10 @@
-@use "../../node_modules/sass-planifolia/sass/contrast";
-
 fieldset {
     border: 0;
     padding: 0;
 }
 
 label {
-    margin-block: 0 $spacer;
+    margin-block: 0 var(--spacer);
 }
 
 input, textarea, select {
@@ -31,7 +29,7 @@ select {
     inline-size: 100%;
     line-height: 2;
     font-size: 110%;
-    margin-block-end: $spacer;
+    margin-block-end: var(--spacer);
 
     @media print {
         display: none;
@@ -39,7 +37,9 @@ select {
 }
 
 .button--secondary {
-    @include button-color($color-border, contrast.color($color-border), $color-fg);
+    --btn-color: var(--color-border);
+    --btn-contrast: var(--color-bg);
+    --btn-focus: var(--color-fg);
 }
 
 .button--small {
@@ -53,9 +53,9 @@ select {
 
 .category-row {
     display: flex;
-    gap: $padding;
+    gap: var(--padding);
     align-items: flex-end;
-    margin: 0 0 $spacer;
+    margin: 0 0 var(--spacer);
 }
 .category-row label {
     flex-grow: 1;

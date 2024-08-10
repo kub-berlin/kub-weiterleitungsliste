@@ -9,7 +9,7 @@ h3 {
     font-weight: normal;
     font-size: 120%;
     margin-block: 2.5em 0.5em;
-    border-block-end: 1px solid $color-link;
+    border-block-end: 1px solid var(--color-link);
 }
 
 p {
@@ -22,21 +22,21 @@ p {
     position: relative;
     color: inherit;
     text-decoration: inherit;
-    padding: $padding;
-    margin-block-end: $spacer;
-    background: $color-bg-tint;
+    padding: var(--padding);
+    margin-block-end: var(--spacer);
+    background: var(--color-bg-tint);
 }
 
 .detail__header {
-    border-block-end: 2px solid $color-link;
+    border-block-end: 2px solid var(--color-link);
 }
 
 .list-item {
-    border-inline-start: 2px solid $color-link;
+    border-inline-start: 2px solid var(--color-link);
 
     &:hover h2,
     &:focus h2 {
-        color: $color-link;
+        color: var(--color-link);
     }
 }
 
@@ -54,13 +54,13 @@ p {
 .subcategory,
 .subtitle {
     font-size: 80%;
-    color: $color-border;
+    color: var(--color-border);
 }
 
 .client-toggle {
     position: absolute;
-    top: $padding;
-    right: $padding;
+    top: var(--padding);
+    right: var(--padding);
     font-size: 90%;
 
     @media print {

@@ -1,10 +1,9 @@
-@import "../node_modules/mfbs/sass/variables";
+@import "../node_modules/mfbs/css/base";
+@import "../node_modules/mfbs/css/form";
 @import "scss/variables";
-@import "../node_modules/mfbs/sass/base";
-@import "../node_modules/mfbs/sass/form";
 
-html {
-    background: $color-bg-tint2;
+:root {
+    background: var(--color-bg-tint2);
 }
 
 body {
@@ -26,7 +25,7 @@ nav {
 
 .filter {
     font-size: 120%;
-    margin-block-end: $spacer;
+    margin-block-end: var(--spacer);
 }
 
 .list > ul {

@@ -23,7 +23,7 @@
         }
     }
     &:focus-visible ~ label {
-        outline: 1px auto $color-link;
+        outline: 1px auto var(--color-link);
     }
     &:checked ~ label::before {
         content: "▼ ";

@@ -1,7 +1,7 @@
 main,
 aside {
-    background: $color-bg;
-    padding: $padding;
+    background: var(--color-bg);
+    padding: var(--padding);
 }
 
 @media screen and (min-width: 40em) {
@@ -9,7 +9,7 @@ aside {
         max-inline-size: 70em;
         margin-block: 2em;
         margin-inline: auto;
-        padding: $padding;
+        padding: var(--padding);
     }
 
     .l-grid {
