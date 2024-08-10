@@ -4,7 +4,7 @@
   "main": "main.js",
   "dependencies": {
     "mfbs": "^6.0.0",
-    "petit-dom": "^0.2.2"
+    "petit-dom": "^0.2.4"
   },
   "author": "Tobias Bengfort <tobias.bengfort@posteo.de>",
   "license": "GPL-2.0+",
