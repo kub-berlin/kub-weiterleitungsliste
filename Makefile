@@ -11,8 +11,8 @@ static/petit-dom: node_modules
 	sed 's/^\(import .* from "[^"]*\)/\1.js/' "node_modules/petit-dom/src/vdom.js" > "static/petit-dom/vdom.js"
 	sed 's/^\(import .* from "[^"]*\)/\1.js/' "node_modules/petit-dom/src/utils.js" > "static/petit-dom/utils.js"
 
-static/style.css: static_src/style.scss static_src/scss/*.scss node_modules
-	npx sass --no-source-map --no-error-css $< $@
+static/style.css: static_src/style.css node_modules
+	cat node_modules/mfbs/css/base.css node_modules/mfbs/css/form.css $< > $@
 
 node_modules/petit-dom/src/%.js: node_modules
 
