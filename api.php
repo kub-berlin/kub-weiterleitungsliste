@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+include_once('auth.php');
+
 // ini_set('display_errors', 'On');
 
 function get_database()
@@ -24,6 +26,10 @@ function get_database()
     );');
 
     return $db;
+}
+
+if (!check_session()) {
+    forbidden();
 }
 
 $db = get_database();

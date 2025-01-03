@@ -1,4 +1,12 @@
-<!DOCTYPE html>
+<?php declare(strict_types=1);
+
+include_once('auth.php');
+
+if (!check_session()) {
+    do_login();
+}
+
+?><!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="de">
     <head>
         <meta charset="utf-8" />
