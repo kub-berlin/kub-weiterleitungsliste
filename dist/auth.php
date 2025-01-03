@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-$base_path = '/weiterleitung/';
+$base_path = '/sprachmittlung/';
 
 session_set_cookie_params([
     'path' => $base_path,
@@ -62,7 +62,7 @@ function do_login()
 {
     global $base_path;
 
-    $client_id = 'weiterleitung';
+    $client_id = 'sprachmittlung';
     $client_secret = 'CHANGEME';
     $authorization_endpoint = 'https://kub.dyndns.berlin/sso/login/';
     $token_endpoint = 'https://kub.dyndns.berlin/sso/token/';
