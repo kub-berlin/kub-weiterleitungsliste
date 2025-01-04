@@ -42,6 +42,14 @@ function sha256($bytes)
     return rtrim(strtr($b64, '+/', '-_'), '=');
 }
 
+function jwk_decode($s)
+{
+    // NOTE: does not do any validation
+    $parts = explode('.', $s);
+    $json = base64_decode(strtr($parts[1], '-_', '+/'));
+    return json_decode($json, true);
+}
+
 function check_session()
 {
     if (!isset($_SESSION['last_activity']) || time() - $_SESSION['last_activity'] > 60 * 60) {
@@ -70,7 +78,8 @@ function do_login()
         ]);
         if ($response) {
             $data = json_decode($response, true);
-            if ($data['nonce'] === sha256($_SESSION['nonce'])) {
+            $token = jwk_decode($data['id_token']);
+            if ($token['aud'] === $client_id || $token['nonce'] === sha256($_SESSION['nonce'])) {
                 $_SESSION['last_activity'] = time();
                 redirect($base_path);
             }
