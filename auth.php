@@ -35,6 +35,13 @@ function post($url, $data)
     ]));
 }
 
+function sha256($bytes)
+{
+    $hash = hash('sha256', $bytes, true);
+    $b64 = base64_encode($bytes);
+    return rtrim(strtr($b64, '+/', '-_'), '=');
+}
+
 function check_session()
 {
     if (!isset($_SESSION['last_activity']) || time() - $_SESSION['last_activity'] > 60 * 60) {
@@ -62,17 +69,21 @@ function do_login()
             'code' => $_GET['code'],
         ]);
         if ($response) {
-            $_SESSION['last_activity'] = time();
-            redirect($base_path);
-        } else {
-            forbidden();
+            $data = json_decode($response, true);
+            if ($data['nonce'] === sha256($_SESSION['nonce'])) {
+                $_SESSION['last_activity'] = time();
+                redirect($base_path);
+            }
         }
+        forbidden();
     } else {
+        $_SESSION['nonce'] = random_bytes(16);
         redirect($authorization_endpoint . '?' . http_build_query([
             'client_id' => $client_id,
             'redirect_uri' => "https://${_SERVER['HTTP_HOST']}$base_path",
             'response_type' => 'code',
             'scope' => 'openid',
+            'nonce' => sha256($_SESSION['nonce']),
         ]));
     }
 }
