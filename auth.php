@@ -70,7 +70,7 @@ function do_login()
     } else {
         redirect($authorization_endpoint . '?' . http_build_query([
             'client_id' => $client_id,
-            'redirect_uri' => "https://${_SERVER['HTTP_HOST']}${_SERVER['REQUEST_URI']}",
+            'redirect_uri' => "https://${_SERVER['HTTP_HOST']}$base_path",
             'response_type' => 'code',
             'scope' => 'openid',
         ]));
