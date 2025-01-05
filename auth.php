@@ -35,11 +35,15 @@ function post($url, $data)
     ]));
 }
 
+function b64($bytes)
+{
+    $b64 = base64_encode($bytes);
+    return rtrim(strtr($b64, '+/', '-_'), '=');
+}
+
 function sha256($bytes)
 {
-    $hash = hash('sha256', $bytes, true);
-    $b64 = base64_encode($hash);
-    return rtrim(strtr($b64, '+/', '-_'), '=');
+    return b64(hash('sha256', $bytes, true));
 }
 
 function jwk_decode($s)
@@ -75,24 +79,22 @@ function do_login()
             'client_secret' => $client_secret,
             'grant_type' => 'authorization_code',
             'code' => $_GET['code'],
+            'code_verifier' => $_SESSION['code_verifier'],
         ]);
         if ($response) {
-            $data = json_decode($response, true);
-            $token = jwk_decode($data['id_token']);
-            if ($token['aud'] === $client_id || $token['nonce'] === sha256($_SESSION['nonce'])) {
-                $_SESSION['last_activity'] = time();
-                redirect($base_path);
-            }
+            $_SESSION['last_activity'] = time();
+            redirect($base_path);
         }
         forbidden();
     } else {
-        $_SESSION['nonce'] = random_bytes(16);
+        $_SESSION['code_verifier'] = b64(random_bytes(64));
         redirect($authorization_endpoint . '?' . http_build_query([
             'client_id' => $client_id,
             'redirect_uri' => "https://${_SERVER['HTTP_HOST']}$base_path",
             'response_type' => 'code',
             'scope' => 'openid',
-            'nonce' => sha256($_SESSION['nonce']),
+            'code_challenge' => sha256($_SESSION['code_verifier']),
+            'code_challenge_method' => 'S256',
         ]));
     }
 }
