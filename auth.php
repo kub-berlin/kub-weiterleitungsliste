@@ -38,7 +38,7 @@ function post($url, $data)
 function sha256($bytes)
 {
     $hash = hash('sha256', $bytes, true);
-    $b64 = base64_encode($bytes);
+    $b64 = base64_encode($hash);
     return rtrim(strtr($b64, '+/', '-_'), '=');
 }
 
