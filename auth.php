@@ -74,6 +74,9 @@ function do_login()
     $token_endpoint = 'https://kub.dyndns.berlin/sso/token/';
 
     if (isset($_GET['code'])) {
+        if ($_GET['state'] !== $_SESSION['state']) {
+            forbidden();
+        }
         $response = post($token_endpoint, [
             'client_id' => $client_id,
             'client_secret' => $client_secret,
@@ -87,12 +90,14 @@ function do_login()
         }
         forbidden();
     } else {
+        $_SESSION['state'] = b64(random_bytes(32));
         $_SESSION['code_verifier'] = b64(random_bytes(64));
         redirect($authorization_endpoint . '?' . http_build_query([
             'client_id' => $client_id,
             'redirect_uri' => "https://${_SERVER['HTTP_HOST']}$base_path",
             'response_type' => 'code',
             'scope' => 'openid',
+            'state' => $_SESSION['state'],
             'code_challenge' => sha256($_SESSION['code_verifier']),
             'code_challenge_method' => 'S256',
         ]));
