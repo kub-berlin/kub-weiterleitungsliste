@@ -74,6 +74,9 @@ function do_login()
     $token_endpoint = 'https://kub.dyndns.berlin/sso/token/';
 
     if (isset($_GET['code'])) {
+        if (time() - $_SESSION['started'] > 5 * 60) {
+            forbidden();
+        }
         if ($_GET['state'] !== $_SESSION['state']) {
             forbidden();
         }
@@ -90,6 +93,7 @@ function do_login()
         }
         forbidden();
     } else {
+        $_SESSION['started'] = time();
         $_SESSION['state'] = b64(random_bytes(32));
         $_SESSION['code_verifier'] = b64(random_bytes(64));
         redirect($authorization_endpoint . '?' . http_build_query([
