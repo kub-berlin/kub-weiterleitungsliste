@@ -48,7 +48,9 @@ function sha256($bytes)
 
 function check_session()
 {
-    if (!isset($_SESSION['last_activity']) || time() - $_SESSION['last_activity'] > 60 * 60) {
+    if (!isset($_SESSION['last_activity']) || time() - $_SESSION['last_activity'] > 60 * 30) {
+        return false;
+    } elseif (!isset($_SESSION['logged_in_at']) || time() - $_SESSION['logged_in_at'] > 60 * 60 * 8) {
         return false;
     } else {
         $_SESSION['last_activity'] = time();
@@ -81,6 +83,7 @@ function do_login()
         ]);
         if ($response) {
             $_SESSION['last_activity'] = time();
+            $_SESSION['logged_in_at'] = time();
             redirect($base_path);
         }
         forbidden();
