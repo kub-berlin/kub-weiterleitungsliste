@@ -46,6 +46,14 @@ function sha256($bytes)
     return b64(hash('sha256', $bytes, true));
 }
 
+function jwk_decode($s)
+{
+    // NOTE: does not do any validation
+    $parts = explode('.', $s);
+    $json = base64_decode(strtr($parts[1], '-_', '+/'));
+    return json_decode($json, true);
+}
+
 function check_session()
 {
     if (!isset($_SESSION['last_activity']) || time() - $_SESSION['last_activity'] > 60 * 30) {
@@ -84,6 +92,12 @@ function do_login()
         if ($response) {
             $_SESSION['last_activity'] = time();
             $_SESSION['logged_in_at'] = time();
+
+            $data = json_decode($response, true);
+            $id_token = jwk_decode($data['id_token']);
+            if (isset($id_token['restrict_id'])) {
+                $_SESSION['restrict_id'] = $id_token['restrict_id'];
+            }
             redirect($base_path);
         }
         forbidden();

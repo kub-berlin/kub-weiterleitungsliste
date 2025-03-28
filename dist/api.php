@@ -36,7 +36,15 @@ $db = get_database();
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $result = $db->query('SELECT * from entries')->fetchAll();
+    if (isset($_SESSION['restrict_id'])) {
+        $sql = 'SELECT * from entries WHERE id=:id';
+        $stmt = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+        $stmt->execute(['id' => $_SESSION['restrict_id']]);
+        $result = $stmt->fetchAll();
+    } else {
+        $result = $db->query('SELECT * from entries')->fetchAll();
+    }
+
     foreach ($result as $i => $row) {
         $result[$i]['categories'] = json_decode($row['categories'], true);
     }
@@ -55,6 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     # FIXME: do server-side validation
 
     $data = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($_SESSION['restrict_id']) && $data['id'] !== "{$_SESSION['restrict_id']}") {
+        forbidden();
+    }
 
     if (!array_key_exists('name', $data)) {
         $sql = 'DELETE from entries WHERE id=:id';
