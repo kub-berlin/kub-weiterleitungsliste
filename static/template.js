@@ -107,12 +107,16 @@ var listItem = function(state, entry) {
 
 var list = function(state) {
     return [
-        h('input', {
+        h('div', {
             'class': 'filter',
-            type: 'search',
-            placeholder: LABELS._search,
-            value: state.q,
-        }),
+        }, [
+            h('input', {
+                type: 'search',
+                placeholder: LABELS._search,
+                value: state.q,
+            }),
+            h('a', {'class': 'button', href: '#!create', title: LABELS._add}, '+'),
+        ]),
         h('ul', {}, state.entries.filter(function(entry) {
             return checkCategoryMatch(entry, state.categories) &&
                 checkQueryMatch(entry, state.q);
@@ -121,7 +125,6 @@ var list = function(state) {
         }).map(function(entry) {
             return h('li', {key: entry.id}, [listItem(state, entry)]);
         })),
-        h('a', {'class': 'button button--block', href: '#!create'}, LABELS._add),
     ];
 };
 

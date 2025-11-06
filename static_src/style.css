@@ -47,6 +47,11 @@ select {
     block-size: calc(2.4em + 2px);
 }
 
+.button,
+button {
+    min-inline-size: 2.6em;
+}
+
 .button--block {
     display: block;
     inline-size: 100%;
@@ -221,6 +226,9 @@ nav {
 }
 
 .filter {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
     font-size: 120%;
     margin-block-end: var(--spacer);
 }
