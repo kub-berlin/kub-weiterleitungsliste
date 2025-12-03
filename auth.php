@@ -93,7 +93,7 @@ function do_login()
         $_SESSION['code_verifier'] = b64(random_bytes(64));
         redirect($authorization_endpoint . '?' . http_build_query([
             'client_id' => $client_id,
-            'redirect_uri' => "https://${_SERVER['HTTP_HOST']}$base_path",
+            'redirect_uri' => "https://{$_SERVER['HTTP_HOST']}$base_path",
             'response_type' => 'code',
             'scope' => 'openid',
             'state' => $_SESSION['state'],
