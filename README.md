@@ -1,6 +1,6 @@
 # installation
 
-Just drop this folder on a server that supports PHP (with JSON and sqlite
+Just drop the `dist` folder on a server that supports PHP (with JSON and sqlite
 support).
 
 If you want to use a different database, just edit the relevant parts in

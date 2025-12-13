@@ -1,20 +1,18 @@
 .PHONY: all
-all: static/style.css static/petit-dom
+all: dist/static/style.css dist/static/petit-dom
 
 .PHONY: serve
 serve:
 	php -S localhost:8000
 
-static/petit-dom: node_modules
+dist/static/petit-dom: node_modules
 	mkdir -p static/petit-dom
 	sed 's/^\(import .* from "[^"]*\)/\1.js/' "node_modules/petit-dom/src/h.js" > "static/petit-dom/h.js"
 	sed 's/^\(import .* from "[^"]*\)/\1.js/' "node_modules/petit-dom/src/vdom.js" > "static/petit-dom/vdom.js"
 	sed 's/^\(import .* from "[^"]*\)/\1.js/' "node_modules/petit-dom/src/utils.js" > "static/petit-dom/utils.js"
 
-static/style.css: static_src/style.css node_modules
+dist/static/style.css: style.css node_modules
 	cat node_modules/mfbs/css/base.css node_modules/mfbs/css/form.css $< > $@
-
-node_modules/petit-dom/src/%.js: node_modules
 
 node_modules: package.json
 	npm install
@@ -22,4 +20,4 @@ node_modules: package.json
 
 .PHONY: clean
 clean:
-	rm -rf static/style.css static/petit-dom node_modules
+	rm -rf dist/static/style.css dist/static/petit-dom node_modules
