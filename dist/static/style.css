@@ -1,17 +1,20 @@
 :root {
+    --link-hue: 257;
     --color-bg: #fff;
     --color-fg: #333;
-    --color-bg-tint: #f5f5f5;
-    --color-border: #888;
-    --color-link: #26c;
-    --color-link-focus: #248;
+    --color-bg-tint: #f2f5f6;
+    --color-bg-tint2: #dde4ea;
+    --color-border: #666;
+    --color-link: oklch(45% 0.16 var(--link-hue));
+    --color-link-focus: oklch(50% 0.16 var(--link-hue));
 
     --padding: 0.5em;
     --spacer: 1em;
     --indentation: 1.5rem;
 
+    font-size: 90%;
     overflow-y: scroll;
-    background-color: var(--color-bg);
+    background-color: var(--color-bg-tint2);
     color: var(--color-fg);
     font-family: sans-serif;
     line-height: 1.5;
@@ -28,23 +31,42 @@
     display: none !important;
 }
 
-img,
-video {
-    max-inline-size: 100%;
-    block-size: auto;
+body {
+    margin: 0;
+    padding: 0;
+    max-inline-size: none;
+}
+
+main,
+aside {
+    background: var(--color-bg);
+    padding: var(--padding);
 }
 
 p, address, blockquote, pre, table, dl, ul, ol, hr, figure, fieldset {
     margin-block: 0 var(--spacer);
 }
 
+p {
+    white-space: pre-line;
+}
+
 h1, h2, h3, h4, h5, h6 {
     line-height: 1.2;
-    margin-block: 0 0.8rem;
     break-after: avoid;
 }
-* + h1, * + h2, * + h3, * + h4, * + h5, * + h6 {
-    margin-block-start: calc(1.5 * var(--spacer));
+
+h2 {
+    font-size: 150%;
+    font-weight: normal;
+    margin: 0;
+}
+
+h3 {
+    font-size: 120%;
+    font-weight: normal;
+    margin-block: 2.5em 0.5em;
+    border-block-end: 1px solid var(--color-link);
 }
 
 a {
@@ -55,82 +77,21 @@ a:hover {
     color: var(--color-link-focus);
 }
 
-hr {
+fieldset {
     border: 0;
-    border-block-end: 1px solid var(--color-border);
+    padding: 0;
 }
 
-pre, code {
-    font-size: 90%;
-    font-family: monospace;
-    background-color: var(--color-bg-tint);
-}
-code {
-    padding-inline: 0.25em;
-}
-pre {
-    padding: var(--padding);
-    overflow: auto;
-    border: 1px solid var(--color-border);
-}
-pre code {
-    all: revert;
-}
-
-ol, ul {
-    padding-inline-start: var(--indentation);
-}
-dt {
-    font-weight: bold;
-}
-dd {
-    margin-inline-start: var(--indentation);
-}
-
-blockquote {
-    font-style: italic;
-    margin-inline: var(--indentation) 0;
-}
-
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-tr {
-    border-bottom: 1px solid var(--color-border);
-}
-td, th {
-    text-align: start;
-    padding: calc(var(--padding) * 0.5);
-    vertical-align: top;
-}
-
-textarea,
-select[multiple] {
-    resize: vertical;
-}
-
-/* Prevent sub and sup affecting line-height. */
-sub, sup {
-    line-height: 0;
-}
-
-@media print {
-    :root {
-        --color-fg: #000;
-        --color-bg: #fff;
-    }
-}
 label {
     display: block;
+    margin-block: 0 var(--spacer);
 }
 
 input,
 textarea,
 select,
 .button,
-button,
-input[type="file"]::file-selector-button {
+button {
     border: 1px solid var(--color-border);
     padding-block: 0.3em;
     padding-inline: 0.75em;
@@ -142,8 +103,11 @@ input[type="file"]::file-selector-button {
 input,
 textarea,
 select {
+    display: block;
+    inline-size: 100%;
     background: var(--color-bg);
     color: var(--color-fg);
+    border-radius: 0.2em;
 }
 input:focus-visible,
 textarea:focus-visible,
@@ -159,14 +123,28 @@ select:disabled {
     cursor: not-allowed;
 }
 
+textarea,
+select[multiple] {
+    resize: vertical;
+}
+
 textarea {
     line-height: inherit;
 }
 
+select {
+    block-size: calc(2.4em + 2px);
+}
+
+input[type=checkbox] {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    inline-size: auto;
+}
+
 .button,
-button,
-[type=button],
-[type=submit] {
+button {
     --btn-color: var(--color-link);
     --btn-focus: var(--color-link-focus);
     --btn-contrast: var(--color-bg);
@@ -184,94 +162,22 @@ button,
 .button:hover,
 .button:focus-visible,
 button:hover,
-button:focus-visible,
-[type=button]:hover,
-[type=button]:focus-visible,
-[type=submit]:hover,
-[type=submit]:focus-visible {
+button:focus-visible {
     --btn-internal: color-mix(in oklch, var(--btn-color), var(--btn-focus));
     color: var(--btn-contrast);
 }
 .button:active,
-button:active,
-[type=button]:active,
-[type=submit]:active {
+button:active {
     --btn-internal: var(--btn-focus);
     color: var(--btn-contrast);
 }
 .button:disabled,
-button:disabled,
-[type=button]:disabled,
-[type=submit]:disabled {
+button:disabled {
     border-color: var(--btn-bg);
     background: var(--btn-bg);
     color: var(--btn-fg);
     opacity: 0.5;
     cursor: not-allowed;
-}
-
-input[type="file"]::file-selector-button {
-    background: var(--color-bg-tint);
-    color: var(--color-fg);
-    border: 0;
-    cursor: pointer;
-
-    margin-block: -0.3em;
-    margin-inline: -0.75em 0.75em;
-    border-inline-end: 1px solid var(--color-border);
-}
-input[type="file"]:disabled::file-selector-button {
-    background: transparent;
-    color: inherit;
-    cursor: not-allowed;
-}
-:root {
-    --link-hue: 257;
-    --color-border: #666;
-    --color-bg-tint: #f2f5f6;
-    --color-bg-tint2: #dde4ea;
-    --color-link: oklch(45% 0.16 var(--link-hue));
-    --color-link-focus: oklch(50% 0.16 var(--link-hue));
-    font-size: 90%;
-    background: var(--color-bg-tint2);
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    max-inline-size: none;
-}
-
-main,
-aside {
-    background: var(--color-bg);
-    padding: var(--padding);
-}
-
-fieldset {
-    border: 0;
-    padding: 0;
-}
-
-label {
-    margin-block: 0 var(--spacer);
-}
-
-input, textarea, select {
-    display: block;
-    inline-size: 100%;
-    border-radius: 0.2em;
-}
-
-input[type=checkbox] {
-    display: inline;
-    margin: 0;
-    padding: 0;
-    inline-size: auto;
-}
-
-select {
-    block-size: calc(2.4em + 2px);
 }
 
 .button,
@@ -312,24 +218,6 @@ button {
 .category-row label {
     flex-grow: 1;
     margin: 0;
-}
-
-h2 {
-    font-size: 150%;
-    font-weight: normal;
-    margin: 0;
-    padding: 0;
-}
-
-h3 {
-    font-weight: normal;
-    font-size: 120%;
-    margin-block: 2.5em 0.5em;
-    border-block-end: 1px solid var(--color-link);
-}
-
-p {
-    white-space: pre-line;
 }
 
 .detail__header,
@@ -505,6 +393,11 @@ nav {
 }
 
 @media print {
+    :root {
+        --color-fg: #000;
+        --color-bg: #fff;
+    }
+
     .button--block,
     .client-toggle,
     .leaflet-control-container {
